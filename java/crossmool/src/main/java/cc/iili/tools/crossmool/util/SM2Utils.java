@@ -19,6 +19,7 @@ import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
 import org.bouncycastle.crypto.params.ECPrivateKeyParameters;
 import org.bouncycastle.crypto.params.ECPublicKeyParameters;
+import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.util.encoders.Hex;
 
 import cc.iili.tools.crossmool.bean.SerialKeyPair;
@@ -115,11 +116,12 @@ public class SM2Utils {
     public static SM2Engine getSM2Engine(boolean forEncryption, String cryptoKey) {
         if(forEncryption) {
             ECPublicKeyParameters publicKeyParameters = SM2KeyUtil.convertX509BytesToECPublicKeyParameters(cryptoKey);
-            sm2Engine.init(true, publicKeyParameters);
+            
+            sm2Engine.init(true, new ParametersWithRandom(publicKeyParameters, new SecureRandom()));
             return sm2Engine;
         }
         ECPrivateKeyParameters privateKeyParameters = SM2KeyUtil.convertX509BytesToECPrivateKeyParameters(cryptoKey);
-        sm2Engine.init(false, privateKeyParameters);
+        sm2Engine.init(false, new ParametersWithRandom(privateKeyParameters, new SecureRandom()));
         return sm2Engine;
     }
     
