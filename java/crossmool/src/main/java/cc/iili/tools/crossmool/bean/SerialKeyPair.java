@@ -31,4 +31,9 @@ public class SerialKeyPair implements java.io.Serializable {
         this.privateKey = privateKey;
     }
     
+    @Override
+    public String toString() {
+        return "SerialKeyPair [publicKey=" + publicKey + ", privateKey=" + privateKey + "]";
+    }
+    
 }

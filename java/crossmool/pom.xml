@@ -6,7 +6,7 @@
 
     <groupId>cc.iili.tools</groupId>
     <artifactId>crossmool</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -23,7 +23,7 @@
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
-            <artifactId>bcpkix-jdk18on</artifactId>
+            <artifactId>bcprov-jdk18on</artifactId>
             <version>1.82</version>
         </dependency>
         <dependency>
