@@ -117,7 +117,7 @@ public class SM2Utils {
             return sm2Engine;
         }
         ECPrivateKeyParameters privateKeyParameters = SM2KeyUtil.convertPKCS8BytesToECPrivateKeyParameters(cryptoKey);
-        sm2Engine.init(false, new ParametersWithRandom(privateKeyParameters, new SecureRandom()));
+        sm2Engine.init(false, privateKeyParameters);
         return sm2Engine;
     }
     
@@ -419,7 +419,7 @@ public class SM2Utils {
      */
     public static CiphertextSignaturePair encryptSign(String content,  String encPublicKey, String signPrivateKey, boolean toBase64) {
         String encrypted = encrypt(content, encPublicKey, toBase64);
-        String signature = sign(content, signPrivateKey, toBase64);
+        String signature = sign(encrypted, signPrivateKey, toBase64);
         return new CiphertextSignaturePair(encrypted, signature);
     }
     /**
