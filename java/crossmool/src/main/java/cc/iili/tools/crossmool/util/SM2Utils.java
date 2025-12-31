@@ -32,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * 
  * charset: utf-8
- * encode: Hex
+ * encode: Hex / Base64
  * sign & encrypt use different keypairs
  *
  */
@@ -454,13 +454,5 @@ public class SM2Utils {
         return verifyDecrypt(cipherSigPair.getCiphertext(), cipherSigPair.getSignature(), signPublicKey, decPrivateKey);
     }
     
-    public static void main(String[] args) {
-        SerialKeyPair keyPairBase64 = generateKeyPairBase64();
-        System.out.println("Generated KeyPair (Base64):\n" + keyPairBase64);
-        SerialKeyPair keyPairHex = generateKeyPairHex();
-        System.out.println("Generated KeyPair (Hex):\n" + keyPairHex);
-        
-    }
-
 
 }

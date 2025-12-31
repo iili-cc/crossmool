@@ -55,7 +55,6 @@ public class SM2KeyUtil {
         if (HexUtil.isHexString(keyStr)) {
             return HexUtil.decodeHexStr(keyStr);
         } else {
-            // 默认按Base64处理
             return Base64.getDecoder().decode(keyStr);
         }
     }
@@ -98,20 +97,9 @@ public class SM2KeyUtil {
     }
     
     /**
-     * @param privateKeyBytes, Just support ASN.1/X.509 encoded
+     * @param privateKeyBytes, Just support ASN.1/X.509(public) or PKCS8(private) encoded
      * @return
      */
-//    public static PrivateKey convertX509BytesToPrivateKey(byte[] privateKeyBytes) {
-//        // 使用X.509格式创建公钥
-//        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(privateKeyBytes);
-//        KeyFactory keyFactory = getKeyFactory();
-//        try {
-//            return keyFactory.generatePrivate(keySpec);
-//        } catch (InvalidKeySpecException e) {
-//            log.error("创建公钥失败: {}", e.getMessage(), e);
-//            throw new RuntimeException("Convert the privateKeyBytes to java.security.PrivateKey failed.", e);
-//        }
-//    }
     public static PrivateKey convertPKCS8BytesToPrivateKey(byte[] privateKeyBytes) {
         // 使用X.509格式创建公钥
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
