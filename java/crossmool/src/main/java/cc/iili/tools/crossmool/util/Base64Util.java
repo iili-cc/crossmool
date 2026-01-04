@@ -19,4 +19,13 @@ public class Base64Util {
             return false;
         }
 	}
+	
+	public static String encodeBase64Str(byte[] data) {
+		return Base64.getEncoder().encodeToString(data);
+	}
+	
+	public static byte[] decodeBase64Str(String base64) {
+		return Base64.getDecoder().decode(base64);
+	}
+	
 }

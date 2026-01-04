@@ -42,6 +42,6 @@ public class SM2Constant {
     /**
      * @deprecated do not use this in production environment.
      */
-    public static final String ORIGINAL_TEST_STRING = "您好，我是SM2算法測試數據，包括简体中文，繁體中文，English三种文字，you can use me for a test!"; 
+    public static final String SM2_TEST_STRING = "您好，我是SM2算法測試數據，包括简体中文，繁體中文，English三种文字，you can use me for a test!"; 
 
 }

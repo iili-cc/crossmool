@@ -33,6 +33,17 @@ import cc.iili.tools.crossmool.util.SM2KeyUtil;
 import lombok.extern.slf4j.Slf4j;
 
 /**
+ * Encrypt only: use encrypt(String, String) to Hex, encrypt(String, String, true) to Base64
+ * Decrypt only: use decrypt(String, String) from Hex, decrypt(String, String, true) from Base64
+ * 
+ * Sign only: use sign(String, String) to Hex, sign(String, String, true) to Base64
+ * Verify only: use verify(String, String, String) from Hex, verify(String, String, String, true) from Base64
+ * 
+ * Encrypt & Sign: use encryptSign(String, String, String) to Hex, encryptSign(String, String, String, true) to Base64
+ * Verify & Decrypt: use verifyDecrypt(String, String, String, String) from Hex, verifyDecrypt(String, String, String, String, true) from Base64
+ * 
+ * Encrypt & Sign with same format keys: encryptSignWithSameFormatKeys(String, String, String): 
+ * 											if both keys are Hex string, output Hex string; if both keys are Base64 string, output Base64 string
  * 
  * charset: utf-8
  * encode: Hex / Base64
