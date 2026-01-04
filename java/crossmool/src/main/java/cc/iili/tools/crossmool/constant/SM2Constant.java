@@ -39,5 +39,9 @@ public class SM2Constant {
      * @deprecated do not suggest to use these test keys in production environment.
      */
     public static final String SIGN_PUBLIC_KEY_HEX = "3059301306072a8648ce3d020106082a811ccf5501822d03420004b053b1c107374e179e1c944821229f1c11e81e7559fa783e9712b56eac1ec50086e4ebc94cbbcefef719b9e4df711001660af45a0753ce062a30018cfb9a497b";
+    /**
+     * @deprecated do not use this in production environment.
+     */
+    public static final String ORIGINAL_TEST_STRING = "您好，我是SM2算法測試數據，包括简体中文，繁體中文，English三种文字，you can use me for a test!"; 
 
 }

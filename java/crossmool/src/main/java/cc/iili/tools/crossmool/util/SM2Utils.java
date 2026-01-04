@@ -425,13 +425,64 @@ public class SM2Utils {
     /**
      * Mainly used encrypt & sign method.
      * @param content
-     * @param encPublicKey
-     * @param signPrivateKey
+     * @param encPublicKey, could be Hex string or Base64 string
+     * @param signPrivateKey, could be Hex string or Base64 string
      * @return , Hex is the default output format
      */
-    public static CiphertextSignaturePair encryptSign(String content,  String encPublicKey, String signPrivateKey) {
+    public static CiphertextSignaturePair encryptSign(String content, String encPublicKey, String signPrivateKey) {
         return encryptSign(content, encPublicKey, signPrivateKey, false);
     }
+    /**
+     * 
+     * @param content
+     * @param encPublicKey, should be Hex string
+     * @param signPrivateKey, should be Hex string
+     * @return, Hex is the output format
+     */
+    public static CiphertextSignaturePair encryptSignWithHexKeys(String content, String encPublicKey, String signPrivateKey) {
+    	boolean hexEncPublicKey = HexUtil.isHexString(encPublicKey);
+    	boolean hexSignPrivateKey = HexUtil.isHexString(signPrivateKey);
+    	if(hexEncPublicKey && hexSignPrivateKey) {
+			return encryptSign(content, encPublicKey, signPrivateKey, false);
+    	}
+    	throw new RuntimeException("SM2 encryptSignWithHexKeys error: the encPublicKey and signPrivateKey must be both Hex string.");
+    }
+    /**
+     * 
+     * @param content
+     * @param encPublicKey, should be Base64 string
+     * @param signPrivateKey, should be Base64 string
+     * @return, Base64 is the output format
+     */
+    public static CiphertextSignaturePair encryptSignWithBase64Keys(String content, String encPublicKey, String signPrivateKey) {
+    	boolean base64EncPublicKey = Base64Util.isBase64String(encPublicKey);
+    	boolean base64SignPrivateKey = Base64Util.isBase64String(signPrivateKey);
+    	if(base64EncPublicKey && base64SignPrivateKey) {
+    		return encryptSign(content, encPublicKey, signPrivateKey, true);
+    	}
+    	throw new RuntimeException("SM2 encryptSignWithBase64Keys error: the encPublicKey and signPrivateKey must be both Base64 string.");
+    }
+    /**
+     * 
+     * @param content
+     * @param encPublicKey, could be Hex string or Base64 string
+     * @param signPrivateKey, must be same format as encPublicKey, if encPublicKey is Hex string, signPrivateKey must be Hex string too; if encPublicKey is Base64 string, signPrivateKey must be Base64 string too
+     * @return, same format as the input keys
+     */
+    public static CiphertextSignaturePair encryptSignWithSameFormatKeys(String content, String encPublicKey, String signPrivateKey) {
+    	boolean hexEncPublicKey = HexUtil.isHexString(encPublicKey);
+    	boolean hexSignPrivateKey = HexUtil.isHexString(signPrivateKey);
+    	if(hexEncPublicKey && hexSignPrivateKey) {
+    		return encryptSign(content, encPublicKey, signPrivateKey, false);
+    	}
+    	boolean base64EncPublicKey = Base64Util.isBase64String(encPublicKey);
+    	boolean base64SignPrivateKey = Base64Util.isBase64String(signPrivateKey);
+    	if(base64EncPublicKey && base64SignPrivateKey) {
+    		return encryptSign(content, encPublicKey, signPrivateKey, true);
+    	}
+    	throw new RuntimeException("SM2 encryptSignWithSameFormatKeys error: the encPublicKey and signPrivateKey must be both Hex string or both Base64 string.");
+    }
+    
     
     /**************************************************************************************************
      * Mainly used verify & decrypt method.

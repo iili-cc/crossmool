@@ -28,5 +28,10 @@ public class CiphertextSignaturePair implements java.io.Serializable {
     public void setSignature(String signature) {
         this.signature = signature;
     }
+    
+    @Override
+    public String toString() {
+        return "CiphertextSignaturePair [ciphertext=" + ciphertext + ", signature=" + signature + "]";
+    }
 
 }
