@@ -23,9 +23,10 @@ import lombok.extern.slf4j.Slf4j;
 public class SM3Util {
 
 	static {
-		if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
-			Security.addProvider(new BouncyCastleProvider());
-		}
+		// register Bouncy Castle Provider（avoid duplicate）
+        if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
+            Security.addProvider(new BouncyCastleProvider());
+        }
 	}
 
 	/**

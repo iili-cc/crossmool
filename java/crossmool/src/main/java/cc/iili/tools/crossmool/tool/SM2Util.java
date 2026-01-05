@@ -22,6 +22,7 @@ import org.bouncycastle.crypto.params.ECPublicKeyParameters;
 import org.bouncycastle.crypto.params.ParametersWithID;
 import org.bouncycastle.crypto.params.ParametersWithRandom;
 import org.bouncycastle.crypto.signers.SM2Signer;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Hex;
 
 import cc.iili.tools.crossmool.bean.CiphertextSignaturePair;
@@ -53,9 +54,11 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class SM2Util {
     
-    
     static {
-        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
+    	// register Bouncy Castle Provider（avoid duplicate）
+        if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
+            Security.addProvider(new BouncyCastleProvider());
+        }
     }
     /**
      * generate a SM2 KeyPair by java.security.KeyPairGenerator
