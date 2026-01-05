@@ -165,28 +165,28 @@ public class SM4Util {
 		
 		String encode = Base64.getEncoder().encodeToString(key);
 
-		System.out.println("原始明文: " + plainText);
-		System.out.println("密钥 (HEX): " + hexKey);
-		System.out.println("密钥 (Base64): " + encode);
+		System.out.println("original text" + plainText);
+		System.out.println("encryption key(HEX): " + hexKey);
+		System.out.println("encryption key(Base64): " + encode);
 
 		// 原生 API
 		byte[] bytes = plainText.getBytes(StandardCharsets.UTF_8);
 		String enc1 = encryptEcbNative(key, bytes);
 		String dec1 = decryptEcbNative(key, enc1);
 		System.out.println("\n[Native API]");
-		System.out.println("加密结果: " + enc1);
-		System.out.println("解密结果: " + dec1);
+		System.out.println("encrypt result:" + enc1);
+		System.out.println("decrypt result:" + dec1);
 
 		// JCA API
 		String enc2 = encryptEcbJca(key, plainText);
 		String dec2 = decryptEcbJca(key, enc2);
 		System.out.println("\n[JCA API]");
-		System.out.println("加密结果: " + enc2);
-		System.out.println("解密结果: " + dec2);
+		System.out.println("encrypt result:" + enc2);
+		System.out.println("decrypt result:" + dec2);
 
 		// 验证一致性
 		assert enc1.equals(enc2);
 		assert plainText.equals(dec1) && plainText.equals(dec2);
-		System.out.println("\n✅ 两种方式结果一致，测试通过！");
+		System.out.println("\n✅ test pass");
 	}
 }
