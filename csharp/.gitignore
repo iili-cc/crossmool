@@ -1,0 +1,17 @@
+# 忽略 bin 和 obj 目录
+bin/
+obj/
+
+# 忽略 Visual Studio 用户缓存
+.vs/
+*.suo
+*.user
+
+# 忽略 NuGet 包（如果使用 packages 目录）
+packages/
+
+# 忽略 .NET Core 全局工具路径（可选）
+.dotnet/
+
+# 忽略本地调试日志
+*.log
