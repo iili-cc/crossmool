@@ -1,0 +1,36 @@
+{
+  "name": "@crossmool/crypto",
+  "version": "1.0.0",
+  "description": "Crossmool SM2/SM3/SM4 utilities based on sm-crypto-v2 (Java interoperable)",
+  "license": "GPLv3",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "browser": "dist/index.global.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "interop:gen": "npm run build && node scripts/interop.mjs gen --out interop.json",
+    "interop:check": "npm run build && node scripts/interop.mjs check",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "sm-crypto-v2": "^1.15.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0"
+  }
+}
