@@ -26,3 +26,22 @@ pt = SM2Util.decrypt(ct_hex, priv)
 
 print(ok, pt)
 ```
+
+Development / Tests
+-------------------
+
+Recommended development install (editable):
+
+```powershell
+cd <repo-root>
+pip install -e python/crossmool
+```
+
+Run tests locally:
+
+```powershell
+Set-Location 'd:\workspaces\git\corssmool\crossmool\python\crossmool'
+pytest -q
+```
+
+If you don't want to install the package, tests and scripts will also work by adding the `src` folder to `PYTHONPATH` or `sys.path` as done in the test scripts.
