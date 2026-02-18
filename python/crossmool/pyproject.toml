@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "crossmool"
+version = "0.1.0"
+description = "Python utilities for SM2/SM3/SM4 compatible with crossmool implementations"
+authors = [{name = "crossmool"}]
+requires-python = ">=3.8"
+dependencies = ["gmssl>=3.0"]
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.0"
+
+[tool.setuptools.packages.find]
+where = ["src"]
