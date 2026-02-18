@@ -3,19 +3,19 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "csharp", "csharp", "{1DFAEBCB-AC14-421E-96B8-72B9D90E35FE}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "crossmool", "crossmool", "{1DFAEBCB-AC14-421E-96B8-72B9D90E35FE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A680C087-63FB-4E5D-8CE3-6BCF6485A43F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crossmool.Crypto", "csharp\src\Crossmool.Crypto\Crossmool.Crypto.csproj", "{84AD6DF4-FEBC-4922-83DD-B4F7A7C89D1B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crossmool.Crypto", "crossmool\src\Crossmool.Crypto\Crossmool.Crypto.csproj", "{84AD6DF4-FEBC-4922-83DD-B4F7A7C89D1B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{1B4F580B-88DC-45FA-8BB7-B57E8C9AFFA9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crossmool.Crypto.Sample", "csharp\samples\Crossmool.Crypto.Sample\Crossmool.Crypto.Sample.csproj", "{88A56C4E-2EC2-44B6-97CC-3F58657FACA7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crossmool.Crypto.Sample", "crossmool\samples\Crossmool.Crypto.Sample\Crossmool.Crypto.Sample.csproj", "{88A56C4E-2EC2-44B6-97CC-3F58657FACA7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{3402E126-47A5-4558-880B-C326621035D2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crossmool.Crypto.Tests", "csharp\tests\Crossmool.Crypto.Tests\Crossmool.Crypto.Tests.csproj", "{20BE9378-5742-4BB6-BA99-A93CEA9020D7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crossmool.Crypto.Tests", "crossmool\tests\Crossmool.Crypto.Tests\Crossmool.Crypto.Tests.csproj", "{20BE9378-5742-4BB6-BA99-A93CEA9020D7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

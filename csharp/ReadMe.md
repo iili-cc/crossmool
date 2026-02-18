@@ -2,8 +2,8 @@ This is a GM tool, and it includes SM2, SM3 and SM4.
 It is not a full implementation, it is just a easy implementation for you to use GM algorithms directly.
 Crossmool Crypto Utilities (SM2/SM3/SM4)
 
-- Library: `csharp/src/Crossmool.Crypto`
-- Sample: `csharp/samples/Crossmool.Crypto.Sample`
+- Library: `crossmool/src/Crossmool.Crypto`
+- Sample: `crossmool/samples/Crossmool.Crypto.Sample`
 
 Supported:
 - `SM2Util`: `encrypt(byte[] originalTextBytes, byte[] publicKeyBytes)`, `encrypt(string originalText, string publicKeyString)`, `decrypt(byte[] encryptedTextBytes, byte[] privateKeyBytes)`, `decrypt(string encryptedText, string privateKeyString)`, `generateKeyPair()`
@@ -26,7 +26,7 @@ Quick start (PowerShell):
 
 ```
 dotnet build
-dotnet run --project csharp\samples\Crossmool.Crypto.Sample\Crossmool.Crypto.Sample.csproj
+dotnet run --project crossmool\samples\Crossmool.Crypto.Sample\Crossmool.Crypto.Sample.csproj
 ```
 
 Example (C#):
