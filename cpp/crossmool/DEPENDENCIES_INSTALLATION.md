@@ -77,7 +77,8 @@ Once you have installed the required dependencies:
 2. Ensure the header files are accessible
 3. Run the build script:
    ```cmd
-   cd build_crossmool.bat
+   cd .
+   # (execute the appropriate build script)
    ```
 
 ## Troubleshooting

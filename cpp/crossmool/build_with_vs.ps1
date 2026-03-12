@@ -44,14 +44,14 @@ if (-Not $cmakeInstalled) {
     Write-Host "CMake is available: $(cmake --version)" -ForegroundColor Green
 }
 
-# Change to the project directory
-$projectDir = "$PSScriptRoot\..\cpp\crossmool"
+# Change to the project directory (we're already there)
+$projectDir = "$PSScriptRoot"
 if (-Not (Test-Path $projectDir)) {
     Write-Host "Project directory not found: $projectDir" -ForegroundColor Red
     exit 1
 }
 
-Write-Host "Changing to project directory: $projectDir" -ForegroundColor Cyan
+Write-Host "Using project directory: $projectDir" -ForegroundColor Cyan
 Set-Location $projectDir
 
 # Create build directory if it doesn't exist

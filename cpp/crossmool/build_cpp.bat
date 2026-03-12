@@ -12,22 +12,16 @@ if "%VCINSTALLDIR%"=="" (
 
 echo Detected Visual Studio environment: %VCINSTALLDIR%
 
-REM Navigate to project directory
-cd /d "%~dp0..\.."
-
-REM Create build directory if it doesn't exist
-if not exist "cpp\crossmool\build" mkdir cpp\crossmool\build
-
-REM Navigate to build directory
-cd cpp\crossmool\build
+REM Navigate to project directory (already in the right directory)
+cd /d "%~dp0"
 
 echo Configuring project with CMake using Visual Studio generator...
-cmake .. -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Release
+cmake . -G "Visual Studio 16 2019" -A x64 -DCMAKE_BUILD_TYPE=Release
 
 if %ERRORLEVEL% NEQ 0 (
     echo CMake configuration failed.
     echo Trying with older Visual Studio version...
-    cmake .. -G "Visual Studio 15 2017" -A x64 -DCMAKE_BUILD_TYPE=Release
+    cmake . -G "Visual Studio 15 2017" -A x64 -DCMAKE_BUILD_TYPE=Release
     if %ERRORLEVEL% NEQ 0 (
         echo CMake configuration failed with VS 2017 too.
         exit /b 1

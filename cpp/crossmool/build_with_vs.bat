@@ -72,17 +72,8 @@ if !errorlevel! neq 0 (
     exit /b 1
 )
 
-REM Change to the project directory
+REM Change to the project directory (we're already there)
 cd /d "%~dp0"
-
-if not exist "cpp\crossmool" (
-    echo Error: Project directory cpp\crossmool not found
-    pause
-    exit /b 1
-)
-
-echo Changing to project directory: cpp\crossmool
-cd cpp\crossmool
 
 REM Create build directory if it doesn't exist
 if not exist "build" mkdir build

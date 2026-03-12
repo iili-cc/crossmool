@@ -39,16 +39,8 @@ if not exist "!CMAKE_PATH!\cmake.exe" (
 echo CMake found at: !CMAKE_PATH!
 echo.
 
-REM Change to the project directory
+REM Change to the project directory (we're already there)
 cd /d "%~dp0"
-if not exist "cpp\crossmool" (
-    echo Error: Project directory cpp\crossmool not found
-    pause
-    exit /b 1
-)
-
-echo Changing to project directory: cpp\crossmool
-cd cpp\crossmool
 
 REM Create build directory if it doesn't exist
 if not exist "build" mkdir build
@@ -98,26 +90,26 @@ if !errorlevel! neq 0 (
     echo Proceeding to manual verification of test files...
 
     REM At least check if the header files exist
-    if not exist "..\include\crossmool\sm2.hpp" (
-        echo Error: Header file not found: include\crossmool\sm2.hpp
+    if not exist "..\include\SM2Util.h" (
+        echo Error: Header file not found: include\SM2Util.h
         pause
         exit /b 1
     )
-    echo Header file found: include\crossmool\sm2.hpp
+    echo Header file found: include\SM2Util.h
 
-    if not exist "..\include\crossmool\sm3.hpp" (
-        echo Error: Header file not found: include\crossmool\sm3.hpp
+    if not exist "..\include\SM3Util.h" (
+        echo Error: Header file not found: include\SM3Util.h
         pause
         exit /b 1
     )
-    echo Header file found: include\crossmool\sm3.hpp
+    echo Header file found: include\SM3Util.h
 
-    if not exist "..\include\crossmool\sm4.hpp" (
-        echo Error: Header file not found: include\crossmool\sm4.hpp
+    if not exist "..\include\SM4Util.h" (
+        echo Error: Header file not found: include\SM4Util.h
         pause
         exit /b 1
     )
-    echo Header file found: include\crossmool\sm4.hpp
+    echo Header file found: include\SM4Util.h
 
     REM Copy test files to a separate directory for manual inspection
     if not exist "manual_test_copy" mkdir manual_test_copy

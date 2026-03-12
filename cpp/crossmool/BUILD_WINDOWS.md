@@ -53,9 +53,9 @@ If you prefer to build manually, follow these steps:
 
 1. Open a Visual Studio Developer Command Prompt (or x64 Native Tools Command Prompt)
 
-2. Navigate to the project directory:
+2. Navigate to the project directory (you are already in it):
    ```cmd
-   cd cpp\crossmool
+   cd .
    ```
 
 3. Create and enter the build directory:
