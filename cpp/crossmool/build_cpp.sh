@@ -22,10 +22,10 @@ echo "Configuring project with CMake..."
 # Try different generators based on platform
 if command -v cl &> /dev/null; then
     # Windows with Visual Studio
-    cmake .. -G "Visual Studio 16 2019" || cmake .. -G "MinGW Makefiles"
+    cmake ../.. -G "Visual Studio 16 2019" || cmake ../.. -G "MinGW Makefiles"
 else
     # Unix-like with gcc
-    cmake .. -G "Unix Makefiles"
+    cmake ../.. -G "Unix Makefiles"
 fi
 
 if [ $? -ne 0 ]; then
