@@ -9,7 +9,7 @@ public class SM3Constant {
 	/**
 	 * @deprecated DO NOT use this constant in your production environment.
 	 */
-	public static final String HMAC_KEY_BASE64 = "pmj4GjONG1q77D7Q6/PivwN0zMeVx6l7NtiJ9C7Pr7c=";
+	public static final String HMAC_KEY_BASE64 = "DUVX5e1LAdK7BYU+FohtgsbV1Es+8ZWMrb3CzUdSCTw=";
 	/**
 	 * @deprecated DO NOT use this constant in your production environment.
 	 */
