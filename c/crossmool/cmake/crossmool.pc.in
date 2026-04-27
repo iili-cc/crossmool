@@ -1,0 +1,9 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+libdir=${prefix}/@CMAKE_INSTALL_LIBDIR@
+includedir=${prefix}/@CMAKE_INSTALL_INCLUDEDIR@
+
+Name: crossmool
+Description: C language implementation of Chinese national cryptographic algorithms (SM2, SM3, SM4)
+Version: @PROJECT_VERSION@
+Libs: -L${libdir} -lcrossmool -lgmssl
+Cflags: -I${includedir}

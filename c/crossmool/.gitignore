@@ -1,0 +1,50 @@
+# 编译输出
+build/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+*.cmake
+
+# Visual Studio
+.vs/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.suo
+*.idb
+*.pdb
+*.ipch
+*.iobj
+*.obj
+
+# 可执行文件和库
+*.exe
+*.dll
+*.lib
+*.so
+*.dylib
+*.a
+*.o
+*.out
+
+# 测试输出
+*.log
+test_results/
+CTestTestfile.cmake
+
+# 编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 操作系统
+.DS_Store
+Thumbs.db
+
+# 临时文件
+*.tmp
+*.bak

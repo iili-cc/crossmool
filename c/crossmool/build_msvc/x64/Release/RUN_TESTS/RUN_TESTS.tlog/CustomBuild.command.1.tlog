@@ -1,0 +1,10 @@
+^G:\WORKSPACES\GIT\CORSSMOOL\CROSSMOOL\C\CROSSMOOL\BUILD_MSVC\CMAKEFILES\EEB2245513171AE33D6186A74570EB6F\RUN_TESTS_FORCE.RULE
+setlocal
+cd .
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

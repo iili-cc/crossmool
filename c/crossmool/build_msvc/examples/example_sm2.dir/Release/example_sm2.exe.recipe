@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <ProjectOutputs>
+    <ProjectOutput>
+      <FullPath>G:\workspaces\git\corssmool\crossmool\c\crossmool\build_msvc\x64\Release\ZERO_CHECK</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>G:\workspaces\git\corssmool\crossmool\c\crossmool\build_msvc\Release\crossmool.dll</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>G:\workspaces\git\corssmool\crossmool\c\crossmool\build_msvc\examples\Release\example_sm2.exe</FullPath>
+    </ProjectOutput>
+  </ProjectOutputs>
+  <ContentFiles />
+  <SatelliteDlls />
+  <NonRecipeFileRefs />
+</Project>
