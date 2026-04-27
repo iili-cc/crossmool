@@ -1,0 +1,9 @@
+{
+	"InstallScripts" : 
+	[
+		"G:/workspaces/git/corssmool/crossmool/c/crossmool/build_msvc/cmake_install.cmake",
+		"G:/workspaces/git/corssmool/crossmool/c/crossmool/build_msvc/tests/cmake_install.cmake",
+		"G:/workspaces/git/corssmool/crossmool/c/crossmool/build_msvc/examples/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

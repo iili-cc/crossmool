@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="G:\workspaces\git\corssmool\crossmool\c\crossmool\build_msvc\CMakeFiles\721ef43a488de27a35d9a7818a72e4ff\RUN_TESTS_force.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{59987CAB-8330-36EB-B2D7-51E363034083}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

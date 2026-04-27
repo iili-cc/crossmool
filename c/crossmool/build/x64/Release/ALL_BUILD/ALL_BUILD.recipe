@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <ProjectOutputs>
+    <ProjectOutput>
+      <FullPath>G:\workspaces\git\corssmool\crossmool\c\crossmool\build\x64\Release\ZERO_CHECK</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>G:\workspaces\git\corssmool\crossmool\c\crossmool\build\Release\crossmool.dll</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>G:\workspaces\git\corssmool\crossmool\c\crossmool\build\tests\Release\crosslang_test.exe</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>G:\workspaces\git\corssmool\crossmool\c\crossmool\build\examples\Release\example_interop.exe</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>G:\workspaces\git\corssmool\crossmool\c\crossmool\build\examples\Release\example_sm2.exe</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>G:\workspaces\git\corssmool\crossmool\c\crossmool\build\examples\Release\example_sm3.exe</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>G:\workspaces\git\corssmool\crossmool\c\crossmool\build\examples\Release\example_sm4.exe</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>G:\workspaces\git\corssmool\crossmool\c\crossmool\build\tests\Release\interop_test.exe</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>G:\workspaces\git\corssmool\crossmool\c\crossmool\build\tests\Release\sm2_test.exe</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>G:\workspaces\git\corssmool\crossmool\c\crossmool\build\tests\Release\sm3_test.exe</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>G:\workspaces\git\corssmool\crossmool\c\crossmool\build\tests\Release\sm4_test.exe</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>G:\workspaces\git\corssmool\crossmool\c\crossmool\build\tests\Release\util_test.exe</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>G:\workspaces\git\corssmool\crossmool\c\crossmool\build\x64\Release\ALL_BUILD</FullPath>
+    </ProjectOutput>
+  </ProjectOutputs>
+  <ContentFiles />
+  <SatelliteDlls />
+  <NonRecipeFileRefs />
+</Project>

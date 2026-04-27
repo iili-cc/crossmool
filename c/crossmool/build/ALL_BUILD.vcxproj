@@ -1,0 +1,229 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ResolveNugetPackages>false</ResolveNugetPackages>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|x64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{9E201C6C-CEA1-39DA-9ACD-57D32BF18A4B}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.26100.0</WindowsTargetPlatformVersion>
+    <Platform>x64</Platform>
+    <ProjectName>ALL_BUILD</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v145</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v145</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v145</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>Utility</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v145</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <Midl>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="G:\workspaces\git\corssmool\crossmool\c\crossmool\CMakeLists.txt">
+      <UseUtf8Encoding>Always</UseUtf8Encoding>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule G:/workspaces/git/corssmool/crossmool/c/crossmool/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+H:\Programs\cmake-4.2.5-windows-x86_64\bin\cmake.exe -SG:/workspaces/git/corssmool/crossmool/c/crossmool -BG:/workspaces/git/corssmool/crossmool/c/crossmool/build --check-stamp-file G:/workspaces/git/corssmool/crossmool/c/crossmool/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">G:\workspaces\git\corssmool\crossmool\c\crossmool\build\CMakeFiles\4.2.5\CMakeCCompiler.cmake;G:\workspaces\git\corssmool\crossmool\c\crossmool\build\CMakeFiles\4.2.5\CMakeRCCompiler.cmake;G:\workspaces\git\corssmool\crossmool\c\crossmool\build\CMakeFiles\4.2.5\CMakeSystem.cmake;G:\workspaces\git\corssmool\crossmool\c\crossmool\cmake\crossmool-config.cmake.in;G:\workspaces\git\corssmool\crossmool\c\crossmool\cmake\crossmool.pc.in;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\BasicConfigVersion-SameMajorVersion.cmake.in;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\CMakeCInformation.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\CMakeCommonLanguageInclude.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\CMakeGenericSystem.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\CMakeInitializeConfigs.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\CMakeLanguageInformation.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\CMakePackageConfigHelpers.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\CMakeRCInformation.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\CMakeSystemSpecificInformation.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\CMakeSystemSpecificInitialize.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Compiler\CMakeCommonCompilerMacros.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Compiler\MSVC-C.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Compiler\MSVC.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\GNUInstallDirs.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Internal\CMakeCLinkerInformation.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Internal\CMakeCommonLinkerInformation.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Linker\MSVC-C.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Linker\MSVC.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Platform\Linker\Windows-MSVC-C.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Platform\Linker\Windows-MSVC.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Platform\Windows-Initialize.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Platform\Windows-MSVC-C.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Platform\Windows-MSVC.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Platform\Windows.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Platform\WindowsPaths.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\WriteBasicConfigVersionFile.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">G:\workspaces\git\corssmool\crossmool\c\crossmool\build\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule G:/workspaces/git/corssmool/crossmool/c/crossmool/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+H:\Programs\cmake-4.2.5-windows-x86_64\bin\cmake.exe -SG:/workspaces/git/corssmool/crossmool/c/crossmool -BG:/workspaces/git/corssmool/crossmool/c/crossmool/build --check-stamp-file G:/workspaces/git/corssmool/crossmool/c/crossmool/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">G:\workspaces\git\corssmool\crossmool\c\crossmool\build\CMakeFiles\4.2.5\CMakeCCompiler.cmake;G:\workspaces\git\corssmool\crossmool\c\crossmool\build\CMakeFiles\4.2.5\CMakeRCCompiler.cmake;G:\workspaces\git\corssmool\crossmool\c\crossmool\build\CMakeFiles\4.2.5\CMakeSystem.cmake;G:\workspaces\git\corssmool\crossmool\c\crossmool\cmake\crossmool-config.cmake.in;G:\workspaces\git\corssmool\crossmool\c\crossmool\cmake\crossmool.pc.in;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\BasicConfigVersion-SameMajorVersion.cmake.in;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\CMakeCInformation.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\CMakeCommonLanguageInclude.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\CMakeGenericSystem.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\CMakeInitializeConfigs.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\CMakeLanguageInformation.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\CMakePackageConfigHelpers.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\CMakeRCInformation.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\CMakeSystemSpecificInformation.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\CMakeSystemSpecificInitialize.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Compiler\CMakeCommonCompilerMacros.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Compiler\MSVC-C.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Compiler\MSVC.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\GNUInstallDirs.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Internal\CMakeCLinkerInformation.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Internal\CMakeCommonLinkerInformation.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Linker\MSVC-C.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Linker\MSVC.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Platform\Linker\Windows-MSVC-C.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Platform\Linker\Windows-MSVC.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Platform\Windows-Initialize.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Platform\Windows-MSVC-C.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Platform\Windows-MSVC.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Platform\Windows.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Platform\WindowsPaths.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\WriteBasicConfigVersionFile.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">G:\workspaces\git\corssmool\crossmool\c\crossmool\build\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule G:/workspaces/git/corssmool/crossmool/c/crossmool/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
+H:\Programs\cmake-4.2.5-windows-x86_64\bin\cmake.exe -SG:/workspaces/git/corssmool/crossmool/c/crossmool -BG:/workspaces/git/corssmool/crossmool/c/crossmool/build --check-stamp-file G:/workspaces/git/corssmool/crossmool/c/crossmool/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">G:\workspaces\git\corssmool\crossmool\c\crossmool\build\CMakeFiles\4.2.5\CMakeCCompiler.cmake;G:\workspaces\git\corssmool\crossmool\c\crossmool\build\CMakeFiles\4.2.5\CMakeRCCompiler.cmake;G:\workspaces\git\corssmool\crossmool\c\crossmool\build\CMakeFiles\4.2.5\CMakeSystem.cmake;G:\workspaces\git\corssmool\crossmool\c\crossmool\cmake\crossmool-config.cmake.in;G:\workspaces\git\corssmool\crossmool\c\crossmool\cmake\crossmool.pc.in;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\BasicConfigVersion-SameMajorVersion.cmake.in;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\CMakeCInformation.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\CMakeCommonLanguageInclude.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\CMakeGenericSystem.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\CMakeInitializeConfigs.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\CMakeLanguageInformation.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\CMakePackageConfigHelpers.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\CMakeRCInformation.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\CMakeSystemSpecificInformation.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\CMakeSystemSpecificInitialize.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Compiler\CMakeCommonCompilerMacros.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Compiler\MSVC-C.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Compiler\MSVC.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\GNUInstallDirs.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Internal\CMakeCLinkerInformation.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Internal\CMakeCommonLinkerInformation.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Linker\MSVC-C.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Linker\MSVC.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Platform\Linker\Windows-MSVC-C.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Platform\Linker\Windows-MSVC.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Platform\Windows-Initialize.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Platform\Windows-MSVC-C.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Platform\Windows-MSVC.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Platform\Windows.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Platform\WindowsPaths.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\WriteBasicConfigVersionFile.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">G:\workspaces\git\corssmool\crossmool\c\crossmool\build\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule G:/workspaces/git/corssmool/crossmool/c/crossmool/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+H:\Programs\cmake-4.2.5-windows-x86_64\bin\cmake.exe -SG:/workspaces/git/corssmool/crossmool/c/crossmool -BG:/workspaces/git/corssmool/crossmool/c/crossmool/build --check-stamp-file G:/workspaces/git/corssmool/crossmool/c/crossmool/build/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">G:\workspaces\git\corssmool\crossmool\c\crossmool\build\CMakeFiles\4.2.5\CMakeCCompiler.cmake;G:\workspaces\git\corssmool\crossmool\c\crossmool\build\CMakeFiles\4.2.5\CMakeRCCompiler.cmake;G:\workspaces\git\corssmool\crossmool\c\crossmool\build\CMakeFiles\4.2.5\CMakeSystem.cmake;G:\workspaces\git\corssmool\crossmool\c\crossmool\cmake\crossmool-config.cmake.in;G:\workspaces\git\corssmool\crossmool\c\crossmool\cmake\crossmool.pc.in;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\BasicConfigVersion-SameMajorVersion.cmake.in;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\CMakeCInformation.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\CMakeCommonLanguageInclude.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\CMakeGenericSystem.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\CMakeInitializeConfigs.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\CMakeLanguageInformation.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\CMakePackageConfigHelpers.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\CMakeRCInformation.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\CMakeSystemSpecificInformation.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\CMakeSystemSpecificInitialize.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Compiler\CMakeCommonCompilerMacros.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Compiler\MSVC-C.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Compiler\MSVC.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\GNUInstallDirs.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Internal\CMakeCLinkerInformation.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Internal\CMakeCommonLinkerInformation.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Linker\MSVC-C.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Linker\MSVC.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Platform\Linker\Windows-MSVC-C.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Platform\Linker\Windows-MSVC.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Platform\Windows-Initialize.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Platform\Windows-MSVC-C.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Platform\Windows-MSVC.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Platform\Windows.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\Platform\WindowsPaths.cmake;H:\Programs\cmake-4.2.5-windows-x86_64\share\cmake-4.2\Modules\WriteBasicConfigVersionFile.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">G:\workspaces\git\corssmool\crossmool\c\crossmool\build\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="G:\workspaces\git\corssmool\crossmool\c\crossmool\build\ZERO_CHECK.vcxproj">
+      <Project>{8B719EDF-1A4B-309A-A9C7-15C3656039B6}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="G:\workspaces\git\corssmool\crossmool\c\crossmool\build\tests\asn1_debug.vcxproj">
+      <Project>{463DE719-8305-3C4C-B460-27536D21C6B9}</Project>
+      <Name>asn1_debug</Name>
+    </ProjectReference>
+    <ProjectReference Include="G:\workspaces\git\corssmool\crossmool\c\crossmool\build\tests\crosslang_test.vcxproj">
+      <Project>{93066203-A833-3F78-AFA8-6EA1C212595D}</Project>
+      <Name>crosslang_test</Name>
+    </ProjectReference>
+    <ProjectReference Include="G:\workspaces\git\corssmool\crossmool\c\crossmool\build\crossmool.vcxproj">
+      <Project>{D4EC92D5-AB94-3688-BC33-C753FC0ECB1E}</Project>
+      <Name>crossmool</Name>
+    </ProjectReference>
+    <ProjectReference Include="G:\workspaces\git\corssmool\crossmool\c\crossmool\build\examples\example_interop.vcxproj">
+      <Project>{FEA8B070-B637-32E6-A63F-34A028AC380D}</Project>
+      <Name>example_interop</Name>
+    </ProjectReference>
+    <ProjectReference Include="G:\workspaces\git\corssmool\crossmool\c\crossmool\build\examples\example_sm2.vcxproj">
+      <Project>{968914DF-E26E-32B6-BE50-1557F6ECCCD4}</Project>
+      <Name>example_sm2</Name>
+    </ProjectReference>
+    <ProjectReference Include="G:\workspaces\git\corssmool\crossmool\c\crossmool\build\examples\example_sm3.vcxproj">
+      <Project>{EB184C6C-9270-3E6D-8640-D436209178EA}</Project>
+      <Name>example_sm3</Name>
+    </ProjectReference>
+    <ProjectReference Include="G:\workspaces\git\corssmool\crossmool\c\crossmool\build\examples\example_sm4.vcxproj">
+      <Project>{DDF94998-3381-3B7E-82E6-A91D7DBE0286}</Project>
+      <Name>example_sm4</Name>
+    </ProjectReference>
+    <ProjectReference Include="G:\workspaces\git\corssmool\crossmool\c\crossmool\build\tests\interop_test.vcxproj">
+      <Project>{969FBB59-1FCF-3D29-8D45-689E133880D5}</Project>
+      <Name>interop_test</Name>
+    </ProjectReference>
+    <ProjectReference Include="G:\workspaces\git\corssmool\crossmool\c\crossmool\build\tests\sm2_test.vcxproj">
+      <Project>{D2E9E8B8-6E80-3267-9053-A5E5359618A6}</Project>
+      <Name>sm2_test</Name>
+    </ProjectReference>
+    <ProjectReference Include="G:\workspaces\git\corssmool\crossmool\c\crossmool\build\tests\sm3_test.vcxproj">
+      <Project>{81773708-FF7D-3EED-AD6B-1BC566C8B260}</Project>
+      <Name>sm3_test</Name>
+    </ProjectReference>
+    <ProjectReference Include="G:\workspaces\git\corssmool\crossmool\c\crossmool\build\tests\sm4_test.vcxproj">
+      <Project>{FDE81110-36A6-3A48-97CD-AD8F781484FD}</Project>
+      <Name>sm4_test</Name>
+    </ProjectReference>
+    <ProjectReference Include="G:\workspaces\git\corssmool\crossmool\c\crossmool\build\tests\util_test.vcxproj">
+      <Project>{CA34409C-3558-326D-84F1-E67056DD3F5B}</Project>
+      <Name>util_test</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

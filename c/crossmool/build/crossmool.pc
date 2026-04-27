@@ -1,0 +1,9 @@
+prefix=C:/Program Files/crossmool-c
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: crossmool
+Description: C language implementation of Chinese national cryptographic algorithms (SM2, SM3, SM4)
+Version: 1.0.0
+Libs: -L${libdir} -lcrossmool -lgmssl
+Cflags: -I${includedir}
