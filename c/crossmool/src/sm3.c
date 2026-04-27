@@ -180,8 +180,9 @@ int crossmool_sm3_hmac_hex(const char* key_hex, const unsigned char* data, size_
 
 /**
  * HMAC-SM3 计算（字符串输入，返回 HEX 字符串）
- * @param key_str HMAC 密钥字符串
+ * @param key_str HMAC 密钥字符串（支持 HEX / Base64 编码或 UTF-8 明文）
  * @param charset 密钥字符集（NULL 表示使用默认 UTF-8）
+ *              当 key_str 为 HEX/Base64 时此参数无效
  * @param data_str 输入数据字符串
  * @param data_charset 数据字符集（NULL 表示使用默认 UTF-8）
  * @param hmac_hex 输出参数，存储 HEX 编码的 HMAC 值
@@ -200,9 +201,22 @@ int crossmool_sm3_hmac_str(const char* key_str, const char* charset,
     unsigned char* data = NULL;
     size_t data_len = 0;
     
-    int ret = crossmool_string_to_bytes(key_str, charset, &key, &key_len);
-    if (ret != CROSSMOOL_SUCCESS) {
-        return ret;
+    /* 自动检测 key 格式：优先尝试 HEX 解码（HEX 是 Base64 的子集），
+     * 如果不是合法 HEX 再尝试 Base64，最后按 UTF-8 原始字符串处理 */
+    int ret;
+    if (crossmool_is_hex_string(key_str)) {
+        ret = crossmool_hex_decode(key_str, &key, &key_len);
+        if (ret != CROSSMOOL_SUCCESS)
+            return ret;
+    } else if (crossmool_is_base64_string(key_str)) {
+        ret = crossmool_base64_decode(key_str, &key, &key_len);
+        if (ret != CROSSMOOL_SUCCESS)
+            return ret;
+    } else {
+        /* 按 UTF-8 明文处理 */
+        ret = crossmool_string_to_bytes(key_str, charset, &key, &key_len);
+        if (ret != CROSSMOOL_SUCCESS)
+            return ret;
     }
     
     ret = crossmool_string_to_bytes(data_str, data_charset, &data, &data_len);

@@ -106,7 +106,7 @@ static const char* SM3_HMAC_KEY_HEX =
     "0d4557e5ed4b01d2bb05853e16886d82c6d5d44b3ef1958cadbdc2cd4752093c";
 
 static const char* SM3_HMAC_KEY_B64 =
-    "pmj4GjONG1q77D7Q6/PivwN0zMeVx6l7NtiJ9C7Pr7c=";
+    "DUVX5e1LAdK7BYU+FohtgsbV1Es+8ZWMrb3CzUdSCTw=";
 
 static const char* SM3_TEST_STRING =
     "Hello"
@@ -131,12 +131,9 @@ static const char* SM3_TEST_STRING =
 
 /* ============================================================
  * Java SM4Constant 中的固定测试数据
- * 注意：Java SM4Constant 中 CIPHER__KEY_BASE64 和 CIPHER__KEY_HEX
- *       的值似乎被互换了（命名与实际格式不匹配）：
- *       CIPHER__KEY_BASE64 = "8091d00c09ba74cfe6da26b7daa7ce39" (实际是 HEX)
- *       CIPHER__KEY_HEX    = "gJHQDAm6dM/m2ia32qfOOQ==" (实际是 Base64)
  * ============================================================ */
 static const char* SM4_KEY_HEX = "8091d00c09ba74cfe6da26b7daa7ce39";
+static const char* SM4_KEY_B64 = "gJHQDAm6dM/m2ia32qfOOQ==";
 static const char* SM4_TEST_STRING =
     "Hello, "
     "\xe9\x80\x99"                         /* 這 */
