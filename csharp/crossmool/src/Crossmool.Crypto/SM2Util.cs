@@ -5,9 +5,11 @@ using Org.BouncyCastle.Asn1.GM;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Asn1.Pkcs;
 using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Crypto.Digests;
 using Org.BouncyCastle.Crypto.Generators;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Crypto.Engines;
+using Org.BouncyCastle.Crypto.Signers;
 using Org.BouncyCastle.Math;
 using Org.BouncyCastle.Math.EC;
 using Org.BouncyCastle.Pkcs;
@@ -65,6 +67,103 @@ namespace Crossmool.Crypto
             var engine = new SM2Engine(SM2Engine.Mode.C1C3C2);
             engine.Init(false, privKey);
             return engine.ProcessBlock(encryptedTextBytes, 0, encryptedTextBytes.Length);
+        }
+
+        public static byte[] sign(byte[] messageBytes, byte[] privateKeyBytes)
+        {
+            if (messageBytes == null) throw new ArgumentNullException(nameof(messageBytes));
+            if (privateKeyBytes == null) throw new ArgumentNullException(nameof(privateKeyBytes));
+
+            var d = new BigInteger(1, privateKeyBytes);
+            var privKey = new ECPrivateKeyParameters(d, Sm2Domain);
+            var digest = new Sm3Digest();
+            var digester = new HMacDSAKCalculator(privKey.Parameters.Curve);
+            var signer = new ECDSASigner(digester);
+            var digestedSigner = new SignerWithDigest(signer, digest);
+            digestedSigner.Init(true, privKey);
+            var sig = digestedSigner.GenerateSignature(messageBytes);
+            var r = new BigInteger(sig[0].ToString(), 16);
+            var s = new BigInteger(sig[1].ToString(), 16);
+            var rBytes = r.ToByteArrayUnsigned();
+            var sBytes = s.ToByteArrayUnsigned();
+            var rLen = rBytes.Length;
+            var sLen = sBytes.Length;
+            var der = new byte[6 + rLen + sLen];
+            der[0] = 0x30;
+            der[1] = (byte)(4 + rLen + sLen);
+            der[2] = 0x02;
+            der[3] = (byte)rLen;
+            Array.Copy(rBytes, 0, der, 4, rLen);
+            der[4 + rLen] = 0x02;
+            der[4 + rLen + 1] = (byte)sLen;
+            Array.Copy(sBytes, 0, der, 4 + rLen + 2, sLen);
+            return der;
+        }
+
+        public static string sign(string message, string privateKeyString)
+        {
+            var messageBytes = EncodingUtils.Utf8GetBytes(message ?? string.Empty);
+            var privBytes = EncodingUtils.ParseBase64OrHex(privateKeyString);
+            var signature = sign(messageBytes, privBytes);
+            return EncodingUtils.ToHex(signature);
+        }
+
+        public static bool verify(byte[] messageBytes, byte[] signatureDerBytes, byte[] publicKeyBytes)
+        {
+            if (messageBytes == null) throw new ArgumentNullException(nameof(messageBytes));
+            if (signatureDerBytes == null) throw new ArgumentNullException(nameof(signatureDerBytes));
+            if (publicKeyBytes == null) throw new ArgumentNullException(nameof(publicKeyBytes));
+
+            var pubPoint = Sm2Domain.Curve.DecodePoint(publicKeyBytes);
+            var pubKey = new ECPublicKeyParameters(pubPoint, Sm2Domain);
+            var digest = new Sm3Digest();
+            var digester = new HMacDSAKCalculator(pubKey.Parameters.Curve);
+            var signer = new ECDSASigner(digester);
+            var digestedSigner = new SignerWithDigest(signer, digest);
+            digestedSigner.Init(false, pubKey);
+            var signature = FromDerSignature(signatureDerBytes);
+            return digestedSigner.VerifySignature(messageBytes, signature);
+        }
+
+        public static bool verify(string message, string signatureHex, string publicKeyString)
+        {
+            var messageBytes = EncodingUtils.Utf8GetBytes(message ?? string.Empty);
+            var signatureBytes = EncodingUtils.FromHex(signatureHex);
+            var pubBytes = EncodingUtils.ParseBase64OrHex(publicKeyString);
+            return verify(messageBytes, signatureBytes, pubBytes);
+        }
+
+        public static (byte[] ciphertext, byte[] signature) encryptSign(byte[] messageBytes, byte[] publicKeyBytes, byte[] privateKeyBytes)
+        {
+            var ciphertext = encrypt(messageBytes, publicKeyBytes);
+            var signature = sign(messageBytes, privateKeyBytes);
+            return (ciphertext, signature);
+        }
+
+        public static (string ciphertextHex, string signatureHex) encryptSign(string message, string publicKeyString, string privateKeyString)
+        {
+            var messageBytes = EncodingUtils.Utf8GetBytes(message ?? string.Empty);
+            var pubBytes = EncodingUtils.ParseBase64OrHex(publicKeyString);
+            var privBytes = EncodingUtils.ParseBase64OrHex(privateKeyString);
+            var (ciphertext, signature) = encryptSign(messageBytes, pubBytes, privBytes);
+            return (EncodingUtils.ToHex(ciphertext), EncodingUtils.ToHex(signature));
+        }
+
+        private static BigInteger[] FromDerSignature(byte[] der)
+        {
+            int pos = 0;
+            if (der[pos++] != 0x30) throw new FormatException("Invalid DER signature");
+            var len = der[pos++];
+            if (der[pos++] != 0x02) throw new FormatException("Invalid DER signature");
+            var rLen = der[pos++];
+            var rBytes = new byte[rLen];
+            Array.Copy(der, pos, rBytes, 0, rLen);
+            pos += rLen;
+            if (der[pos++] != 0x02) throw new FormatException("Invalid DER signature");
+            var sLen = der[pos++];
+            var sBytes = new byte[sLen];
+            Array.Copy(der, pos, sBytes, 0, sLen);
+            return new BigInteger[] { new BigInteger(1, rBytes), new BigInteger(1, sBytes) };
         }
 
         public static string decrypt(string encryptedText, string privateKeyString)

@@ -1,2 +1,2 @@
-PlatformToolSet=v143:VCToolArchitecture=Native64Bit:VCToolsVersion=14.41.34120:TargetPlatformVersion=10.0.22621.0:VcpkgTriplet=x64-windows:
-Release|x64|D:\workspaces\git\corssmool\crossmool\cpp\crossmool\build\|
+PlatformToolSet=v145:VCToolArchitecture=Native64Bit:VCToolsVersion=14.50.35717:VCServicingVersionCompilers=14.50.35729:TargetPlatformVersion=10.0.26100.0:
+Release|x64|G:\workspaces\git\corssmool\crossmool\cpp\crossmool\build\|

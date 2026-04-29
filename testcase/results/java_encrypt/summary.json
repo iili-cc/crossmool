@@ -1,0 +1,37 @@
+{
+  "summary": {
+    "total": 5,
+    "success": 4,
+    "failed": 1
+  },
+  "results": [
+    {
+      "test_case_id": 1,
+      "test_case_name": "simple_text",
+      "plaintext": "Hello, Crossmool!",
+      "ciphertext_hex": "04b87a6b13a1efcc44cb38309bc158ee87f59ec4eddcf7c8701fe0d39a466633b17457233c508425a835eab06fe6de5a6b36fd8954316a0234ed14eb5d2cfc5c8c3840781c92a5775b7ed48da73868aae9ee170fe8623c262638ad3cd3fe28954e9629d669b9acf86a60cac2040f501fc27f",
+      "signature_hex": "304502205e6d10e71e7ebf1b211147439c158c9e6cd7eaee613539f18a5a39cbb6fe13c2022100afc617b10c21107d7dd9e97958aba604cbeb15716ab21cab86adf9f2f1a2eca8"
+    },
+    {
+      "test_case_id": 2,
+      "test_case_name": "chinese_text",
+      "plaintext": "跨语言互操作性测试",
+      "ciphertext_hex": "040d14129b26e5f925619ee956d28fd5810406d168aad92e782b7f2b18158e16bda440538213bb0171b66c350139a715fde0f80e1a2c97673a036fa7eafde36baa93934d2d671230bae63f3e424f39b1e165138afa12d9177857712bc83a86e4c44e6a4870981b69c3f8bf62831be0d534595f79932942e716c6dcd9",
+      "signature_hex": "30440220469d116e2b3e5b8ecd823eaff0df93d6620ee6d39000124d22a3c8607dcc032c0220373e5641173dd7310d136558de77d0f2014f2814eb0af57af1242e3e326a5ff0"
+    },
+    {
+      "test_case_id": 3,
+      "test_case_name": "mixed_content",
+      "plaintext": "Test 测试 123!@#",
+      "ciphertext_hex": "0459af76c66d6c1fb4288a16dfd404f45eee9e0ab5e09c2deb35e9670f5dcba45c90a360551cd119225bdc31f070060e50b42a141898cabd2bdec5d833bdd0ed2a9b908f39a76c4cfb9824c0c27bb40a2a1ed1f558f4ca4902dd1544c652995e59ed8a8fe686546ae8ffd7abd48a966b48b319",
+      "signature_hex": "30450220212b936b44a9e80acba2b179c0fe35e3314ed958c0ea5da93837f0810a08b335022100a83b514227f8d5cee4607b2e9434165dc0ae69e2764d844cc2a11a3b5fa2c7a3"
+    },
+    {
+      "test_case_id": 4,
+      "test_case_name": "longer_text",
+      "plaintext": "This is a longer text for testing SM2 encryption and signature interoperability across multiple programming languages including Java, C, C++, C#, Go, JavaScript, Python, and Rust.",
+      "ciphertext_hex": "045a076828b5053b7d997ca6456f71b310fc3799ac1540f16631859f14ce066fe8d78808603f91642d91153bb634d2292797d8a44606042831cfa72c8f83281fabbe704410764a93fdfa72a8ee05100d4538bd8f29c90f078f5bba1749dd666b1edfeb1f37f3d4719cb9c751954ee2ce6d4532c9c283dd25caa7410fb9147835b9a55c87ce183471770493e10dd80ad89376a8f633c6b954b31944103d0608f9d932cf0ef467cf7d14caad31faa685cf694299e67248adb13f6312b6e588e1efba6ac6e4ddce012427b5aaa06c2cb87e41fed7123b6e222d80cbc623b2fbfb0c59f1a8ea8cc5beb98e3e709db5393fc58d294639228b567b48e3634bae7c1bf0adb70e76de3a646ae933cb4278c2b28858d5b88c",
+      "signature_hex": "3045022100f7ab76cc11e67a73c0a8a429409c11606972c3fc0faf04e9d955b491dfdde243022036722e2829986d0ffe2df99686ab3e9276cfa2b267c18f17d980eb690afcaf35"
+    }
+  ]
+}

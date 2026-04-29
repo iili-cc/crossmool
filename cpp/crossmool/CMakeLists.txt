@@ -16,7 +16,7 @@ option(USE_SYSTEM_GMSSL "Use system-installed GmSSL library" ON)
 
 if(USE_SYSTEM_GMSSL)
     # Find GmSSL library
-    find_package(PkgConfig REQUIRED)
+    find_package(PkgConfig QUIET)
 
     # Try to find GmSSL with pkg-config first
     if(PkgConfig_FOUND)

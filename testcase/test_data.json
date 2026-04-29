@@ -1,0 +1,29 @@
+{
+  "test_cases": [
+    {
+      "id": 1,
+      "name": "simple_text",
+      "plaintext": "Hello, Crossmool!"
+    },
+    {
+      "id": 2,
+      "name": "chinese_text",
+      "plaintext": "跨语言互操作性测试"
+    },
+    {
+      "id": 3,
+      "name": "mixed_content",
+      "plaintext": "Test 测试 123!@#"
+    },
+    {
+      "id": 4,
+      "name": "longer_text",
+      "plaintext": "This is a longer text for testing SM2 encryption and signature interoperability across multiple programming languages including Java, C, C++, C#, Go, JavaScript, Python, and Rust."
+    },
+    {
+      "id": 5,
+      "name": "special_characters",
+      "plaintext": "Special chars: \n\t\r\"'<>{}[]|\\^~`"
+    }
+  ]
+}

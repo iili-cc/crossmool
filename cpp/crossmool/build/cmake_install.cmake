@@ -1,8 +1,8 @@
-# Install script for directory: D:/workspaces/git/corssmool/crossmool/cpp/crossmool
+# Install script for directory: G:/workspaces/git/corssmool/crossmool/cpp/crossmool
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "C:/Program Files (x86)/crossmool-cpp")
+  set(CMAKE_INSTALL_PREFIX "C:/Program Files/crossmool-cpp")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -34,24 +34,24 @@ endif()
 
 if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
   if(CMAKE_INSTALL_CONFIG_NAME MATCHES "^([Dd][Ee][Bb][Uu][Gg])$")
-    file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" TYPE STATIC_LIBRARY FILES "D:/workspaces/git/corssmool/crossmool/cpp/crossmool/build/lib/Debug/crossmool.lib")
+    file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" TYPE STATIC_LIBRARY FILES "G:/workspaces/git/corssmool/crossmool/cpp/crossmool/build/lib/Debug/crossmool.lib")
   elseif(CMAKE_INSTALL_CONFIG_NAME MATCHES "^([Rr][Ee][Ll][Ee][Aa][Ss][Ee])$")
-    file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" TYPE STATIC_LIBRARY FILES "D:/workspaces/git/corssmool/crossmool/cpp/crossmool/build/lib/Release/crossmool.lib")
+    file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" TYPE STATIC_LIBRARY FILES "G:/workspaces/git/corssmool/crossmool/cpp/crossmool/build/lib/Release/crossmool.lib")
   elseif(CMAKE_INSTALL_CONFIG_NAME MATCHES "^([Mm][Ii][Nn][Ss][Ii][Zz][Ee][Rr][Ee][Ll])$")
-    file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" TYPE STATIC_LIBRARY FILES "D:/workspaces/git/corssmool/crossmool/cpp/crossmool/build/lib/MinSizeRel/crossmool.lib")
+    file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" TYPE STATIC_LIBRARY FILES "G:/workspaces/git/corssmool/crossmool/cpp/crossmool/build/lib/MinSizeRel/crossmool.lib")
   elseif(CMAKE_INSTALL_CONFIG_NAME MATCHES "^([Rr][Ee][Ll][Ww][Ii][Tt][Hh][Dd][Ee][Bb][Ii][Nn][Ff][Oo])$")
-    file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" TYPE STATIC_LIBRARY FILES "D:/workspaces/git/corssmool/crossmool/cpp/crossmool/build/lib/RelWithDebInfo/crossmool.lib")
+    file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib" TYPE STATIC_LIBRARY FILES "G:/workspaces/git/corssmool/crossmool/cpp/crossmool/build/lib/RelWithDebInfo/crossmool.lib")
   endif()
 endif()
 
 if(CMAKE_INSTALL_COMPONENT STREQUAL "Unspecified" OR NOT CMAKE_INSTALL_COMPONENT)
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/include/crossmool" TYPE DIRECTORY FILES "D:/workspaces/git/corssmool/crossmool/cpp/crossmool/include/")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/include/crossmool" TYPE DIRECTORY FILES "G:/workspaces/git/corssmool/crossmool/cpp/crossmool/include/")
 endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
 if(CMAKE_INSTALL_LOCAL_ONLY)
-  file(WRITE "D:/workspaces/git/corssmool/crossmool/cpp/crossmool/build/install_local_manifest.txt"
+  file(WRITE "G:/workspaces/git/corssmool/crossmool/cpp/crossmool/build/install_local_manifest.txt"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()
 if(CMAKE_INSTALL_COMPONENT)
@@ -67,6 +67,6 @@ else()
 endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
-  file(WRITE "D:/workspaces/git/corssmool/crossmool/cpp/crossmool/build/${CMAKE_INSTALL_MANIFEST}"
+  file(WRITE "G:/workspaces/git/corssmool/crossmool/cpp/crossmool/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
 endif()

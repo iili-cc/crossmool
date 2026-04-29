@@ -1,8 +1,8 @@
-D:/workspaces/git/corssmool/crossmool/cpp/crossmool/build/CMakeFiles/crossmool.dir
-D:/workspaces/git/corssmool/crossmool/cpp/crossmool/build/CMakeFiles/crossmool_test.dir
-D:/workspaces/git/corssmool/crossmool/cpp/crossmool/build/CMakeFiles/interoperability_test.dir
-D:/workspaces/git/corssmool/crossmool/cpp/crossmool/build/CMakeFiles/edge_case_tests.dir
-D:/workspaces/git/corssmool/crossmool/cpp/crossmool/build/CMakeFiles/RUN_TESTS.dir
-D:/workspaces/git/corssmool/crossmool/cpp/crossmool/build/CMakeFiles/INSTALL.dir
-D:/workspaces/git/corssmool/crossmool/cpp/crossmool/build/CMakeFiles/ALL_BUILD.dir
-D:/workspaces/git/corssmool/crossmool/cpp/crossmool/build/CMakeFiles/ZERO_CHECK.dir
+G:/workspaces/git/corssmool/crossmool/cpp/crossmool/build/CMakeFiles/crossmool.dir
+G:/workspaces/git/corssmool/crossmool/cpp/crossmool/build/CMakeFiles/crossmool_test.dir
+G:/workspaces/git/corssmool/crossmool/cpp/crossmool/build/CMakeFiles/interoperability_test.dir
+G:/workspaces/git/corssmool/crossmool/cpp/crossmool/build/CMakeFiles/edge_case_tests.dir
+G:/workspaces/git/corssmool/crossmool/cpp/crossmool/build/CMakeFiles/RUN_TESTS.dir
+G:/workspaces/git/corssmool/crossmool/cpp/crossmool/build/CMakeFiles/INSTALL.dir
+G:/workspaces/git/corssmool/crossmool/cpp/crossmool/build/CMakeFiles/ALL_BUILD.dir
+G:/workspaces/git/corssmool/crossmool/cpp/crossmool/build/CMakeFiles/ZERO_CHECK.dir

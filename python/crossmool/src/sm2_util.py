@@ -1,13 +1,24 @@
 from gmssl import sm2, func
-from .encoding import (
-    is_hex_string,
-    is_base64_string,
-    hex_to_bytes,
-    bytes_to_hex,
-    base64_to_bytes,
-    bytes_to_base64,
-    utf8_to_bytes,
-)
+try:
+    from .encoding import (
+        is_hex_string,
+        is_base64_string,
+        hex_to_bytes,
+        bytes_to_hex,
+        base64_to_bytes,
+        bytes_to_base64,
+        utf8_to_bytes,
+    )
+except ImportError:
+    from encoding import (
+        is_hex_string,
+        is_base64_string,
+        hex_to_bytes,
+        bytes_to_hex,
+        base64_to_bytes,
+        bytes_to_base64,
+        utf8_to_bytes,
+    )
 from .der import DerReader
 
 

@@ -2,19 +2,19 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>D:\workspaces\git\corssmool\crossmool\cpp\crossmool\build\x64\Release\ZERO_CHECK</FullPath>
+      <FullPath>G:\workspaces\git\corssmool\crossmool\cpp\crossmool\build\x64\Release\ZERO_CHECK</FullPath>
     </ProjectOutput>
     <ProjectOutput>
-      <FullPath>D:\workspaces\git\corssmool\crossmool\cpp\crossmool\build\bin\Release\crossmool_test.exe</FullPath>
+      <FullPath>G:\workspaces\git\corssmool\crossmool\cpp\crossmool\build\bin\Release\crossmool_test.exe</FullPath>
     </ProjectOutput>
     <ProjectOutput>
-      <FullPath>D:\workspaces\git\corssmool\crossmool\cpp\crossmool\build\bin\Release\edge_case_tests.exe</FullPath>
+      <FullPath>G:\workspaces\git\corssmool\crossmool\cpp\crossmool\build\bin\Release\edge_case_tests.exe</FullPath>
     </ProjectOutput>
     <ProjectOutput>
-      <FullPath>D:\workspaces\git\corssmool\crossmool\cpp\crossmool\build\bin\Release\interoperability_test.exe</FullPath>
+      <FullPath>G:\workspaces\git\corssmool\crossmool\cpp\crossmool\build\bin\Release\interoperability_test.exe</FullPath>
     </ProjectOutput>
     <ProjectOutput>
-      <FullPath>D:\workspaces\git\corssmool\crossmool\cpp\crossmool\build\x64\Release\ALL_BUILD</FullPath>
+      <FullPath>G:\workspaces\git\corssmool\crossmool\cpp\crossmool\build\x64\Release\ALL_BUILD</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />

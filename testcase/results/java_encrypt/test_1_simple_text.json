@@ -1,0 +1,7 @@
+{
+  "test_case_id": 1,
+  "test_case_name": "simple_text",
+  "plaintext": "Hello, Crossmool!",
+  "ciphertext_hex": "04b87a6b13a1efcc44cb38309bc158ee87f59ec4eddcf7c8701fe0d39a466633b17457233c508425a835eab06fe6de5a6b36fd8954316a0234ed14eb5d2cfc5c8c3840781c92a5775b7ed48da73868aae9ee170fe8623c262638ad3cd3fe28954e9629d669b9acf86a60cac2040f501fc27f",
+  "signature_hex": "304502205e6d10e71e7ebf1b211147439c158c9e6cd7eaee613539f18a5a39cbb6fe13c2022100afc617b10c21107d7dd9e97958aba604cbeb15716ab21cab86adf9f2f1a2eca8"
+}

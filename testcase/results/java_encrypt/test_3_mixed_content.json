@@ -1,0 +1,7 @@
+{
+  "test_case_id": 3,
+  "test_case_name": "mixed_content",
+  "plaintext": "Test 测试 123!@#",
+  "ciphertext_hex": "0459af76c66d6c1fb4288a16dfd404f45eee9e0ab5e09c2deb35e9670f5dcba45c90a360551cd119225bdc31f070060e50b42a141898cabd2bdec5d833bdd0ed2a9b908f39a76c4cfb9824c0c27bb40a2a1ed1f558f4ca4902dd1544c652995e59ed8a8fe686546ae8ffd7abd48a966b48b319",
+  "signature_hex": "30450220212b936b44a9e80acba2b179c0fe35e3314ed958c0ea5da93837f0810a08b335022100a83b514227f8d5cee4607b2e9434165dc0ae69e2764d844cc2a11a3b5fa2c7a3"
+}

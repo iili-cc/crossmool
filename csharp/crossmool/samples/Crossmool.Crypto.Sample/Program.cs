@@ -1,11 +1,46 @@
-﻿using System;
+using System;
 using Crossmool.Crypto;
 using Crossmool.Crypto.Utils;
 
 class Program
 {
-	static void Main()
+	static void Main(string[] args)
 	{
+		if (args.Length == 3)
+		{
+			// 命令行模式：encryptSign <message> <publicKey> <privateKey>
+			var message = args[0];
+			var publicKey = args[1];
+			var privateKey = args[2];
+			
+			var (ciphertextHex, signatureHex) = SM2Util.encryptSign(message, publicKey, privateKey);
+			Console.WriteLine($"{ciphertextHex}\t{signatureHex}");
+			return;
+		}
+		
+		if (args.Length == 2)
+		{
+			// 命令行模式：encryptToHex <message> <publicKey>
+			var message = args[0];
+			var publicKey = args[1];
+			
+			var ciphertextHex = SM2Util.encryptToHex(message, publicKey);
+			Console.WriteLine(ciphertextHex);
+			return;
+		}
+		
+		if (args.Length == 2 && args[0] == "sign")
+		{
+			// 命令行模式：sign <message> <privateKey>
+			var message = args[1];
+			var privateKey = args[2];
+			
+			var signatureHex = SM2Util.sign(message, privateKey);
+			Console.WriteLine(signatureHex);
+			return;
+		}
+
+		// 默认演示模式
 		Console.WriteLine("SM2 KeyPair:");
 		var kpJson = SM2Util.generateKeyPair();
 		Console.WriteLine(kpJson);

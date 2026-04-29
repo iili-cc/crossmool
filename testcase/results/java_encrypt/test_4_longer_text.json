@@ -1,0 +1,7 @@
+{
+  "test_case_id": 4,
+  "test_case_name": "longer_text",
+  "plaintext": "This is a longer text for testing SM2 encryption and signature interoperability across multiple programming languages including Java, C, C++, C#, Go, JavaScript, Python, and Rust.",
+  "ciphertext_hex": "045a076828b5053b7d997ca6456f71b310fc3799ac1540f16631859f14ce066fe8d78808603f91642d91153bb634d2292797d8a44606042831cfa72c8f83281fabbe704410764a93fdfa72a8ee05100d4538bd8f29c90f078f5bba1749dd666b1edfeb1f37f3d4719cb9c751954ee2ce6d4532c9c283dd25caa7410fb9147835b9a55c87ce183471770493e10dd80ad89376a8f633c6b954b31944103d0608f9d932cf0ef467cf7d14caad31faa685cf694299e67248adb13f6312b6e588e1efba6ac6e4ddce012427b5aaa06c2cb87e41fed7123b6e222d80cbc623b2fbfb0c59f1a8ea8cc5beb98e3e709db5393fc58d294639228b567b48e3634bae7c1bf0adb70e76de3a646ae933cb4278c2b28858d5b88c",
+  "signature_hex": "3045022100f7ab76cc11e67a73c0a8a429409c11606972c3fc0faf04e9d955b491dfdde243022036722e2829986d0ffe2df99686ab3e9276cfa2b267c18f17d980eb690afcaf35"
+}

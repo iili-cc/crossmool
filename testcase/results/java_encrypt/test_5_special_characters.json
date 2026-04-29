@@ -1,0 +1,7 @@
+{
+  "test_case_id": 5,
+  "test_case_name": "special_characters",
+  "plaintext": "Special chars: \n\t\r\"'<>{}[]|\\^~`",
+  "ciphertext_hex": "044e82db76415f7933210e1664e5da893ff9db9130083fff880f9c612826ac27c0075f477d3e3bf1500c4fd58a8a158e8478974161de95da51fde0e9030f992c4fea7ac41e71b0ccbc15c5cb83600c429c3fb26eaad3e9bd86c37249d0b43170e2128c4b18903cd52ac0deca018209b2bfe034ecc191bc28b7cb1ed5ebff0fca",
+  "signature_hex": "3046022100f0310ccdb494d03b927d1d3798b216285b30fb255f0c95a7631f84746a02ed86022100a01d835ac815cc3c1334f7595c592e3d76d79a4c336eaadc26b01eae350200aa"
+}

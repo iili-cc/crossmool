@@ -1,16 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="D:\workspaces\git\corssmool\crossmool\cpp\crossmool\tests\interoperability_test.cpp">
+    <ClCompile Include="G:\workspaces\git\corssmool\crossmool\cpp\crossmool\tests\interoperability_test.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="D:\workspaces\git\corssmool\crossmool\cpp\crossmool\CMakeLists.txt" />
+    <CustomBuild Include="G:\workspaces\git\corssmool\crossmool\cpp\crossmool\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{AB1F6838-DC5B-3DBB-91F5-43F4787CA2D0}</UniqueIdentifier>
+      <UniqueIdentifier>{B1B6036A-36CD-3D6D-B8EE-30C7619E3EFE}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
