@@ -1,0 +1,61 @@
+{
+  "total": 6,
+  "success": 0,
+  "failed": 6,
+  "results": [
+    {
+      "test_case_id": 1,
+      "test_case_name": "simple_text",
+      "verify_language": "c",
+      "status": "failed",
+      "error": "verify_decrypt failed: -6",
+      "expected_plaintext": "Hello, Crossmool!",
+      "match": false
+    },
+    {
+      "test_case_id": 2,
+      "test_case_name": "chinese_text",
+      "verify_language": "c",
+      "status": "failed",
+      "error": "verify_decrypt failed: -6",
+      "expected_plaintext": "跨语言互操作性测试",
+      "match": false
+    },
+    {
+      "test_case_id": 3,
+      "test_case_name": "mixed_content",
+      "verify_language": "c",
+      "status": "failed",
+      "error": "verify_decrypt failed: -6",
+      "expected_plaintext": "Test 测试 123!@#",
+      "match": false
+    },
+    {
+      "test_case_id": 4,
+      "test_case_name": "longer_text",
+      "verify_language": "c",
+      "status": "failed",
+      "error": "verify_decrypt failed: -6",
+      "expected_plaintext": "This is a longer text for testing SM2 encryption and signature interoperability across multiple programming languages including Java, C, C++, C#, Go, JavaScript, Python, and Rust.",
+      "match": false
+    },
+    {
+      "test_case_id": 5,
+      "test_case_name": "special_characters",
+      "verify_language": "c",
+      "status": "failed",
+      "error": "verify_decrypt failed: -6",
+      "expected_plaintext": "Special chars: \n\t\r\"'<>{}[]|\\^~`",
+      "match": false
+    },
+    {
+      "test_case_id": 5,
+      "test_case_name": "special_characters",
+      "verify_language": "c",
+      "status": "failed",
+      "error": "verify_decrypt failed: -6",
+      "expected_plaintext": "Special chars: \n\t\r\"'<>{}[]|\\^~`",
+      "match": false
+    }
+  ]
+}

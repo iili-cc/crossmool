@@ -76,28 +76,11 @@ namespace Crossmool.Crypto
 
             var d = new BigInteger(1, privateKeyBytes);
             var privKey = new ECPrivateKeyParameters(d, Sm2Domain);
-            var digest = new Sm3Digest();
-            var digester = new HMacDSAKCalculator(privKey.Parameters.Curve);
-            var signer = new ECDSASigner(digester);
-            var digestedSigner = new SignerWithDigest(signer, digest);
-            digestedSigner.Init(true, privKey);
-            var sig = digestedSigner.GenerateSignature(messageBytes);
-            var r = new BigInteger(sig[0].ToString(), 16);
-            var s = new BigInteger(sig[1].ToString(), 16);
-            var rBytes = r.ToByteArrayUnsigned();
-            var sBytes = s.ToByteArrayUnsigned();
-            var rLen = rBytes.Length;
-            var sLen = sBytes.Length;
-            var der = new byte[6 + rLen + sLen];
-            der[0] = 0x30;
-            der[1] = (byte)(4 + rLen + sLen);
-            der[2] = 0x02;
-            der[3] = (byte)rLen;
-            Array.Copy(rBytes, 0, der, 4, rLen);
-            der[4 + rLen] = 0x02;
-            der[4 + rLen + 1] = (byte)sLen;
-            Array.Copy(sBytes, 0, der, 4 + rLen + 2, sLen);
-            return der;
+            var signer = new SM2Signer();
+            var parameters = new ParametersWithRandom(privKey, Rng);
+            signer.Init(true, parameters);
+            signer.BlockUpdate(messageBytes, 0, messageBytes.Length);
+            return signer.GenerateSignature();
         }
 
         public static string sign(string message, string privateKeyString)
@@ -116,13 +99,16 @@ namespace Crossmool.Crypto
 
             var pubPoint = Sm2Domain.Curve.DecodePoint(publicKeyBytes);
             var pubKey = new ECPublicKeyParameters(pubPoint, Sm2Domain);
-            var digest = new Sm3Digest();
-            var digester = new HMacDSAKCalculator(pubKey.Parameters.Curve);
-            var signer = new ECDSASigner(digester);
-            var digestedSigner = new SignerWithDigest(signer, digest);
-            digestedSigner.Init(false, pubKey);
+            var signer = new SM2Signer();
+            signer.Init(false, pubKey);
+            signer.BlockUpdate(messageBytes, 0, messageBytes.Length);
             var signature = FromDerSignature(signatureDerBytes);
-            return digestedSigner.VerifySignature(messageBytes, signature);
+            var rBytes = signature[0].ToByteArrayUnsigned();
+            var sBytes = signature[1].ToByteArrayUnsigned();
+            var sigBytes = new byte[rBytes.Length + sBytes.Length];
+            Array.Copy(rBytes, 0, sigBytes, 0, rBytes.Length);
+            Array.Copy(sBytes, 0, sigBytes, rBytes.Length, sBytes.Length);
+            return signer.VerifySignature(sigBytes);
         }
 
         public static bool verify(string message, string signatureHex, string publicKeyString)
@@ -193,15 +179,13 @@ namespace Crossmool.Crypto
             var pub = (ECPublicKeyParameters)pair.Public;
 
             var privBytes = priv.D.ToByteArrayUnsigned();
-            var pubBytes = pub.Q.GetEncoded(false); // uncompressed 0x04 + X + Y
+            var pubBytes = pub.Q.GetEncoded(false);
 
             var privHex = EncodingUtils.ToHex(privBytes);
             var pubHex = EncodingUtils.ToHex(pubBytes);
-            // Return JSON for clarity
             return $"{{\"privateKeyHex\":\"{privHex}\",\"publicKeyHex\":\"{pubHex}\"}}";
         }
 
-        // PEM helpers (PKCS#8 private key, SubjectPublicKeyInfo public key)
         public static string exportPrivateKeyPem(byte[] privateKeyBytes)
         {
             if (privateKeyBytes == null) throw new ArgumentNullException(nameof(privateKeyBytes));

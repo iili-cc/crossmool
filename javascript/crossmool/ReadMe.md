@@ -6,7 +6,7 @@
 
 - **SM2 密文格式**：`C1C3C2`（对应 `sm2.doEncrypt(..., cipherMode=1)`）
 - **SM2 签名格式**：DER 编码（`der: true`）
-- **SM2 杂凑/ID**：SM3-with-ID（`hash: true` 且固定 `userId = "0123456789ABCDEF"`）
+- **SM2 杂凑/ID**：SM3-with-ID（`hash: true` 且固定 `userId = "1234567812345678"`）
 - **SM2 Key 格式**：兼容 Java 的
 	- 公钥：X.509 / SubjectPublicKeyInfo（Hex/Base64）
 	- 私钥：PKCS8 / PrivateKeyInfo（Hex/Base64）

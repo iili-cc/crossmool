@@ -1,3 +1,4 @@
 {
-    "cmake.sourceDirectory": "D:/workspaces/git/corssmool/crossmool/cpp/crossmool"
+    "cmake.sourceDirectory": "D:/workspaces/git/corssmool/crossmool/cpp/crossmool",
+    "cmake.ignoreCMakeListsMissing": true
 }

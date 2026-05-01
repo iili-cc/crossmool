@@ -1,0 +1,14 @@
+﻿原文：Hello, Crossmool!
+原文长度：17 字节
+
+Java 密文 (C1C3C2):
+  C1: 04e4534be6847921acdf2f0ff2e4d1e0057bcdba9450c64af197c30762e8356531a26295dfbfc6335d21ad8176312e8c9b0489400599657c6eacf197f08db43a35
+  C3: d96c52a989a8aab3f9b855a56bb507e5ebe81f2aea88d76d72671a3bd1244273
+  C2: f80dd60d50556bb4e5cff5fc6a02b97fdf
+
+重新排列后 (C1C2C3):
+  04e4534be6847921acdf2f0ff2e4d1e0057bcdba9450c64af197c30762e8356531a26295dfbfc6335d21ad8176312e8c9b0489400599657c6eacf197f08db43a35f80dd60d50556bb4e5cff5fc6a02b97fdfd96c52a989a8aab3f9b855a56bb507e5ebe81f2aea88d76d72671a3bd1244273
+
+解密结果：b'|\x14\xd1)\xdcar\xa29-Q\xc4\xc7x-?\x87\xd2'
+
+解密失败：'utf-8' codec can't decode byte 0xd1 in position 2: invalid continuation byte

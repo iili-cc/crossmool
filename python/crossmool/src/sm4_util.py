@@ -1,11 +1,9 @@
 from gmssl import sm4
-from .encoding import bytes_to_hex, hex_to_bytes, bytes_to_base64, base64_to_bytes
-
+from encoding import bytes_to_hex, hex_to_bytes, bytes_to_base64, base64_to_bytes
 
 def pkcs7_pad(data: bytes, block_size: int = 16) -> bytes:
     pad_len = block_size - (len(data) % block_size)
     return data + bytes([pad_len]) * pad_len
-
 
 def pkcs7_unpad(data: bytes) -> bytes:
     if not data:
@@ -14,7 +12,6 @@ def pkcs7_unpad(data: bytes) -> bytes:
     if pad_len < 1 or pad_len > 16:
         raise ValueError('Invalid padding')
     return data[:-pad_len]
-
 
 class SM4Util:
     @staticmethod

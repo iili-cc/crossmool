@@ -13,7 +13,7 @@ Status
 Compatibility notes
 -------------------
 - Java `SM2Util` uses BouncyCastle `SM2Engine.Mode.C1C3C2` for encryption. Any Rust SM2 implementation must output/read ciphertext in C1C3C2 order to be interoperable.
-- Java `SM2Util` signs using `SM2Signer` with user id `0123456789ABCDEF`. When implementing signatures in Rust, make sure to use the same user id and the same signature encoding (Bouncy Castle returns DER-encoded signature bytes from `generateSignature()`).
+- Java `SM2Util` signs using `SM2Signer` with user id `1234567812345678`. When implementing signatures in Rust, make sure to use the same user id and the same signature encoding (Bouncy Castle returns DER-encoded signature bytes from `generateSignature()`).
 - SM3 digest and HMAC-SM3 must match BouncyCastle outputs; the Rust `sm3` crate (RustCrypto-style) is compatible.
 - SM4 ECB/PKCS7 implemented and returns raw cipher bytes; helpers provided for hex/base64.
 

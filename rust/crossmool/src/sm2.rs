@@ -2,7 +2,7 @@
 //!
 //! Provides SM2 key generation, sign and verify helpers compatible with the Java
 //! `SM2Util` conventions used in this repository (DER key encodings, SM2Signer user-id
-//! = "0123456789ABCDEF"). SM2 public-key encryption (PKE) producing C1C3C2
+//! = "1234567812345678"). SM2 public-key encryption (PKE) producing C1C3C2
 //! format is implemented in this module (C1 = uncompressed SEC1 point, C3 = SM3(Sx||M||Sy), C2 = M xor KDF).
 
 use rand::rngs::OsRng;
@@ -80,7 +80,7 @@ pub fn generate_keypair() -> Result<SerialKeyPair, String> {
 pub fn sign_bytes(msg: &[u8], private_pkcs8_der: &[u8]) -> Result<Vec<u8>, String> {
     let sk = SecretKey::from_pkcs8_der(private_pkcs8_der)
         .map_err(|e| format!("parse sk pkcs8 error: {:?}", e))?;
-    let signing_key = SigningKey::new("0123456789ABCDEF", &sk)
+    let signing_key = SigningKey::new("1234567812345678", &sk)
         .map_err(|e| format!("create signing key error: {:?}", e))?;
     let sig = signing_key
         .try_sign(msg)
@@ -92,7 +92,7 @@ pub fn sign_bytes(msg: &[u8], private_pkcs8_der: &[u8]) -> Result<Vec<u8>, Strin
 pub fn sign_with_private_pem(msg: &[u8], private_pkcs8_pem: &str) -> Result<Vec<u8>, String> {
     let sk = SecretKey::from_pkcs8_pem(private_pkcs8_pem)
         .map_err(|e| format!("parse sk pem error: {:?}", e))?;
-    let signing_key = SigningKey::new("0123456789ABCDEF", &sk)
+    let signing_key = SigningKey::new("1234567812345678", &sk)
         .map_err(|e| format!("create signing key error: {:?}", e))?;
     let sig = signing_key
         .try_sign(msg)
@@ -108,7 +108,7 @@ pub fn verify_with_public_pem(
 ) -> Result<bool, String> {
     let pk = PublicKey::from_public_key_pem(public_pem)
         .map_err(|e| format!("parse public pem error: {:?}", e))?;
-    let verifying_key = VerifyingKey::new("0123456789ABCDEF", pk)
+    let verifying_key = VerifyingKey::new("1234567812345678", pk)
         .map_err(|e| format!("create verifying key error: {:?}", e))?;
     if signature.len() != 64 {
         return Err("signature must be 64 bytes".into());
@@ -127,7 +127,7 @@ pub fn verify_with_public_pem(
 pub fn verify_bytes(msg: &[u8], signature: &[u8], public_x509_der: &[u8]) -> Result<bool, String> {
     let pk = PublicKey::from_public_key_der(public_x509_der)
         .map_err(|e| format!("parse public der error: {:?}", e))?;
-    let verifying_key = VerifyingKey::new("0123456789ABCDEF", pk)
+    let verifying_key = VerifyingKey::new("1234567812345678", pk)
         .map_err(|e| format!("create verifying key error: {:?}", e))?;
     if signature.len() != 64 {
         return Err("signature must be 64 bytes".into());

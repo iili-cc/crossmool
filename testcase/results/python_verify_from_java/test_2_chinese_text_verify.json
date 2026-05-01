@@ -1,0 +1,13 @@
+{
+  "test_case_id": 2,
+  "test_case_name": "chinese_text",
+  "original_plaintext": "跨语言互操作性测试",
+  "ciphertext_hex": "04049c9ae287231173de5c0cde57d08cf9ad90d9f34babac3af7fdd9178217f3f6a67fc4cf7e83db78e4237206c51bd5478d7bf10913ac3b6eadf36376002546c3d1f9a6cf5949dc4eb3a6b54c2c8e9303ab8493e677ee5a56f41bda972d7f6be437bf347a2cbf96909d9670766d3e7ce10b5721f73976f26acad701",
+  "signature_hex": "304402201cd0153a548d1ba7244880c4a5a0774d07ae1f08c835a9426177c96eac5ac3c6022077a6096df358533321c7afbe1d0f32eee42e2c8e8cf71e025c6da3b2add327c0",
+  "decrypt_success": false,
+  "decrypt_result": null,
+  "decrypt_error": "'utf-8' codec can't decode byte 0xb9 in position 1: invalid start byte",
+  "verify_success": false,
+  "verify_error": "签名验证失败",
+  "match_plaintext": false
+}

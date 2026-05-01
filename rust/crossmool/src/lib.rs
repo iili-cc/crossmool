@@ -7,7 +7,7 @@
 //! - base64 string
 //!
 //! Implementation notes:
-//! - The Java implementation uses BouncyCastle with SM2 mode C1C3C2 and SM2Signer with user id `0123456789ABCDEF`.
+//! - The Java implementation uses BouncyCastle with SM2 mode C1C3C2 and SM2Signer with user id `1234567812345678`.
 //! - This crate aims to be compatible with that format. Implementations use `ckb-crypto` where available,
 //!   and fallback to commonly available crates (`sm2`, `sm3`, `sm4`) if needed. You may need to pin exact
 //!   dependency versions in `Cargo.toml` for your environment.

@@ -302,7 +302,7 @@ public class SM2Util {
      * @return
      * **********************************************************************************************
      */
-    private static final String USER_ID = "0123456789ABCDEF";
+    private static final String USER_ID = "1234567812345678";
     private static final byte[] USER_ID_BYTES = USER_ID.getBytes(StandardCharsets.UTF_8);
     /**
      * 

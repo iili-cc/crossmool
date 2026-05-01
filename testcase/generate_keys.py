@@ -42,7 +42,7 @@ from der import DerReader
 from gmssl import sm2, func
 
 # 复制 SM2Util 的核心功能
-USER_ID = b"0123456789ABCDEF"
+USER_ID = b"1234567812345678"
 
 def _ensure_uncompressed_pubhex(hexstr: str) -> str:
     s = hexstr.strip().lower()

@@ -22,9 +22,9 @@ if str(PYTHON_MODULE_PATH) not in sys.path:
     sys.path.insert(0, str(PYTHON_MODULE_PATH))
 
 try:
-    from crossmool.sm2_util import SM2Util
+    from sm2_util import SM2Util
 except ImportError as e:
-    print(f"错误：无法导入 crossmool.sm2_util 模块：{e}")
+    print(f"错误：无法导入 sm2_util 模块：{e}")
     print(f"Python 路径：{sys.path}")
     print(f"尝试从：{PYTHON_MODULE_PATH}")
     sys.exit(1)

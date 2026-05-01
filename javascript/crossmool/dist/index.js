@@ -287,7 +287,7 @@ function sm2PrivateKeyToRawHex(privateKey) {
 }
 
 // src/SM2Util.ts
-var USER_ID = "0123456789ABCDEF";
+var USER_ID = "1234567812345678";
 var CIPHER_MODE_C1C3C2 = 1;
 function normalizeCiphertextToHex(ciphertext) {
   const enc = detectStringEncoding(ciphertext);

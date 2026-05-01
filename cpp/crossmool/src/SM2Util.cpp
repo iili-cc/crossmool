@@ -16,7 +16,7 @@
 #include <algorithm>
 #endif
 
-const std::string SM2Util::USER_ID = "0123456789ABCDEF";
+const std::string SM2Util::USER_ID = "1234567812345678";
 
 #ifndef USE_GMSSL
 

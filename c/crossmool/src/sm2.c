@@ -371,16 +371,17 @@ static int sm2_decrypt_core(const char* ciphertext_str, const char* private_key,
 }
 
 /* ====================================================
- * 内部核心签名
+ * 内部核心签名（使用 SM3-with-ID，与 Java 保持一致）
+ * Java 使用的 USER_ID 为 "1234567812345678"
  * ==================================================== */
 static int sm2_sign_core(const unsigned char* content, size_t content_len,
-                         const char* private_key,
-                         unsigned char** signature, size_t* sig_len)
+                          const char* private_key,
+                          unsigned char** signature, size_t* sig_len)
 {
     unsigned char priv_bytes[SM2_PRIVATE_KEY_SIZE];
     size_t priv_len = 0;
     SM2_KEY key;
-    uint8_t digest[SM3_DIGEST_SIZE];
+    SM2_SIGN_CTX ctx;
     unsigned char sig_buf[SM2_SIGNATURE_MAX_SIZE];
     size_t sig_buf_len = 0;
     int ret;
@@ -390,9 +391,14 @@ static int sm2_sign_core(const unsigned char* content, size_t content_len,
 
     if (sm2_key_set_private_key(&key, priv_bytes) < 0) return CROSSMOOL_ERR_KEY_INVALID;
 
-    sm3_digest(content, content_len, digest);
+    /* 使用 SM3-with-ID 进行签名，USER_ID 与 Java 保持一致 */
+    ret = sm2_sign_init(&ctx, &key, "1234567812345678", 16);
+    if (ret < 0) return CROSSMOOL_ERR_SIGN_VERIFY;
 
-    ret = sm2_sign(&key, digest, sig_buf, &sig_buf_len);
+    ret = sm2_sign_update(&ctx, content, content_len);
+    if (ret < 0) return CROSSMOOL_ERR_SIGN_VERIFY;
+
+    ret = sm2_sign_finish(&ctx, sig_buf, &sig_buf_len);
     if (ret < 0) return CROSSMOOL_ERR_SIGN_VERIFY;
 
     *signature = (unsigned char*)malloc(sig_buf_len);
@@ -403,16 +409,17 @@ static int sm2_sign_core(const unsigned char* content, size_t content_len,
 }
 
 /* ====================================================
- * 内部核心验签
+ * 内部核心验签（使用 SM3-with-ID，与 Java 保持一致）
+ * Java 使用的 USER_ID 为 "1234567812345678"
  * ==================================================== */
 static int sm2_verify_core(const unsigned char* content, size_t content_len,
-                            const char* signature_str, const char* public_key)
+                             const char* signature_str, const char* public_key)
 {
     unsigned char* sig_bytes = NULL;
     size_t sig_len = 0;
     SM2_KEY key;
     SM2_POINT tmp_pub;
-    uint8_t digest[SM3_DIGEST_SIZE];
+    SM2_SIGN_CTX ctx;
     int ret;
 
     memset(&key, 0, sizeof(SM2_KEY));
@@ -433,11 +440,23 @@ static int sm2_verify_core(const unsigned char* content, size_t content_len,
         return CROSSMOOL_ERR_KEY_INVALID;
     }
 
-    sm3_digest(content, content_len, digest);
-    ret = sm2_verify(&key, digest, sig_bytes, sig_len);
+    /* 使用 SM3-with-ID 进行验签，USER_ID 与 Java 保持一致 */
+    ret = sm2_verify_init(&ctx, &key, "1234567812345678", 16);
+    if (ret < 0) {
+        free(sig_bytes);
+        return CROSSMOOL_ERR_SIGN_VERIFY;
+    }
+
+    ret = sm2_verify_update(&ctx, content, content_len);
+    if (ret < 0) {
+        free(sig_bytes);
+        return CROSSMOOL_ERR_SIGN_VERIFY;
+    }
+
+    ret = sm2_verify_finish(&ctx, sig_bytes, sig_len);
     free(sig_bytes);
 
-    /* sm2_verify: 1 = success, <= 0 = failure */
+    /* sm2_verify_finish: 1 = success, <= 0 = failure */
     if (ret == 1) return 1;  /* 验签成功 */
     return 0;                 /* 验签失败 */
 }

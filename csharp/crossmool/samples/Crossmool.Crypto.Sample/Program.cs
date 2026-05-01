@@ -9,11 +9,11 @@ class Program
 		if (args.Length == 3)
 		{
 			// 命令行模式：encryptSign <message> <publicKey> <privateKey>
-			var message = args[0];
-			var publicKey = args[1];
-			var privateKey = args[2];
+			var msg1 = args[0];
+			var publicKey1 = args[1];
+			var privateKey1 = args[2];
 			
-			var (ciphertextHex, signatureHex) = SM2Util.encryptSign(message, publicKey, privateKey);
+			var (ciphertextHex, signatureHex) = SM2Util.encryptSign(msg1, publicKey1, privateKey1);
 			Console.WriteLine($"{ciphertextHex}\t{signatureHex}");
 			return;
 		}
@@ -21,10 +21,10 @@ class Program
 		if (args.Length == 2)
 		{
 			// 命令行模式：encryptToHex <message> <publicKey>
-			var message = args[0];
-			var publicKey = args[1];
+			var msg2 = args[0];
+			var publicKey2 = args[1];
 			
-			var ciphertextHex = SM2Util.encryptToHex(message, publicKey);
+			var ciphertextHex = SM2Util.encryptToHex(msg2, publicKey2);
 			Console.WriteLine(ciphertextHex);
 			return;
 		}
@@ -32,10 +32,10 @@ class Program
 		if (args.Length == 2 && args[0] == "sign")
 		{
 			// 命令行模式：sign <message> <privateKey>
-			var message = args[1];
-			var privateKey = args[2];
+			var msg3 = args[1];
+			var privateKey3 = args[2];
 			
-			var signatureHex = SM2Util.sign(message, privateKey);
+			var signatureHex = SM2Util.sign(msg3, privateKey3);
 			Console.WriteLine(signatureHex);
 			return;
 		}

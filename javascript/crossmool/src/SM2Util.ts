@@ -15,7 +15,7 @@ export interface CiphertextSignaturePair {
   signature: string;
 }
 
-const USER_ID = '0123456789ABCDEF';
+const USER_ID = '1234567812345678';
 const CIPHER_MODE_C1C3C2 = 1;
 
 function normalizeCiphertextToHex(ciphertext: string): string {

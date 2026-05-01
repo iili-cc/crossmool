@@ -762,7 +762,7 @@ sequenceDiagram
     GmSSL-->>SM2: 密文
     SM2->>Util: HEX/Base64 编码密文
     Util-->>SM2: 编码后的密文
-    SM2->>GmSSL: 签名（USER_ID="0123456789ABCDEF"）
+    SM2->>GmSSL: 签名（USER_ID="1234567812345678"）
     GmSSL-->>SM2: 签名
     SM2->>Util: HEX/Base64 编码签名
     Util-->>SM2: 编码后的签名

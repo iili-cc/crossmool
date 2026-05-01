@@ -1,7 +1,6 @@
 from gmssl import sm3
 import base64
-from .encoding import bytes_to_hex, bytes_to_base64, hex_to_bytes
-
+from encoding import bytes_to_hex, bytes_to_base64, hex_to_bytes
 
 class SM3Util:
     @staticmethod

@@ -197,7 +197,7 @@ static int test_sm4_ctr(void)
 
 static int test_sm4_ctr_with_carray(void)
 {
-	const char *hex_key =	"0123456789ABCDEFFEDCBA9876543210";
+	const char *hex_key =	"1234567812345678FEDCBA9876543210";
 	const char *hex_ctr =	"0000000000000000000000000000FFFF";
 	const char *hex_in  =	"AAAAAAAAAAAAAAAABBBBBBBBBBBBBBBB"
 				"CCCCCCCCCCCCCCCCDDDDDDDDDDDD";
@@ -242,7 +242,7 @@ static int test_sm4_ctr_with_carray(void)
 static int test_sm4_gcm(void)
 {
 	// gcm test vectors from rfc 8998 A.1
-	const char *hex_key =	"0123456789ABCDEFFEDCBA9876543210";
+	const char *hex_key =	"1234567812345678FEDCBA9876543210";
 	const char *hex_iv  =	"00001234567800000000ABCD";
 	const char *hex_aad =	"FEEDFACEDEADBEEFFEEDFACEDEADBEEF"
 				"ABADDAD2";

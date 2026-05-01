@@ -113,7 +113,7 @@
   - 实现 `crossmool_sm2_decrypt()` 函数
   - 实现 `crossmool_sm2_decrypt_to_string()` 函数
   - 使用 GmSSL 的 `sm2_encrypt()` 和 `sm2_decrypt()` 函数
-  - 使用 USER_ID = "0123456789ABCDEF"
+  - 使用 USER_ID = "1234567812345678"
   - _需求：2, 12_
 
 - [ ] 17. 实现 sm2.c - 签名验签
