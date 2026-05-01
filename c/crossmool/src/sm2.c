@@ -409,14 +409,95 @@ static int sm2_sign_core(const unsigned char* content, size_t content_len,
 }
 
 /* ====================================================
+ * 内部辅助：将 Java DER 编码签名转换为 GmSSL 期望的 r||s 格式
+ * Java BouncyCastle 输出：SEQUENCE { INTEGER r, INTEGER s }
+ * GmSSL 期望格式：r[32 字节] || s[32 字节]（共 64 字节）
+ * ==================================================== */
+static int sm2_signature_der_to_raw(const unsigned char* der_sig, size_t der_len,
+                                     unsigned char* raw_sig, size_t* raw_len)
+{
+    const unsigned char* p = der_sig;
+    const unsigned char* end = der_sig + der_len;
+
+    /* 解析 SEQUENCE 头 */
+    if (p >= end || *p != 0x30) return -1;  /* 不是 DER SEQUENCE */
+    p++;
+
+    /* 解析 SEQUENCE 长度 */
+    if (p >= end) return -1;
+    size_t seq_len = *p;
+    if (seq_len & 0x80) {  /* 长格式长度 */
+        size_t len_bytes = seq_len & 0x7f;
+        if (len_bytes == 0 || p + len_bytes > end) return -1;
+        seq_len = 0;
+        for (size_t i = 0; i < len_bytes; i++) {
+            seq_len = (seq_len << 8) | p[1 + i];
+        }
+        p += 1 + len_bytes;
+    } else {
+        p++;
+    }
+
+    if (p + seq_len > end) return -1;
+    end = p + seq_len;  /* 更新结束位置 */
+
+    /* 解析 INTEGER r */
+    if (p >= end || *p != 0x02) return -1;  /* 不是 INTEGER */
+    p++;
+    if (p >= end) return -1;
+    size_t r_len = *p;
+    if (r_len & 0x80) {  /* 长格式长度 */
+        size_t len_bytes = r_len & 0x7f;
+        if (len_bytes == 0 || p + len_bytes > end) return -1;
+        r_len = 0;
+        for (size_t i = 0; i < len_bytes; i++) {
+            r_len = (r_len << 8) | p[1 + i];
+        }
+        p += 1 + len_bytes;
+    } else {
+        p++;
+    }
+    if (p + r_len > end) return -1;
+
+    /* 解析 INTEGER s */
+    const unsigned char* s_start = p;
+    if (p >= end || *p != 0x02) return -1;  /* 不是 INTEGER */
+    p++;
+    if (p >= end) return -1;
+    size_t s_len = *p;
+    if (s_len & 0x80) {  /* 长格式长度 */
+        size_t len_bytes = s_len & 0x7f;
+        if (len_bytes == 0 || p + len_bytes > end) return -1;
+        s_len = 0;
+        for (size_t i = 0; i < len_bytes; i++) {
+            s_len = (s_len << 8) | p[1 + i];
+        }
+        p += 1 + len_bytes;
+    } else {
+        p++;
+    }
+    if (p + s_len > end) return -1;
+
+    /* 将 r 和 s 填充为各 32 字节并拼接 */
+    memset(raw_sig, 0, 32);
+    memcpy(raw_sig + 32 - r_len, s_start + 1, r_len);  /* 去除前导零，右对齐 */
+    memset(raw_sig + 32, 0, 32);
+    memcpy(raw_sig + 64 - s_len, p, s_len);  /* 去除前导零，右对齐 */
+
+    *raw_len = 64;
+    return 0;
+}
+
+/* ====================================================
  * 内部核心验签（使用 SM3-with-ID，与 Java 保持一致）
  * Java 使用的 USER_ID 为 "1234567812345678"
  * ==================================================== */
 static int sm2_verify_core(const unsigned char* content, size_t content_len,
-                             const char* signature_str, const char* public_key)
+                            const char* signature_str, const char* public_key)
 {
     unsigned char* sig_bytes = NULL;
     size_t sig_len = 0;
+    unsigned char raw_sig[64];  /* 用于存储转换后的 r||s 格式 */
     SM2_KEY key;
     SM2_POINT tmp_pub;
     SM2_SIGN_CTX ctx;
@@ -434,27 +515,35 @@ static int sm2_verify_core(const unsigned char* content, size_t content_len,
 
     if (ret != CROSSMOOL_SUCCESS) return CROSSMOOL_ERR_FORMAT_CONVERSION;
 
+    /* 检测是否为 DER 格式签名（以 0x30 开头），如果是则转换为 r||s 格式 */
+    if (sig_len > 0 && sig_bytes[0] == 0x30) {
+        ret = sm2_signature_der_to_raw(sig_bytes, sig_len, raw_sig, (size_t*)&sig_len);
+        free(sig_bytes);
+        if (ret != 0) return CROSSMOOL_ERR_FORMAT_CONVERSION;
+        sig_bytes = raw_sig;  /* 使用转换后的原始格式 */
+    }
+
     /* 设置公钥（同时验证点是否在曲线上） */
     if (sm2_key_set_public_key(&key, &tmp_pub) < 0) {
-        free(sig_bytes);
+        if (sig_bytes != raw_sig) free(sig_bytes);
         return CROSSMOOL_ERR_KEY_INVALID;
     }
 
     /* 使用 SM3-with-ID 进行验签，USER_ID 与 Java 保持一致 */
     ret = sm2_verify_init(&ctx, &key, "1234567812345678", 16);
     if (ret < 0) {
-        free(sig_bytes);
+        if (sig_bytes != raw_sig) free(sig_bytes);
         return CROSSMOOL_ERR_SIGN_VERIFY;
     }
 
     ret = sm2_verify_update(&ctx, content, content_len);
     if (ret < 0) {
-        free(sig_bytes);
+        if (sig_bytes != raw_sig) free(sig_bytes);
         return CROSSMOOL_ERR_SIGN_VERIFY;
     }
 
     ret = sm2_verify_finish(&ctx, sig_bytes, sig_len);
-    free(sig_bytes);
+    if (sig_bytes != raw_sig) free(sig_bytes);
 
     /* sm2_verify_finish: 1 = success, <= 0 = failure */
     if (ret == 1) return 1;  /* 验签成功 */
@@ -657,7 +746,8 @@ int crossmool_sm2_encrypt_sign(
     if (ret != CROSSMOOL_SUCCESS) { free(pair); return ret; }
     pair->ciphertext = _strdup(pair->ciphertext_hex);
 
-    ret = crossmool_sm2_sign(content, charset, sign_private_key, &pair->signature_hex);
+    /* 对密文字符串签名，与 Java SM2Util.encryptSign 一致 */
+    ret = crossmool_sm2_sign(pair->ciphertext_hex, "UTF-8", sign_private_key, &pair->signature_hex);
     if (ret != CROSSMOOL_SUCCESS) {
         crossmool_sm2_cipher_sig_pair_free(pair);
         return ret;
@@ -676,17 +766,16 @@ int crossmool_sm2_verify_decrypt(
     if (!ciphertext || !signature || !sign_public_key || !dec_private_key || !plaintext)
         return CROSSMOOL_ERR_INVALID_PARAM;
 
-    /* 先解密，获得原文 */
-    unsigned char* pt = NULL; size_t pt_len = 0;
-    int ret = sm2_decrypt_core(ciphertext, dec_private_key, &pt, &pt_len);
-    if (ret != CROSSMOOL_SUCCESS) return ret;
-
-    /* 验签 */
-    ret = sm2_verify_core(pt, pt_len, signature, sign_public_key);
+    /* 先验签：对密文字符串 (UTF-8) 进行验签，与 Java SM2Util.verifyDecrypt 一致 */
+    int ret = sm2_verify_core((const unsigned char*)ciphertext, strlen(ciphertext), signature, sign_public_key);
     if (ret != 1) {
-        free(pt);
         return (ret < 0) ? ret : CROSSMOOL_ERR_SIGN_VERIFY;
     }
+
+    /* 验签成功后再解密 */
+    unsigned char* pt = NULL; size_t pt_len = 0;
+    ret = sm2_decrypt_core(ciphertext, dec_private_key, &pt, &pt_len);
+    if (ret != CROSSMOOL_SUCCESS) return ret;
 
     /* 转换为字符串 */
     ret = crossmool_bytes_to_string(pt, pt_len, charset, plaintext);

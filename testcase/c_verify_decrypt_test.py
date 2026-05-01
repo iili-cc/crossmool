@@ -54,6 +54,7 @@ def run_c_verify_decrypt(ciphertext_hex, signature_hex, sign_public_key_hex, dec
     # 创建临时 C 测试程序
     c_code = f'''#include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "crossmool.h"
 
 int main() {{
@@ -116,7 +117,8 @@ int main() {{
                 
                 if compile_result.returncode != 0:
                     stderr = compile_result.stderr if compile_result.stderr else "未知错误"
-                    return False, f"MSVC 编译失败：{stderr}"
+                    stdout = compile_result.stdout if compile_result.stdout else ""
+                    return False, f"MSVC 编译失败：{stderr}\n{stdout}"
             else:
                 # 使用 GCC (MinGW) 作为备选方案
                 gcc_path = shutil.which("gcc")
@@ -149,16 +151,17 @@ int main() {{
                     f'cmd /c "cd /d {C_DLL_PATH} && temp_verify.exe"',
                     shell=True,
                     capture_output=True,
-                    encoding='utf-8',
+                    encoding='gbk',
                     errors='ignore'
                 )
                 
                 if run_result.returncode != 0:
                     stderr = run_result.stderr if run_result.stderr else "未知错误"
+                    stdout = run_result.stdout if run_result.stdout else ""
                     if "ERROR:" in stderr:
                         error_msg = stderr.split("ERROR:")[1].strip().split("\n")[0]
                     else:
-                        error_msg = stderr
+                        error_msg = f"返回码：{run_result.returncode}, stderr: {stderr}, stdout: {stdout}"
                     return False, error_msg
                 
                 # 输出解密后的明文
@@ -232,7 +235,7 @@ def verify_language_results(language, output_dir, expected_plaintexts):
             if success:
                 # 验证解密结果是否与原始明文一致
                 if decrypted_or_error == expected_plaintext:
-                    print(f"    ✓ 验签成功，解密结果匹配")
+                    print(f"    [OK] 验签成功，解密结果匹配")
                     print(f"    解密文本：{decrypted_or_error[:50]}{'...' if len(decrypted_or_error) > 50 else ''}")
                     success_count += 1
                     result_entry = {
@@ -245,7 +248,7 @@ def verify_language_results(language, output_dir, expected_plaintexts):
                         "match": True
                     }
                 else:
-                    print(f"    ✗ 验签成功，但解密结果不匹配")
+                    print(f"    [FAIL] 验签成功，但解密结果不匹配")
                     print(f"    期望：{expected_plaintext[:50]}{'...' if len(expected_plaintext) > 50 else ''}")
                     print(f"    实际：{decrypted_or_error[:50]}{'...' if len(decrypted_or_error) > 50 else ''}")
                     fail_count += 1
@@ -259,7 +262,7 @@ def verify_language_results(language, output_dir, expected_plaintexts):
                         "match": False
                     }
             else:
-                print(f"    ✗ 验签失败：{decrypted_or_error}")
+                print(f"    [FAIL] 验签失败：{decrypted_or_error}")
                 fail_count += 1
                 result_entry = {
                     "test_case_id": test_id,
@@ -274,7 +277,7 @@ def verify_language_results(language, output_dir, expected_plaintexts):
             results.append(result_entry)
             
         except Exception as e:
-            print(f"\n  处理文件 {json_file.name} 时出错：{e}")
+            print(f"\n  [ERROR] 处理文件 {json_file.name} 时出错：{e}")
             fail_count += 1
     
     return {
