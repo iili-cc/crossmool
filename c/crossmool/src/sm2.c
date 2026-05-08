@@ -329,7 +329,121 @@ static int sm2_encrypt_core(const unsigned char* content, size_t content_len,
 }
 
 /* ====================================================
+ * 内部辅助：将 Java/BouncyCastle 的 RAW 格式密文转换为 GmSSL 的 DER SEQUENCE 格式
+ *
+ * Java SM2Engine(C1C3C2) 输出格式: 04 || x[32] || y[32] || C3[32] || C2[N]
+ * GmSSL sm2_decrypt 期望格式:
+ *   SM2Cipher ::= SEQUENCE {
+ *       XCoordinate  INTEGER,
+ *       YCoordinate  INTEGER,
+ *       HASH         OCTET STRING SIZE(32),
+ *       CipherText   OCTET STRING }
+ *
+ * 输出 der_out 由本函数 malloc，调用方负责 free。
+ * ==================================================== */
+static int sm2_raw_c1c3c2_to_der(const unsigned char* raw, size_t raw_len,
+                                  unsigned char** der_out, size_t* der_len)
+{
+    if (raw_len < 1 + 32 + 32 + 32 + 1) return -1; /* 至少 04+x+y+c3+1byte_c2 */
+    if (raw[0] != 0x04) return -1;                  /* 必须是非压缩点标记 */
+
+    const unsigned char* x  = raw + 1;
+    const unsigned char* y  = raw + 1 + 32;
+    const unsigned char* c3 = raw + 1 + 64;
+    const unsigned char* c2 = raw + 1 + 96;
+    size_t c2_len = raw_len - (1 + 32 + 32 + 32);
+
+    /* --- 编码 INTEGER x --- */
+    /* 跳过前导零，若最高位为1则加 0x00 前缀 */
+    size_t xi = 0;
+    while (xi < 31 && x[xi] == 0x00) xi++;
+    const unsigned char* xv = x + xi;
+    size_t xv_len = 32 - xi;
+    int x_pad = (xv[0] & 0x80) ? 1 : 0;
+    size_t int_x_len = 2 + x_pad + xv_len; /* tag + len + [pad] + val */
+
+    /* --- 编码 INTEGER y --- */
+    size_t yi = 0;
+    while (yi < 31 && y[yi] == 0x00) yi++;
+    const unsigned char* yv = y + yi;
+    size_t yv_len = 32 - yi;
+    int y_pad = (yv[0] & 0x80) ? 1 : 0;
+    size_t int_y_len = 2 + y_pad + yv_len;
+
+    /* --- 编码 OCTET STRING c3 (固定 32 字节) --- */
+    size_t oct_c3_len = 2 + 32;
+
+    /* --- 编码 OCTET STRING c2 --- */
+    size_t oct_c2_hdr = 2; /* tag + len (1 byte 或 2 bytes) */
+    if (c2_len >= 128) oct_c2_hdr = 3; /* 长格式: 04 81 NN */
+    if (c2_len >= 256) oct_c2_hdr = 4; /* 长格式: 04 82 HH LL */
+    size_t oct_c2_len = oct_c2_hdr + c2_len;
+
+    /* --- 计算 SEQUENCE 内部长度 --- */
+    size_t inner_len = int_x_len + int_y_len + oct_c3_len + oct_c2_len;
+
+    /* --- 计算 SEQUENCE 头部长度 --- */
+    size_t seq_hdr = 2;
+    if (inner_len >= 128) seq_hdr = 3;  /* 30 81 NN */
+    if (inner_len >= 256) seq_hdr = 4;  /* 30 82 HH LL */
+
+    size_t total = seq_hdr + inner_len;
+    unsigned char* out = (unsigned char*)malloc(total);
+    if (!out) return -1;
+
+    unsigned char* p = out;
+
+    /* SEQUENCE header */
+    *p++ = 0x30;
+    if (inner_len < 128) {
+        *p++ = (unsigned char)inner_len;
+    } else if (inner_len < 256) {
+        *p++ = 0x81; *p++ = (unsigned char)inner_len;
+    } else {
+        *p++ = 0x82;
+        *p++ = (unsigned char)(inner_len >> 8);
+        *p++ = (unsigned char)(inner_len & 0xff);
+    }
+
+    /* INTEGER x */
+    *p++ = 0x02;
+    *p++ = (unsigned char)(x_pad + xv_len);
+    if (x_pad) *p++ = 0x00;
+    memcpy(p, xv, xv_len); p += xv_len;
+
+    /* INTEGER y */
+    *p++ = 0x02;
+    *p++ = (unsigned char)(y_pad + yv_len);
+    if (y_pad) *p++ = 0x00;
+    memcpy(p, yv, yv_len); p += yv_len;
+
+    /* OCTET STRING c3 (32 bytes) */
+    *p++ = 0x04; *p++ = 32;
+    memcpy(p, c3, 32); p += 32;
+
+    /* OCTET STRING c2 */
+    *p++ = 0x04;
+    if (c2_len < 128) {
+        *p++ = (unsigned char)c2_len;
+    } else if (c2_len < 256) {
+        *p++ = 0x81; *p++ = (unsigned char)c2_len;
+    } else {
+        *p++ = 0x82;
+        *p++ = (unsigned char)(c2_len >> 8);
+        *p++ = (unsigned char)(c2_len & 0xff);
+    }
+    memcpy(p, c2, c2_len);
+
+    *der_out = out;
+    *der_len = total;
+    return 0;
+}
+
+/* ====================================================
  * 内部核心解密
+ * 支持两种密文格式：
+ *   1. GmSSL DER SEQUENCE 格式（30开头）
+ *   2. Java/BouncyCastle RAW C1C3C2 格式（04开头：04||x[32]||y[32]||C3[32]||C2[N]）
  * ==================================================== */
 static int sm2_decrypt_core(const char* ciphertext_str, const char* private_key,
                              unsigned char** plaintext, size_t* plaintext_len)
@@ -338,6 +452,8 @@ static int sm2_decrypt_core(const char* ciphertext_str, const char* private_key,
     size_t priv_len = 0;
     unsigned char* ct_bytes = NULL;
     size_t ct_len = 0;
+    unsigned char* der_bytes = NULL; /* DER 格式密文（可能是转换后的） */
+    size_t der_len = 0;
     SM2_KEY key;
     unsigned char* buf = NULL;
     size_t actual_len = 0;
@@ -358,11 +474,30 @@ static int sm2_decrypt_core(const char* ciphertext_str, const char* private_key,
         return CROSSMOOL_ERR_KEY_INVALID;
     }
 
-    buf = (unsigned char*)malloc(ct_len);
-    if (!buf) { free(ct_bytes); return CROSSMOOL_ERR_MEMORY_ALLOC; }
+    /* 判断密文格式：
+     *   - 0x30 开头 => GmSSL DER SEQUENCE 格式，直接使用
+     *   - 0x04 开头 => Java RAW C1C3C2 格式（04||x||y||C3||C2），需转换为 DER
+     */
+    if (ct_len > 0 && ct_bytes[0] == 0x04) {
+        /* Java RAW 格式 → 转换为 GmSSL DER SEQUENCE */
+        if (sm2_raw_c1c3c2_to_der(ct_bytes, ct_len, &der_bytes, &der_len) != 0) {
+            free(ct_bytes);
+            return CROSSMOOL_ERR_FORMAT_CONVERSION;
+        }
+        free(ct_bytes);
+        ct_bytes = NULL;
+    } else {
+        /* 已是 DER SEQUENCE 格式或其他格式，直接使用 */
+        der_bytes = ct_bytes;
+        der_len   = ct_len;
+        ct_bytes  = NULL; /* 转移所有权，避免重复释放 */
+    }
 
-    ret = sm2_decrypt(&key, ct_bytes, ct_len, buf, &actual_len);
-    free(ct_bytes);
+    buf = (unsigned char*)malloc(der_len);
+    if (!buf) { free(der_bytes); return CROSSMOOL_ERR_MEMORY_ALLOC; }
+
+    ret = sm2_decrypt(&key, der_bytes, der_len, buf, &actual_len);
+    free(der_bytes);
     if (ret < 0) { free(buf); return CROSSMOOL_ERR_ENCRYPT_DECRYPT; }
 
     *plaintext = buf;
@@ -459,8 +594,12 @@ static int sm2_signature_der_to_raw(const unsigned char* der_sig, size_t der_len
     }
     if (p + r_len > end) return -1;
 
+    /* 保存 r 的起始位置 */
+    const unsigned char* r_start = p;
+    /* 跳过 r 值 */
+    p += r_len;
+    
     /* 解析 INTEGER s */
-    const unsigned char* s_start = p;
     if (p >= end || *p != 0x02) return -1;  /* 不是 INTEGER */
     p++;
     if (p >= end) return -1;
@@ -480,9 +619,25 @@ static int sm2_signature_der_to_raw(const unsigned char* der_sig, size_t der_len
 
     /* 将 r 和 s 填充为各 32 字节并拼接 */
     memset(raw_sig, 0, 32);
-    memcpy(raw_sig + 32 - r_len, s_start + 1, r_len);  /* 去除前导零，右对齐 */
     memset(raw_sig + 32, 0, 32);
-    memcpy(raw_sig + 64 - s_len, p, s_len);  /* 去除前导零，右对齐 */
+    
+    /* 处理 r：跳过前导零（ASN.1 INTEGER 为表示正数可能添加 0x00） */
+    size_t r_offset = 0;
+    while (r_offset < r_len && r_start[r_offset] == 0x00) {
+        r_offset++;
+    }
+    size_t r_actual_len = r_len - r_offset;
+    if (r_actual_len > 32) r_actual_len = 32;
+    memcpy(raw_sig + 32 - r_actual_len, r_start + r_offset, r_actual_len);
+    
+    /* 处理 s：跳过前导零 */
+    size_t s_offset = 0;
+    while (s_offset < s_len && p[s_offset] == 0x00) {
+        s_offset++;
+    }
+    size_t s_actual_len = s_len - s_offset;
+    if (s_actual_len > 32) s_actual_len = 32;
+    memcpy(raw_sig + 64 - s_actual_len, p + s_offset, s_actual_len);
 
     *raw_len = 64;
     return 0;
@@ -515,35 +670,28 @@ static int sm2_verify_core(const unsigned char* content, size_t content_len,
 
     if (ret != CROSSMOOL_SUCCESS) return CROSSMOOL_ERR_FORMAT_CONVERSION;
 
-    /* 检测是否为 DER 格式签名（以 0x30 开头），如果是则转换为 r||s 格式 */
-    if (sig_len > 0 && sig_bytes[0] == 0x30) {
-        ret = sm2_signature_der_to_raw(sig_bytes, sig_len, raw_sig, (size_t*)&sig_len);
-        free(sig_bytes);
-        if (ret != 0) return CROSSMOOL_ERR_FORMAT_CONVERSION;
-        sig_bytes = raw_sig;  /* 使用转换后的原始格式 */
-    }
-
     /* 设置公钥（同时验证点是否在曲线上） */
     if (sm2_key_set_public_key(&key, &tmp_pub) < 0) {
-        if (sig_bytes != raw_sig) free(sig_bytes);
+        free(sig_bytes);
         return CROSSMOOL_ERR_KEY_INVALID;
     }
 
     /* 使用 SM3-with-ID 进行验签，USER_ID 与 Java 保持一致 */
     ret = sm2_verify_init(&ctx, &key, "1234567812345678", 16);
     if (ret < 0) {
-        if (sig_bytes != raw_sig) free(sig_bytes);
+        free(sig_bytes);
         return CROSSMOOL_ERR_SIGN_VERIFY;
     }
 
     ret = sm2_verify_update(&ctx, content, content_len);
     if (ret < 0) {
-        if (sig_bytes != raw_sig) free(sig_bytes);
+        free(sig_bytes);
         return CROSSMOOL_ERR_SIGN_VERIFY;
     }
 
+    /* GmSSL 的 sm2_verify_finish 期望 DER 格式签名，直接使用 */
     ret = sm2_verify_finish(&ctx, sig_bytes, sig_len);
-    if (sig_bytes != raw_sig) free(sig_bytes);
+    free(sig_bytes);
 
     /* sm2_verify_finish: 1 = success, <= 0 = failure */
     if (ret == 1) return 1;  /* 验签成功 */

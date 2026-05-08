@@ -8,85 +8,85 @@
 extern "C" {
 #endif
 
-// SM2 密钥对结构（同时存储 HEX 和 Base64 格式）
+// SM2 keypair structure (stores both HEX and Base64 formats)
 typedef struct {
-    char* private_key;          // 原始私钥（Base64 或 HEX，由生成方式决定）
-    char* public_key;           // 原始公钥（Base64 或 HEX，由生成方式决定）
-    char* private_key_hex;      // HEX 格式私钥（调用 crossmool_sm2_keypair_to_hex 后赋值）
-    char* public_key_hex;       // HEX 格式公钥
-    char* private_key_base64;   // Base64 格式私钥（调用 crossmool_sm2_keypair_to_base64 后赋值）
-    char* public_key_base64;    // Base64 格式公钥
+    char* private_key;          // Original private key (Base64 or HEX)
+    char* public_key;           // Original public key (Base64 or HEX)
+    char* private_key_hex;      // HEX format private key
+    char* public_key_hex;       // HEX format public key
+    char* private_key_base64;   // Base64 format private key
+    char* public_key_base64;    // Base64 format public key
 } crossmool_sm2_keypair_t;
 
-// 密文签名对结构
+// Ciphertext and signature pair structure
 typedef struct {
-    char* ciphertext;       // 密文（与加密格式一致）
-    char* signature;        // 签名（与签名格式一致）
-    char* ciphertext_hex;   // HEX 格式密文（encrypt_sign 使用 HEX 时赋值）
-    char* signature_hex;    // HEX 格式签名
-    char* ciphertext_base64;// Base64 格式密文（encrypt_sign 使用 Base64 时赋值）
-    char* signature_base64; // Base64 格式签名
+    char* ciphertext;       // Ciphertext (same format as encryption)
+    char* signature;        // Signature (same format as signing)
+    char* ciphertext_hex;   // HEX format ciphertext
+    char* signature_hex;    // HEX format signature
+    char* ciphertext_base64;// Base64 format ciphertext
+    char* signature_base64; // Base64 format signature
 } crossmool_sm2_cipher_sig_pair_t;
 
 /* ====================================================
- * 密钥生成
+ * Key Generation
  * ==================================================== */
 
 /**
- * 生成 SM2 密钥对（返回指针，自动分配内存）
- * 密钥默认以 HEX 格式存储在 private_key/public_key 字段中
- * @param keypair 输出参数，存储生成的密钥对指针
- * @return 成功返回 0，失败返回负数错误码
- * @note 调用者需调用 crossmool_sm2_keypair_free() 释放内存
+ * Generate SM2 keypair (returns pointer, auto-allocates memory)
+ * Keys are stored in HEX format in private_key/public_key fields by default
+ * @param keypair Output parameter, stores generated keypair pointer
+ * @return 0 on success, negative error code on failure
+ * @note Caller must call crossmool_sm2_keypair_free() to release memory
  */
 int crossmool_sm2_generate_keypair(crossmool_sm2_keypair_t** keypair);
 
 /**
- * 将密钥对转换为 HEX 格式（填充 private_key_hex / public_key_hex 字段）
- * @param keypair 已生成的密钥对
- * @return 成功返回 0，失败返回负数错误码
+ * Convert keypair to HEX format (fills private_key_hex / public_key_hex fields)
+ * @param keypair Generated keypair
+ * @return 0 on success, negative error code on failure
  */
 int crossmool_sm2_keypair_to_hex(crossmool_sm2_keypair_t* keypair);
 
 /**
- * 将密钥对转换为 Base64 格式（填充 private_key_base64 / public_key_base64 字段）
- * @param keypair 已生成的密钥对
- * @return 成功返回 0，失败返回负数错误码
+ * Convert keypair to Base64 format (fills private_key_base64 / public_key_base64 fields)
+ * @param keypair Generated keypair
+ * @return 0 on success, negative error code on failure
  */
 int crossmool_sm2_keypair_to_base64(crossmool_sm2_keypair_t* keypair);
 
 /**
- * 生成 SM2 密钥对（Base64 编码，直接结构体）
- * @param keypair 输出参数，存储生成的密钥对
- * @return 成功返回 0，失败返回负数错误码
+ * Generate SM2 keypair (Base64 encoded, direct struct)
+ * @param keypair Output parameter, stores generated keypair
+ * @return 0 on success, negative error code on failure
  */
 int crossmool_sm2_generate_keypair_base64(crossmool_sm2_keypair_t* keypair);
 
 /**
- * 生成 SM2 密钥对（HEX 编码，直接结构体）
- * @param keypair 输出参数，存储生成的密钥对
- * @return 成功返回 0，失败返回负数错误码
+ * Generate SM2 keypair (HEX encoded, direct struct)
+ * @param keypair Output parameter, stores generated keypair
+ * @return 0 on success, negative error code on failure
  */
 int crossmool_sm2_generate_keypair_hex(crossmool_sm2_keypair_t* keypair);
 
 /**
- * 释放密钥对内存（指针版本）
- * @param keypair 要释放的密钥对指针
+ * Free keypair memory (pointer version)
+ * @param keypair Keypair pointer to free
  */
 void crossmool_sm2_keypair_free(crossmool_sm2_keypair_t* keypair);
 
 /* ====================================================
- * 加密 / 解密
+ * Encryption / Decryption
  * ==================================================== */
 
 /**
- * SM2 加密（自动检测 charset，输出 HEX 字符串）
- * @param content  明文字符串（C字符串，以'\0'结束）
- * @param charset  字符集（可为 NULL，表示 UTF-8）
- * @param public_key 公钥（支持 HEX 或 Base64）
- * @param ciphertext_hex 输出 HEX 格式密文
- * @return 成功返回 0，失败返回负数错误码
- * @note 调用者需调用 free() 释放 ciphertext_hex
+ * SM2 encryption (auto-detect charset, output HEX string)
+ * @param content  Plaintext string (C string, null-terminated)
+ * @param charset  Character set (can be NULL for UTF-8)
+ * @param public_key Public key (supports HEX or Base64)
+ * @param ciphertext_hex Output HEX format ciphertext
+ * @return 0 on success, negative error code on failure
+ * @note Caller must call free() to release ciphertext_hex
  */
 int crossmool_sm2_encrypt(
     const char* content,
@@ -96,13 +96,13 @@ int crossmool_sm2_encrypt(
 );
 
 /**
- * SM2 解密（自动检测格式，输出字符串）
- * @param ciphertext 密文（HEX 或 Base64 字符串）
- * @param private_key 私钥（支持 HEX 或 Base64）
- * @param charset 字符集（可为 NULL）
- * @param plaintext_str 输出明文字符串
- * @return 成功返回 0，失败返回负数错误码
- * @note 调用者需调用 free() 释放 plaintext_str
+ * SM2 decryption (auto-detect format, output string)
+ * @param ciphertext Ciphertext (HEX or Base64 string)
+ * @param private_key Private key (supports HEX or Base64)
+ * @param charset Character set (can be NULL)
+ * @param plaintext_str Output plaintext string
+ * @return 0 on success, negative error code on failure
+ * @note Caller must call free() to release plaintext_str
  */
 int crossmool_sm2_decrypt(
     const char* ciphertext,
@@ -112,13 +112,13 @@ int crossmool_sm2_decrypt(
 );
 
 /**
- * SM2 加密（返回字节数组）
- * @param content 明文数据
- * @param content_len 明文长度
- * @param public_key 公钥
- * @param ciphertext 输出密文
- * @param ciphertext_len 输出密文长度
- * @return 成功返回 0，失败返回负数错误码
+ * SM2 encryption (returns byte array)
+ * @param content Plaintext data
+ * @param content_len Plaintext length
+ * @param public_key Public key
+ * @param ciphertext Output ciphertext
+ * @param ciphertext_len Output ciphertext length
+ * @return 0 on success, negative error code on failure
  */
 int crossmool_sm2_encrypt_bytes(
     const unsigned char* content,
@@ -129,7 +129,7 @@ int crossmool_sm2_encrypt_bytes(
 );
 
 /**
- * SM2 加密（返回 HEX 字符串，字节数组输入）
+ * SM2 encryption (returns HEX string, byte array input)
  */
 int crossmool_sm2_encrypt_to_hex(
     const unsigned char* content,
@@ -140,7 +140,7 @@ int crossmool_sm2_encrypt_to_hex(
 );
 
 /**
- * SM2 加密（返回 Base64 字符串，字节数组输入）
+ * SM2 encryption (returns Base64 string, byte array input)
  */
 int crossmool_sm2_encrypt_to_base64(
     const unsigned char* content,
@@ -151,7 +151,7 @@ int crossmool_sm2_encrypt_to_base64(
 );
 
 /**
- * SM2 解密（返回字节数组）
+ * SM2 decryption (returns byte array)
  */
 int crossmool_sm2_decrypt_bytes(
     const char* ciphertext,
@@ -161,7 +161,7 @@ int crossmool_sm2_decrypt_bytes(
 );
 
 /**
- * SM2 解密并转换为字符串
+ * SM2 decryption and convert to string
  */
 int crossmool_sm2_decrypt_to_string(
     const char* ciphertext,
@@ -171,17 +171,17 @@ int crossmool_sm2_decrypt_to_string(
 );
 
 /* ====================================================
- * 签名 / 验签
+ * Signing / Verification
  * ==================================================== */
 
 /**
- * SM2 签名（自动检测 charset，输出 HEX 字符串）
- * @param content 待签名字符串（C字符串，以'\0'结束）
- * @param charset 字符集（可为 NULL）
- * @param private_key 私钥（支持 HEX 或 Base64）
- * @param signature_hex 输出 HEX 格式签名
- * @return 成功返回 0，失败返回负数错误码
- * @note 调用者需调用 free() 释放 signature_hex
+ * SM2 signing (auto-detect charset, output HEX string)
+ * @param content Data to sign (C string)
+ * @param charset Character set (can be NULL)
+ * @param private_key Private key (supports HEX or Base64)
+ * @param signature_hex Output HEX format signature
+ * @return 0 on success, negative error code on failure
+ * @note Caller must call free() to release signature_hex
  */
 int crossmool_sm2_sign(
     const char* content,
@@ -191,12 +191,12 @@ int crossmool_sm2_sign(
 );
 
 /**
- * SM2 验签
- * @param content 原始字符串（C字符串）
- * @param charset 字符集（可为 NULL）
- * @param signature 签名（HEX 或 Base64）
- * @param public_key 公钥（HEX 或 Base64）
- * @return 验证成功返回 1，失败返回 0，错误返回负数
+ * SM2 verification
+ * @param content Original string (C string)
+ * @param charset Character set (can be NULL)
+ * @param signature Signature (HEX or Base64)
+ * @param public_key Public key (HEX or Base64)
+ * @return 1 on success, 0 on failure, negative on error
  */
 int crossmool_sm2_verify(
     const char* content,
@@ -206,7 +206,7 @@ int crossmool_sm2_verify(
 );
 
 /**
- * SM2 签名（字节数组输入，返回字节数组）
+ * SM2 signing (byte array input, returns byte array)
  */
 int crossmool_sm2_sign_bytes(
     const unsigned char* content,
@@ -217,7 +217,7 @@ int crossmool_sm2_sign_bytes(
 );
 
 /**
- * SM2 签名（字节数组输入，返回 HEX 字符串）
+ * SM2 signing (byte array input, returns HEX string)
  */
 int crossmool_sm2_sign_to_hex(
     const unsigned char* content,
@@ -228,7 +228,7 @@ int crossmool_sm2_sign_to_hex(
 );
 
 /**
- * SM2 签名（字节数组输入，返回 Base64 字符串）
+ * SM2 signing (byte array input, returns Base64 string)
  */
 int crossmool_sm2_sign_to_base64(
     const unsigned char* content,
@@ -239,7 +239,7 @@ int crossmool_sm2_sign_to_base64(
 );
 
 /**
- * SM2 验签（字节数组输入）
+ * SM2 verification (byte array input)
  */
 int crossmool_sm2_verify_bytes(
     const unsigned char* content,
@@ -249,18 +249,18 @@ int crossmool_sm2_verify_bytes(
 );
 
 /* ====================================================
- * 加密+签名组合 / 验签+解密组合
+ * Encrypt+Sign / Verify+Decrypt
  * ==================================================== */
 
 /**
- * 加密并签名（字符串输入，输出 HEX）
- * @param content 明文字符串
- * @param charset 字符集（可为 NULL）
- * @param enc_public_key 加密用公钥
- * @param sign_private_key 签名用私钥
- * @param result 输出密文签名对指针（自动分配）
- * @return 成功返回 0，失败返回负数错误码
- * @note 调用者需调用 crossmool_sm2_cipher_sig_pair_free() 释放内存
+ * Encrypt and sign (string input, output HEX)
+ * @param content Plaintext string
+ * @param charset Character set (can be NULL)
+ * @param enc_public_key Encryption public key
+ * @param sign_private_key Signing private key
+ * @param result Output ciphertext-signature pair pointer (auto-allocated)
+ * @return 0 on success, negative error code on failure
+ * @note Caller must call crossmool_sm2_cipher_sig_pair_free() to release memory
  */
 int crossmool_sm2_encrypt_sign(
     const char* content,
@@ -271,14 +271,14 @@ int crossmool_sm2_encrypt_sign(
 );
 
 /**
- * 验签并解密（字符串输出）
- * @param ciphertext 密文（HEX 或 Base64）
- * @param signature 签名（HEX 或 Base64）
- * @param sign_public_key 验签用公钥
- * @param dec_private_key 解密用私钥
- * @param charset 字符集（可为 NULL）
- * @param plaintext 输出明文字符串
- * @return 成功返回 0，失败返回负数错误码
+ * Verify and decrypt (string output)
+ * @param ciphertext Ciphertext (HEX or Base64)
+ * @param signature Signature (HEX or Base64)
+ * @param sign_public_key Verification public key
+ * @param dec_private_key Decryption private key
+ * @param charset Character set (can be NULL)
+ * @param plaintext Output plaintext string
+ * @return 0 on success, negative error code on failure
  */
 int crossmool_sm2_verify_decrypt(
     const char* ciphertext,
@@ -290,7 +290,7 @@ int crossmool_sm2_verify_decrypt(
 );
 
 /**
- * 加密并签名（字节数组输入，支持 HEX 或 Base64 输出）
+ * Encrypt and sign (byte array input, supports HEX or Base64 output)
  * @param to_base64 0=HEX, 1=Base64
  */
 int crossmool_sm2_encrypt_sign_ex(
@@ -304,7 +304,7 @@ int crossmool_sm2_encrypt_sign_ex(
 );
 
 /**
- * 释放密文签名对内存（指针版本）
+ * Free ciphertext-signature pair memory (pointer version)
  */
 void crossmool_sm2_cipher_sig_pair_free(crossmool_sm2_cipher_sig_pair_t* pair);
 

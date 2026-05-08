@@ -8,7 +8,7 @@ Java 到 C 语言互通测试脚本
 2. 读取 testcase/results/java_encrypt/ 目录下的 Java 加密结果
 3. 使用 MSVC 编译器调用 c/crossmool/build_msvc/Release/crossmool.dll
 4. 执行 crossmool_sm2_verify 和 crossmool_sm2_decrypt 函数进行验签和解密
-5. 记录详细日志到 java_interop_test_20260430.log
+5. 记录详细日志到 java_interop_test_20260507.log
 """
 
 import json
@@ -26,7 +26,8 @@ C_DLL_PATH = r"c/crossmool/build_msvc/Release"
 C_DLL_NAME = "crossmool.dll"
 JAVA_KEYS_FILE = "testcase/keys/java/keys.json"
 JAVA_ENCRYPT_DIR = "testcase/results/java_encrypt"
-LOG_FILE = "java_interop_test_20260430.log"
+# 使用绝对路径确保日志文件正确写入
+LOG_FILE = "java_interop_test_20260507.log"
 
 class Logger:
     """日志记录器"""
@@ -53,32 +54,99 @@ def load_json_file(file_path):
     with open(file_path, 'r', encoding='utf-8') as f:
         return json.load(f)
 
+def get_msvc_env():
+    """获取 x64 MSVC 编译器的环境变量"""
+    # 尝试多个 VsDevCmd.bat 路径
+    vsdevcmd_paths = [
+        r"H:\Programs\Microsoft\Microsoft Visual Studio\18\Community\Common7\Tools\VsDevCmd.bat",
+        r"C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\VsDevCmd.bat",
+        r"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools\VsDevCmd.bat",
+        r"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat",
+    ]
+    
+    vsdevcmd_path = None
+    for p in vsdevcmd_paths:
+        if os.path.exists(p):
+            vsdevcmd_path = p
+            logger.log(f"找到 VsDevCmd.bat: {p}")
+            break
+    
+    if not vsdevcmd_path:
+        logger.log("错误：找不到 VsDevCmd.bat")
+        return None
+    
+    # 尝试使用 vcvars64.bat 直接获取 x64 环境
+    # vcvars64.bat 是专门用于设置 x64 编译环境的批处理文件
+    vcvars64_path = vsdevcmd_path.replace("VsDevCmd.bat", "VC\\Auxiliary\\Build\\vcvars64.bat")
+    
+    if not os.path.exists(vcvars64_path):
+        # 尝试旧版本路径
+        vcvars64_path = vsdevcmd_path.replace("VsDevCmd.bat", "vcvars64.bat")
+    
+    use_vcvars64 = os.path.exists(vcvars64_path)
+    
+    if use_vcvars64:
+        logger.log(f"使用 vcvars64.bat: {vcvars64_path}")
+        cmd = f'cmd /c "call "{vcvars64_path}" && set"'
+    else:
+        logger.log(f"使用 VsDevCmd.bat: {vsdevcmd_path}")
+        cmd = f'cmd /c "call "{vsdevcmd_path}" -host_arch=amd64 -arch=amd64 && set"'
+    
+    result = subprocess.run(
+        cmd,
+        shell=True,
+        capture_output=True,
+        encoding='gbk',
+        errors='ignore',
+        timeout=60
+    )
+    
+    if result.returncode != 0:
+        logger.log(f"VS 环境初始化失败：{result.stderr[:200] if result.stderr else '未知错误'}")
+        return None
+    
+    # 解析环境变量
+    env_vars = os.environ.copy()
+    for line in result.stdout.split('\n'):
+        if '=' in line:
+            key, value = line.split('=', 1)
+            env_vars[key.strip()] = value.strip()
+    
+    # 验证架构
+    platform = env_vars.get('PLATFORM', '')
+    processor_arch = env_vars.get('PROCESSOR_ARCHITECTURE', '')
+    
+    logger.log(f"PLATFORM={platform}, PROCESSOR_ARCHITECTURE={processor_arch}")
+    
+    return env_vars
+
 def run_c_verify(ciphertext_hex, signature_hex, content_to_verify, sign_public_key_hex):
     """
     使用 MSVC 编译器编译并运行 C 程序执行验签
-    
-    参数:
-        ciphertext_hex: 密文 (Hex 格式)
-        signature_hex: 签名 (Hex 格式)
-        content_to_verify: 要验签的内容（对于 Java encryptSign，这是对密文的签名，所以传密文）
-        sign_public_key_hex: 验签公钥 (Hex 格式)
-    
-    返回:
-        tuple: (success: bool, result_message: str)
     """
     def escape_for_c_string(s):
-        s = s.replace('\\', '\\\\')
-        s = s.replace('"', '\\"')
-        s = s.replace('\n', '\\n')
-        s = s.replace('\r', '\\r')
-        s = s.replace('\t', '\\t')
+        """转义字符串为 C 语言兼容格式，使用 Unicode 转义处理非 ASCII 字符"""
+        result = []
         for c in s:
-            if ord(c) < 32 and c not in '\n\r\t':
-                s = s.replace(c, f'\\x{ord(c):02x}')
-        return s
+            if c == '\\':
+                result.append('\\\\')
+            elif c == '"':
+                result.append('\\"')
+            elif c == '\n':
+                result.append('\\n')
+            elif c == '\r':
+                result.append('\\r')
+            elif c == '\t':
+                result.append('\\t')
+            elif ord(c) < 32:
+                result.append(f'\\x{ord(c):02x}')
+            elif ord(c) >= 128:
+                # 非 ASCII 字符使用 Unicode 转义
+                result.append(f'\\u{ord(c):04x}')
+            else:
+                result.append(c)
+        return ''.join(result)
     
-    # Java encryptSign 是对密文字符串 (HEX 字符串) 签名，不是对密文字节签名
-    # 所以验签时也要用密文字符串
     escaped_content = escape_for_c_string(content_to_verify)
     
     c_code = f'''#include <stdio.h>
@@ -89,11 +157,9 @@ def run_c_verify(ciphertext_hex, signature_hex, content_to_verify, sign_public_k
 int main() {{
     const char* signature = "{signature_hex}";
     const char* public_key = "{sign_public_key_hex}";
-    const char* ciphertext_hex_str = "{escaped_content}";
+    const char* content = "{escaped_content}";
     
-    // Java encryptSign 是对密文字符串 (HEX 字符串) 签名，不是对密文字节签名
-    // 所以验签时也要用密文字符串
-    int verify_ret = crossmool_sm2_verify(ciphertext_hex_str, NULL, signature, public_key);
+    int verify_ret = crossmool_sm2_verify(content, NULL, signature, public_key);
     
     if (verify_ret == 1) {{
         printf("VERIFY_SUCCESS");
@@ -115,53 +181,31 @@ int main() {{
             f.write(c_code)
         
         try:
-            vsdevcmd_path = r"H:\Programs\Microsoft\Microsoft Visual Studio\18\Community\Common7\Tools\VsDevCmd.bat"
+            # 获取 MSVC x64 环境
+            msvc_env = get_msvc_env()
+            if not msvc_env:
+                return False, "无法获取 MSVC x64 环境"
             
-            if not os.path.exists(vsdevcmd_path):
-                alt_paths = [
-                    r"C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\VsDevCmd.bat",
-                    r"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools\VsDevCmd.bat",
-                    r"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat",
-                ]
-                for alt_path in alt_paths:
-                    if os.path.exists(alt_path):
-                        vsdevcmd_path = alt_path
-                        break
+            # 编译
+            compile_cmd = f'cl.exe /I"{C_INCLUDE_PATH}" "{temp_c_file}" /Fe"{temp_exe_file}" /link /LIBPATH:"{C_DLL_PATH}" crossmool.lib'
             
-            if os.path.exists(vsdevcmd_path):
-                cl_cmd = f'cmd /c "call "{vsdevcmd_path}" && cl.exe /I"{C_INCLUDE_PATH}" "{temp_c_file}" /Fe"{temp_exe_file}" /link /LIBPATH:"{C_DLL_PATH}" crossmool.lib"'
-                
-                compile_result = subprocess.run(
-                    cl_cmd,
-                    shell=True,
-                    capture_output=True,
-                    encoding='gbk',
-                    errors='ignore'
-                )
-                
-                if compile_result.returncode != 0:
-                    stderr = compile_result.stderr if compile_result.stderr else "未知错误"
-                    stdout = compile_result.stdout if compile_result.stdout else ""
-                    return False, f"MSVC 编译失败：{stderr}\n{stdout}"
-            else:
-                gcc_path = shutil.which("gcc")
-                if not gcc_path:
-                    return False, "找不到 gcc 编译器"
-                
-                gcc_cmd = f'"{gcc_path}" -I"{C_INCLUDE_PATH}" "{temp_c_file}" -o "{temp_exe_file}" -L"{C_DLL_PATH}" -lcrossmool'
-                
-                compile_result = subprocess.run(
-                    gcc_cmd,
-                    shell=True,
-                    capture_output=True,
-                    encoding='utf-8',
-                    errors='ignore'
-                )
-                
-                if compile_result.returncode != 0:
-                    stderr = compile_result.stderr if compile_result.stderr else "未知错误"
-                    return False, f"GCC 编译失败：{stderr}"
+            compile_result = subprocess.run(
+                compile_cmd,
+                shell=True,
+                capture_output=True,
+                encoding='gbk',
+                errors='ignore',
+                env=msvc_env
+            )
             
+            if compile_result.returncode != 0:
+                stderr = compile_result.stderr if compile_result.stderr else "未知错误"
+                stdout = compile_result.stdout if compile_result.stdout else ""
+                return False, f"MSVC 编译失败：{stderr}\n{stdout}"
+            
+            logger.log("MSVC 编译成功")
+            
+            # 复制 exe 到 DLL 目录以便运行
             temp_exe_in_dll_dir = os.path.join(C_DLL_PATH, "temp_verify.exe")
             shutil.copy(temp_exe_file, temp_exe_in_dll_dir)
             
@@ -195,13 +239,6 @@ int main() {{
 def run_c_decrypt(ciphertext_hex, dec_private_key_hex):
     """
     使用 MSVC 编译器编译并运行 C 程序执行解密
-    
-    参数:
-        ciphertext_hex: 密文 (Hex 格式)
-        dec_private_key_hex: 解密私钥 (Hex 格式)
-    
-    返回:
-        tuple: (success: bool, decrypted_text: str or error_message: str)
     """
     c_code = f'''#include <stdio.h>
 #include <stdlib.h>
@@ -234,52 +271,30 @@ int main() {{
             f.write(c_code)
         
         try:
-            vsdevcmd_path = r"H:\Programs\Microsoft\Microsoft Visual Studio\18\Community\Common7\Tools\VsDevCmd.bat"
+            # 获取 MSVC x64 环境
+            msvc_env = get_msvc_env()
+            if not msvc_env:
+                return False, "无法获取 MSVC x64 环境"
             
-            if not os.path.exists(vsdevcmd_path):
-                alt_paths = [
-                    r"C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\Tools\VsDevCmd.bat",
-                    r"C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\Tools\VsDevCmd.bat",
-                    r"C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat",
-                ]
-                for alt_path in alt_paths:
-                    if os.path.exists(alt_path):
-                        vsdevcmd_path = alt_path
-                        break
+            # 编译
+            compile_cmd = f'cl.exe /I"{C_INCLUDE_PATH}" "{temp_c_file}" /Fe"{temp_exe_file}" /link /LIBPATH:"{C_DLL_PATH}" crossmool.lib'
             
-            if os.path.exists(vsdevcmd_path):
-                cl_cmd = f'cmd /c "call "{vsdevcmd_path}" && cl.exe /I"{C_INCLUDE_PATH}" "{temp_c_file}" /Fe"{temp_exe_file}" /link /LIBPATH:"{C_DLL_PATH}" crossmool.lib"'
-                
-                compile_result = subprocess.run(
-                    cl_cmd,
-                    shell=True,
-                    capture_output=True,
-                    encoding='gbk',
-                    errors='ignore'
-                )
-                
-                if compile_result.returncode != 0:
-                    stderr = compile_result.stderr if compile_result.stderr else "未知错误"
-                    return False, f"MSVC 编译失败：{stderr}"
-            else:
-                gcc_path = shutil.which("gcc")
-                if not gcc_path:
-                    return False, "找不到 gcc 编译器"
-                
-                gcc_cmd = f'"{gcc_path}" -I"{C_INCLUDE_PATH}" "{temp_c_file}" -o "{temp_exe_file}" -L"{C_DLL_PATH}" -lcrossmool'
-                
-                compile_result = subprocess.run(
-                    gcc_cmd,
-                    shell=True,
-                    capture_output=True,
-                    encoding='utf-8',
-                    errors='ignore'
-                )
-                
-                if compile_result.returncode != 0:
-                    stderr = compile_result.stderr if compile_result.stderr else "未知错误"
-                    return False, f"GCC 编译失败：{stderr}"
+            compile_result = subprocess.run(
+                compile_cmd,
+                shell=True,
+                capture_output=True,
+                encoding='gbk',
+                errors='ignore',
+                env=msvc_env
+            )
             
+            if compile_result.returncode != 0:
+                stderr = compile_result.stderr if compile_result.stderr else "未知错误"
+                return False, f"MSVC 编译失败：{stderr}"
+            
+            logger.log("MSVC 编译成功")
+            
+            # 复制 exe 到 DLL 目录以便运行
             temp_exe_in_dll_dir = os.path.join(C_DLL_PATH, "temp_decrypt.exe")
             shutil.copy(temp_exe_file, temp_exe_in_dll_dir)
             
@@ -381,7 +396,7 @@ def test_java_to_c_interop():
             logger.log(f"  密文 (Hex): {ciphertext_hex[:60]}...")
             logger.log(f"  签名 (Hex): {signature_hex[:60]}...")
             
-            # 步骤 1: C 语言验签（Java encryptSign 是对密文签名，所以验签也要用密文）
+            # 步骤 1: C 语言验签（Java 对密文签名，所以用密文验签）
             logger.log(f"\n  [步骤 1] 执行 C 语言验签（对密文验签）...")
             verify_ok, verify_msg = run_c_verify(
                 ciphertext_hex, signature_hex, ciphertext_hex, sign_public_key_hex
