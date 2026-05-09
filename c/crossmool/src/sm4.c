@@ -185,9 +185,11 @@ int crossmool_sm4_encrypt_ecb(
         return CROSSMOOL_ERR_MEMORY_ALLOC;
     }
     
-    // 加密 - 使用 CBC 模式配合全 0 IV 实现 ECB 效果
+    // 加密 - ECB 模式：对每个块独立加密
     sm4_set_encrypt_key(&ctx, key);
-    sm4_cbc_encrypt(&ctx, iv, padded_data, padded_len / 16, ciphertext);
+    for (size_t i = 0; i < padded_len; i += 16) {
+        sm4_encrypt(&ctx, padded_data + i, ciphertext + i);
+    }
     
     // 转换为 HEX
     ret = crossmool_hex_encode(ciphertext, padded_len, ciphertext_hex);
@@ -244,9 +246,11 @@ int crossmool_sm4_decrypt_ecb(
         return CROSSMOOL_ERR_MEMORY_ALLOC;
     }
     
-    // 解密 - 使用 CBC 模式配合全 0 IV 实现 ECB 效果
+    // 解密 - ECB 模式：对每个块独立解密
     sm4_set_decrypt_key(&ctx, key);
-    sm4_cbc_decrypt(&ctx, iv, ciphertext, ciphertext_len / 16, decrypted);
+    for (size_t i = 0; i < ciphertext_len; i += 16) {
+        sm4_decrypt(&ctx, ciphertext + i, decrypted + i);
+    }
     
     free(ciphertext);
     

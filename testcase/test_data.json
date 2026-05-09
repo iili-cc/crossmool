@@ -1,29 +1,12 @@
 {
-  "test_cases": [
-    {
-      "id": 1,
-      "name": "simple_text",
-      "plaintext": "Hello, Crossmool!"
-    },
-    {
-      "id": 2,
-      "name": "chinese_text",
-      "plaintext": "跨语言互操作性测试"
-    },
-    {
-      "id": 3,
-      "name": "mixed_content",
-      "plaintext": "Test 测试 123!@#"
-    },
-    {
-      "id": 4,
-      "name": "longer_text",
-      "plaintext": "This is a longer text for testing SM2 encryption and signature interoperability across multiple programming languages including Java, C, C++, C#, Go, JavaScript, Python, and Rust."
-    },
-    {
-      "id": 5,
-      "name": "special_characters",
-      "plaintext": "Special chars: \n\t\r\"'<>{}[]|\\^~`"
-    }
-  ]
+  "test_message": "Hello, Cross-Language Interop Test!",
+  "sm2_public_key": "3059301306072a8648ce3d020106082a811ccf5501822d034200041bbd39557ea886064d812a766d103953ab85484a9d035575baac328cb35794fd8f689089bd7702ee9c1ff012101c8c740b2094fd71f21affe862d1d21468f5f6",
+  "sm2_private_key": "308193020100301306072a8648ce3d020106082a811ccf5501822d04793077020101042088cff91ada8b70f848f03979ce2b69796bd0cea3a3f409e1a80de428cfb5c122a00a06082a811ccf5501822da144034200041bbd39557ea886064d812a766d103953ab85484a9d035575baac328cb35794fd8f689089bd7702ee9c1ff012101c8c740b2094fd71f21affe862d1d21468f5f6",
+  "sm2_ciphertext": "0498b78838c9d0d14fc8b4f57e3c954da89d4384b86f72eee6e07e4968db7b120cd5b0dc34c855473a60138e31a0211ce05bee820089301750908f5e4dd08dbae990f016057bc6180f69739062907bfa092a263562ac7c8e7dfbf94e7bcf659529bc2ee23957033be83200c318801f9f17a91c4e25c5fba5a006053f491d99bde44e3388",
+  "sm2_signature": "3046022100841801fa5af97b6cb2f0c135ab0b9470cd4ab28d791595ce1a270693e87b5e520221009607721d0b1e8f0ab619f209a3a2889d6996266f255d643cfa18977e8e04ed80",
+  "sm3_digest": "b723fc24a1d6ad071229bfee3ef667ec3df3f79801a3c41e622bd55a3e466b37",
+  "hmac_key_hex": "0123456789abcdef0123456789abcdef",
+  "hmac_sm3": "00e9bd6012151a7ba4a1701b5ce4bdf81f8d44fcaaa2cc41c0f1c088a962daf3",
+  "sm4_key_hex": "fa3f9a56f212b4ef2e5367f4a73b8e73",
+  "sm4_ciphertext": "1ed050f3879bfb8bd345c994f4b7bc39c5f02dac23b8bc0fc3987b0148bbd1f5188f763b1b627505c2c4ea9429e64f7f"
 }
