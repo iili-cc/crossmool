@@ -101,13 +101,13 @@ public class SM2KeyUtil {
      * @return
      */
     public static PrivateKey convertPKCS8BytesToPrivateKey(byte[] privateKeyBytes) {
-        // 使用X.509格式创建公钥
+        // 使用 X.509 格式创建公钥
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
         KeyFactory keyFactory = getKeyFactory();
         try {
             return keyFactory.generatePrivate(keySpec);
         } catch (InvalidKeySpecException e) {
-            log.error("创建公钥失败: {}", e.getMessage(), e);
+            log.error("创建公钥失败：{}", e.getMessage(), e);
             throw new RuntimeException("Convert the privateKeyBytes to java.security.PrivateKey failed.", e);
         }
     }
