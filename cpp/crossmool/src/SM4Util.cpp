@@ -44,15 +44,12 @@ std::string SM4Util::encryptEcbNative(const std::vector<unsigned char>& key, con
     SM4_KEY sm4_key;
     sm4_set_encrypt_key(&sm4_key, key.data());
 
-    // Pad input to multiple of block size (16 bytes)
+    // PKCS7 padding: always add padding, even for block-aligned inputs
     std::vector<unsigned char> paddedInput = input;
     size_t blockSize = 16;
-    size_t remainder = paddedInput.size() % blockSize;
-    if (remainder != 0) {
-        size_t paddingLen = blockSize - remainder;
-        for (size_t i = 0; i < paddingLen; ++i) {
-            paddedInput.push_back(paddingLen);
-        }
+    size_t paddingLen = blockSize - (paddedInput.size() % blockSize);
+    for (size_t i = 0; i < paddingLen; ++i) {
+        paddedInput.push_back(static_cast<unsigned char>(paddingLen));
     }
 
     std::vector<unsigned char> output(paddedInput.size());

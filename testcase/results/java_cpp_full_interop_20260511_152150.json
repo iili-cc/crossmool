@@ -1,0 +1,220 @@
+{
+  "time": "2026-05-11T15:21:50.545558",
+  "total": 30,
+  "passed": 22,
+  "failed": 8,
+  "rate": "73.3%",
+  "sm2_public": "3059301306072a8648ce3d020106082a811ccf5501822d034200046ba77c6fcd7ce502a7792a46983a9f0d8680695ff6752c5565cb3eac08a811718edb3d042ff6da2bb3317631325b6ed50b00ac93f9103cdfc6ee12e0deb1e98d",
+  "results": [
+    {
+      "algorithm": "SM2",
+      "operation": "enc/dec",
+      "direction": "Java→C++",
+      "status": "PASS",
+      "details": "#1 Hello, Cross-Language Interop "
+    },
+    {
+      "algorithm": "SM2",
+      "operation": "enc/dec",
+      "direction": "C++→Java",
+      "status": "FAIL",
+      "details": "#1 Hello, Cross-Language Interop "
+    },
+    {
+      "algorithm": "SM2",
+      "operation": "enc/dec",
+      "direction": "Java→C++",
+      "status": "PASS",
+      "details": "#2 国密算法跨语言互通测试：简体中文"
+    },
+    {
+      "algorithm": "SM2",
+      "operation": "enc/dec",
+      "direction": "C++→Java",
+      "status": "FAIL",
+      "details": "#2 国密算法跨语言互通测试：简体中文"
+    },
+    {
+      "algorithm": "SM2",
+      "operation": "enc/dec",
+      "direction": "Java→C++",
+      "status": "PASS",
+      "details": "#3 Mixed content 123!@#$% 混合測試數據"
+    },
+    {
+      "algorithm": "SM2",
+      "operation": "enc/dec",
+      "direction": "C++→Java",
+      "status": "FAIL",
+      "details": "#3 Mixed content 123!@#$% 混合測試數據"
+    },
+    {
+      "algorithm": "SM2",
+      "operation": "sign/verify",
+      "direction": "Java→C++",
+      "status": "PASS",
+      "details": "#1 Hello, Cross-Language Interop "
+    },
+    {
+      "algorithm": "SM2",
+      "operation": "sign/verify",
+      "direction": "C++→Java",
+      "status": "PASS",
+      "details": "#1 Hello, Cross-Language Interop "
+    },
+    {
+      "algorithm": "SM2",
+      "operation": "sign/verify",
+      "direction": "Java→C++",
+      "status": "PASS",
+      "details": "#2 国密算法跨语言互通测试：简体中文"
+    },
+    {
+      "algorithm": "SM2",
+      "operation": "sign/verify",
+      "direction": "C++→Java",
+      "status": "PASS",
+      "details": "#2 国密算法跨语言互通测试：简体中文"
+    },
+    {
+      "algorithm": "SM2",
+      "operation": "sign/verify",
+      "direction": "Java→C++",
+      "status": "PASS",
+      "details": "#3 Mixed content 123!@#$% 混合測試數據"
+    },
+    {
+      "algorithm": "SM2",
+      "operation": "sign/verify",
+      "direction": "C++→Java",
+      "status": "PASS",
+      "details": "#3 Mixed content 123!@#$% 混合測試數據"
+    },
+    {
+      "algorithm": "SM2",
+      "operation": "enc_sign/ver_dec",
+      "direction": "Java→C++",
+      "status": "PASS",
+      "details": "#1 Hello, Cross-Language Interop "
+    },
+    {
+      "algorithm": "SM2",
+      "operation": "enc_sign/ver_dec",
+      "direction": "C++→Java",
+      "status": "FAIL",
+      "details": "#1 Hello, Cross-Language Interop  verify=false"
+    },
+    {
+      "algorithm": "SM2",
+      "operation": "enc_sign/ver_dec",
+      "direction": "Java→C++",
+      "status": "PASS",
+      "details": "#2 国密算法跨语言互通测试：简体中文"
+    },
+    {
+      "algorithm": "SM2",
+      "operation": "enc_sign/ver_dec",
+      "direction": "C++→Java",
+      "status": "FAIL",
+      "details": "#2 国密算法跨语言互通测试：简体中文 verify=false"
+    },
+    {
+      "algorithm": "SM2",
+      "operation": "enc_sign/ver_dec",
+      "direction": "Java→C++",
+      "status": "PASS",
+      "details": "#3 Mixed content 123!@#$% 混合測試數據"
+    },
+    {
+      "algorithm": "SM2",
+      "operation": "enc_sign/ver_dec",
+      "direction": "C++→Java",
+      "status": "FAIL",
+      "details": "#3 Mixed content 123!@#$% 混合測試數據 verify=false"
+    },
+    {
+      "algorithm": "SM3",
+      "operation": "digest",
+      "direction": "Java↔C++",
+      "status": "PASS",
+      "details": "#1 Hello, Cross-Language Interop  J=b723fc24a1d6... C=b723fc24a1d6..."
+    },
+    {
+      "algorithm": "SM3",
+      "operation": "digest",
+      "direction": "Java↔C++",
+      "status": "PASS",
+      "details": "#2 国密算法跨语言互通测试：简体中文 J=49ca4fc4c4fc... C=49ca4fc4c4fc..."
+    },
+    {
+      "algorithm": "SM3",
+      "operation": "digest",
+      "direction": "Java↔C++",
+      "status": "PASS",
+      "details": "#3 Mixed content 123!@#$% 混合測試數據 J=1e022b6e2313... C=1e022b6e2313..."
+    },
+    {
+      "algorithm": "HMAC-SM3",
+      "operation": "hmac",
+      "direction": "Java↔C++",
+      "status": "PASS",
+      "details": "#1 Hello, Cross-Language Interop  J=00e9bd601215... C=00e9bd601215..."
+    },
+    {
+      "algorithm": "HMAC-SM3",
+      "operation": "hmac",
+      "direction": "Java↔C++",
+      "status": "PASS",
+      "details": "#2 国密算法跨语言互通测试：简体中文 J=2b4304b6c9de... C=2b4304b6c9de..."
+    },
+    {
+      "algorithm": "HMAC-SM3",
+      "operation": "hmac",
+      "direction": "Java↔C++",
+      "status": "PASS",
+      "details": "#3 Mixed content 123!@#$% 混合測試數據 J=3d9f9a9a7bcc... C=3d9f9a9a7bcc..."
+    },
+    {
+      "algorithm": "SM4",
+      "operation": "enc/dec",
+      "direction": "Java→C++",
+      "status": "PASS",
+      "details": "#1 Hello, Cross-Language Interop "
+    },
+    {
+      "algorithm": "SM4",
+      "operation": "enc/dec",
+      "direction": "C++→Java",
+      "status": "PASS",
+      "details": "#1 Hello, Cross-Language Interop "
+    },
+    {
+      "algorithm": "SM4",
+      "operation": "enc/dec",
+      "direction": "Java→C++",
+      "status": "PASS",
+      "details": "#2 国密算法跨语言互通测试：简体中文"
+    },
+    {
+      "algorithm": "SM4",
+      "operation": "enc/dec",
+      "direction": "C++→Java",
+      "status": "FAIL",
+      "details": "#2 国密算法跨语言互通测试：简体中文"
+    },
+    {
+      "algorithm": "SM4",
+      "operation": "enc/dec",
+      "direction": "Java→C++",
+      "status": "PASS",
+      "details": "#3 Mixed content 123!@#$% 混合測試數據"
+    },
+    {
+      "algorithm": "SM4",
+      "operation": "enc/dec",
+      "direction": "C++→Java",
+      "status": "FAIL",
+      "details": "#3 Mixed content 123!@#$% 混合測試數據 [got:Mixed content 123!@#]"
+    }
+  ]
+}

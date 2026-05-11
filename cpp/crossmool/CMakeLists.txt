@@ -6,6 +6,11 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# Force MSVC to use UTF-8 source/execution charset so Chinese comments compile correctly
+if(MSVC)
+    add_compile_options(/utf-8)
+endif()
+
 # Set output directories
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
@@ -14,55 +19,36 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 # Option to use system GmSSL or build with bundled implementation
 option(USE_SYSTEM_GMSSL "Use system-installed GmSSL library" ON)
 
-if(USE_SYSTEM_GMSSL)
-    # Find GmSSL library
-    find_package(PkgConfig QUIET)
+# Sibling GmSSL install path (relative to this project - used when GmSSL is not in system path)
+set(GMSSL_SIBLING_DIR "${PROJECT_SOURCE_DIR}/../../c/crossmool/gmssl_install")
 
-    # Try to find GmSSL with pkg-config first
-    if(PkgConfig_FOUND)
-        pkg_check_modules(GMSSL QUIET gmssl)
-    endif()
+# Resolve GmSSL paths (command-line override takes priority)
+if(NOT GMSSL_LIBRARIES)
+    find_library(GMSSL_LIBRARIES NAMES gmssl
+        PATHS
+            "${GMSSL_SIBLING_DIR}/lib"
+            "C:/Program Files/GmSSL/lib"
+            "C:/Program Files (x86)/GmSSL/lib"
+        NO_DEFAULT_PATH
+    )
+endif()
+if(NOT GMSSL_INCLUDE_DIRS)
+    find_path(GMSSL_INCLUDE_DIRS NAMES gmssl/sm2.h
+        PATHS
+            "${GMSSL_SIBLING_DIR}/include"
+            "C:/Program Files/GmSSL/include"
+            "C:/Program Files (x86)/GmSSL/include"
+        NO_DEFAULT_PATH
+    )
+endif()
 
-    if(GMSSL_FOUND)
-        message(STATUS "Found GmSSL via pkg-config: ${GMSSL_VERSION}")
-    else()
-        # Alternative: try find_library and find_path
-        find_library(GMSSL_LIBRARIES NAMES gmssl libgmssl PATHS ENV LD_LIBRARY_PATH)
-        find_path(GMSSL_INCLUDE_DIRS NAMES gmssl.h PATHS ENV CPATH PATH_SUFFIXES include)
-
-        # On Windows, also check common installation paths
-        if(WIN32)
-            find_library(GMSSL_LIBRARIES NAMES gmssl libgmssl
-                PATHS
-                    "C:/Program Files/GmSSL/lib"
-                    "C:/Program Files (x86)/GmSSL/lib"
-                    "$ENV{PROGRAMFILES}/GmSSL/lib"
-                    "$ENV{PROGRAMFILES(X86)}/GmSSL/lib"
-                    "${PROJECT_SOURCE_DIR}/../GmSSL/build"
-                    "${PROJECT_SOURCE_DIR}/../../GmSSL/build"
-            )
-            find_path(GMSSL_INCLUDE_DIRS NAMES gmssl.h
-                PATHS
-                    "C:/Program Files/GmSSL/include"
-                    "C:/Program Files (x86)/GmSSL/include"
-                    "$ENV{PROGRAMFILES}/GmSSL/include"
-                    "$ENV{PROGRAMFILES(X86)}/GmSSL/include"
-                    "${PROJECT_SOURCE_DIR}/../GmSSL/include"
-                    "${PROJECT_SOURCE_DIR}/../../GmSSL/include"
-                    "${PROJECT_SOURCE_DIR}/../GmSSL/build"
-                    "${PROJECT_SOURCE_DIR}/../../GmSSL/build"
-                PATH_SUFFIXES include
-            )
-        endif()
-
-        if(GMSSL_LIBRARIES AND GMSSL_INCLUDE_DIRS)
-            set(GMSSL_FOUND TRUE)
-            message(STATUS "Found GmSSL: ${GMSSL_LIBRARIES}")
-        else()
-            message(WARNING "GmSSL not found. Building with stub implementations.")
-            set(USE_SYSTEM_GMSSL OFF)
-        endif()
-    endif()
+if(USE_SYSTEM_GMSSL AND GMSSL_LIBRARIES AND GMSSL_INCLUDE_DIRS)
+    set(GMSSL_FOUND TRUE)
+    message(STATUS "GmSSL found: lib=${GMSSL_LIBRARIES}, include=${GMSSL_INCLUDE_DIRS}")
+else()
+    message(WARNING "GmSSL not found. Building with stub implementations. GMSSL_LIBRARIES=${GMSSL_LIBRARIES}, GMSSL_INCLUDE_DIRS=${GMSSL_INCLUDE_DIRS}")
+    set(USE_SYSTEM_GMSSL OFF)
+    set(GMSSL_FOUND FALSE)
 endif()
 
 # Define library target
@@ -80,13 +66,15 @@ target_include_directories(crossmool PUBLIC
     ${PROJECT_SOURCE_DIR}/utils
 )
 
-if(USE_SYSTEM_GMSSL)
+if(USE_SYSTEM_GMSSL AND GMSSL_FOUND)
     target_include_directories(crossmool PUBLIC ${GMSSL_INCLUDE_DIRS})
     target_link_libraries(crossmool PRIVATE ${GMSSL_LIBRARIES})
     target_compile_definitions(crossmool PRIVATE USE_GMSSL=1)
+    message(STATUS "crossmool will be compiled with USE_GMSSL=1")
 else()
     # Define stub implementations
     target_compile_definitions(crossmool PRIVATE USE_STUB_IMPLEMENTATION=1)
+    message(STATUS "crossmool will be compiled with stub implementations")
 endif()
 
 # Create executables for testing

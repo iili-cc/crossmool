@@ -98,9 +98,9 @@ public class SM4Util {
 
 			byte[] output = new byte[cipher.getOutputSize(cipherBytes.length)];
 			int len = cipher.processBytes(cipherBytes, 0, cipherBytes.length, output, 0);
-			cipher.doFinal(output, len);
+			len += cipher.doFinal(output, len);
 
-			return new String(output, StandardCharsets.UTF_8).trim();
+			return new String(output, 0, len, StandardCharsets.UTF_8);
 		} catch (Exception e) {
 			throw new RuntimeException("SM4 native decryption failed", e);
 		}

@@ -96,7 +96,7 @@ std::string SM3Util::generateHmacKeyToStr(int keyLengthInBytes, bool toBase64) {
 std::vector<unsigned char> SM3Util::hmac(const std::vector<unsigned char>& key, const std::vector<unsigned char>& data) {
 #ifdef USE_GMSSL
     uint8_t out[SM3_DIGEST_SIZE];
-    hmac_sm3(key.data(), key.size(), data.data(), data.size(), out);
+    sm3_hmac(key.data(), key.size(), data.data(), data.size(), out);
     return std::vector<unsigned char>(out, out + SM3_DIGEST_SIZE);
 #else
     // Stub implementation for HMAC-SM3

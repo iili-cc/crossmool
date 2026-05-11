@@ -4,9 +4,8 @@
 #include <string>
 #include <vector>
 
-// Forward declarations for GmSSL types
-typedef struct sm2_key_st SM2_KEY;
-typedef struct sm2_ciphertext_st SM2_CIPHERTEXT;
+// SM2 signature max size (DER encoded, from GmSSL)
+#define SM2_SIGNATURE_DER_MAX_SIZE 72
 
 class SM2Util {
 private:
@@ -26,11 +25,6 @@ public:
     };
 
     /**
-     * Generate SM2 key pair in ASN.1/X.509 format
-     */
-    static SM2_KEY* generateKeyPair();
-
-    /**
      * Generate SM2 key pair and return as Base64 encoded strings
      */
     static KeyPair generateKeyPairBase64();
@@ -41,7 +35,7 @@ public:
     static KeyPair generateKeyPairHex();
 
     /**
-     * Encrypt data with public key, return as byte array
+     * Encrypt data with public key (raw bytes), return as byte array
      */
     static std::vector<unsigned char> encryptToBytes(const std::vector<unsigned char>& content, const std::vector<unsigned char>& publicKey);
 
@@ -66,7 +60,7 @@ public:
     static std::string encrypt(const std::string& content, const std::string& publicKey, bool toBase64 = false);
 
     /**
-     * Decrypt byte array with private key, return as byte array
+     * Decrypt byte array with private key (raw bytes), return as byte array
      */
     static std::vector<unsigned char> decryptToBytes(const std::vector<unsigned char>& content, const std::vector<unsigned char>& privateKey);
 
@@ -86,7 +80,7 @@ public:
     static std::string decrypt(const std::string& content, const std::string& privateKey);
 
     /**
-     * Sign byte array with private key, return as byte array
+     * Sign byte array with private key (raw bytes), return as byte array
      */
     static std::vector<unsigned char> sign(const std::vector<unsigned char>& content, const std::vector<unsigned char>& privateKey);
 
@@ -111,7 +105,7 @@ public:
     static std::string sign(const std::string& content, const std::string& privateKey, bool toBase64 = false);
 
     /**
-     * Verify signature for byte array content with public key
+     * Verify signature for byte array content with public key (raw bytes)
      */
     static bool verify(const std::vector<unsigned char>& content, const std::vector<unsigned char>& signature, const std::vector<unsigned char>& publicKey);
 
