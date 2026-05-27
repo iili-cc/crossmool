@@ -22,6 +22,7 @@ namespace Crossmool.Crypto
     {
         private static readonly ECDomainParameters Sm2Domain;
         private static readonly SecureRandom Rng = new SecureRandom();
+        private static readonly byte[] UserId = Encoding.UTF8.GetBytes("1234567812345678");
 
         static SM2Util()
         {
@@ -29,13 +30,76 @@ namespace Crossmool.Crypto
             Sm2Domain = new ECDomainParameters(curve.Curve, curve.G, curve.N, curve.H, curve.GetSeed());
         }
 
+        #region Key Conversion Helpers
+
+        private static ECPublicKeyParameters ParsePublicKey(byte[] keyBytes)
+        {
+            if (keyBytes == null || keyBytes.Length == 0)
+                throw new ArgumentException("Public key bytes cannot be empty");
+
+            if (keyBytes.Length == 65 && keyBytes[0] == 0x04)
+            {
+                var pubPoint = Sm2Domain.Curve.DecodePoint(keyBytes);
+                return new ECPublicKeyParameters(pubPoint, Sm2Domain);
+            }
+
+            if (keyBytes[0] == 0x30)
+            {
+                var info = SubjectPublicKeyInfo.GetInstance(keyBytes);
+                var key = (ECPublicKeyParameters)PublicKeyFactory.CreateKey(info);
+                return key;
+            }
+
+            try
+            {
+                var pubPoint = Sm2Domain.Curve.DecodePoint(keyBytes);
+                return new ECPublicKeyParameters(pubPoint, Sm2Domain);
+            }
+            catch (Exception ex)
+            {
+                throw new ArgumentException($"Cannot parse public key (length={keyBytes.Length}, first byte=0x{keyBytes[0]:x2}): {ex.Message}", ex);
+            }
+        }
+
+        private static ECPrivateKeyParameters ParsePrivateKey(byte[] keyBytes)
+        {
+            if (keyBytes == null || keyBytes.Length == 0)
+                throw new ArgumentException("Private key bytes cannot be empty");
+
+            if (keyBytes.Length == 32)
+            {
+                var d = new BigInteger(1, keyBytes);
+                return new ECPrivateKeyParameters(d, Sm2Domain);
+            }
+
+            if (keyBytes[0] == 0x30)
+            {
+                var info = PrivateKeyInfo.GetInstance(keyBytes);
+                var key = (ECPrivateKeyParameters)PrivateKeyFactory.CreateKey(info);
+                return key;
+            }
+
+            try
+            {
+                var d = new BigInteger(1, keyBytes);
+                return new ECPrivateKeyParameters(d, Sm2Domain);
+            }
+            catch (Exception ex)
+            {
+                throw new ArgumentException($"Cannot parse private key (length={keyBytes.Length}, first byte=0x{keyBytes[0]:x2}): {ex.Message}", ex);
+            }
+        }
+
+        #endregion
+
+        #region Encrypt
+
         public static byte[] encrypt(byte[] originalTextBytes, byte[] publicKeyBytes)
         {
             if (originalTextBytes == null) throw new ArgumentNullException(nameof(originalTextBytes));
             if (publicKeyBytes == null) throw new ArgumentNullException(nameof(publicKeyBytes));
 
-            var pubPoint = Sm2Domain.Curve.DecodePoint(publicKeyBytes);
-            var pubKey = new ECPublicKeyParameters(pubPoint, Sm2Domain);
+            var pubKey = ParsePublicKey(publicKeyBytes);
             var engine = new SM2Engine(SM2Engine.Mode.C1C3C2);
             engine.Init(true, new ParametersWithRandom(pubKey, Rng));
             return engine.ProcessBlock(originalTextBytes, 0, originalTextBytes.Length);
@@ -57,99 +121,19 @@ namespace Crossmool.Crypto
             return EncodingUtils.ToHex(output);
         }
 
+        #endregion
+
+        #region Decrypt
+
         public static byte[] decrypt(byte[] encryptedTextBytes, byte[] privateKeyBytes)
         {
             if (encryptedTextBytes == null) throw new ArgumentNullException(nameof(encryptedTextBytes));
             if (privateKeyBytes == null) throw new ArgumentNullException(nameof(privateKeyBytes));
 
-            var d = new BigInteger(1, privateKeyBytes);
-            var privKey = new ECPrivateKeyParameters(d, Sm2Domain);
+            var privKey = ParsePrivateKey(privateKeyBytes);
             var engine = new SM2Engine(SM2Engine.Mode.C1C3C2);
             engine.Init(false, privKey);
             return engine.ProcessBlock(encryptedTextBytes, 0, encryptedTextBytes.Length);
-        }
-
-        public static byte[] sign(byte[] messageBytes, byte[] privateKeyBytes)
-        {
-            if (messageBytes == null) throw new ArgumentNullException(nameof(messageBytes));
-            if (privateKeyBytes == null) throw new ArgumentNullException(nameof(privateKeyBytes));
-
-            var d = new BigInteger(1, privateKeyBytes);
-            var privKey = new ECPrivateKeyParameters(d, Sm2Domain);
-            var signer = new SM2Signer();
-            var parameters = new ParametersWithRandom(privKey, Rng);
-            signer.Init(true, parameters);
-            signer.BlockUpdate(messageBytes, 0, messageBytes.Length);
-            return signer.GenerateSignature();
-        }
-
-        public static string sign(string message, string privateKeyString)
-        {
-            var messageBytes = EncodingUtils.Utf8GetBytes(message ?? string.Empty);
-            var privBytes = EncodingUtils.ParseBase64OrHex(privateKeyString);
-            var signature = sign(messageBytes, privBytes);
-            return EncodingUtils.ToHex(signature);
-        }
-
-        public static bool verify(byte[] messageBytes, byte[] signatureDerBytes, byte[] publicKeyBytes)
-        {
-            if (messageBytes == null) throw new ArgumentNullException(nameof(messageBytes));
-            if (signatureDerBytes == null) throw new ArgumentNullException(nameof(signatureDerBytes));
-            if (publicKeyBytes == null) throw new ArgumentNullException(nameof(publicKeyBytes));
-
-            var pubPoint = Sm2Domain.Curve.DecodePoint(publicKeyBytes);
-            var pubKey = new ECPublicKeyParameters(pubPoint, Sm2Domain);
-            var signer = new SM2Signer();
-            signer.Init(false, pubKey);
-            signer.BlockUpdate(messageBytes, 0, messageBytes.Length);
-            var signature = FromDerSignature(signatureDerBytes);
-            var rBytes = signature[0].ToByteArrayUnsigned();
-            var sBytes = signature[1].ToByteArrayUnsigned();
-            var sigBytes = new byte[rBytes.Length + sBytes.Length];
-            Array.Copy(rBytes, 0, sigBytes, 0, rBytes.Length);
-            Array.Copy(sBytes, 0, sigBytes, rBytes.Length, sBytes.Length);
-            return signer.VerifySignature(sigBytes);
-        }
-
-        public static bool verify(string message, string signatureHex, string publicKeyString)
-        {
-            var messageBytes = EncodingUtils.Utf8GetBytes(message ?? string.Empty);
-            var signatureBytes = EncodingUtils.FromHex(signatureHex);
-            var pubBytes = EncodingUtils.ParseBase64OrHex(publicKeyString);
-            return verify(messageBytes, signatureBytes, pubBytes);
-        }
-
-        public static (byte[] ciphertext, byte[] signature) encryptSign(byte[] messageBytes, byte[] publicKeyBytes, byte[] privateKeyBytes)
-        {
-            var ciphertext = encrypt(messageBytes, publicKeyBytes);
-            var signature = sign(messageBytes, privateKeyBytes);
-            return (ciphertext, signature);
-        }
-
-        public static (string ciphertextHex, string signatureHex) encryptSign(string message, string publicKeyString, string privateKeyString)
-        {
-            var messageBytes = EncodingUtils.Utf8GetBytes(message ?? string.Empty);
-            var pubBytes = EncodingUtils.ParseBase64OrHex(publicKeyString);
-            var privBytes = EncodingUtils.ParseBase64OrHex(privateKeyString);
-            var (ciphertext, signature) = encryptSign(messageBytes, pubBytes, privBytes);
-            return (EncodingUtils.ToHex(ciphertext), EncodingUtils.ToHex(signature));
-        }
-
-        private static BigInteger[] FromDerSignature(byte[] der)
-        {
-            int pos = 0;
-            if (der[pos++] != 0x30) throw new FormatException("Invalid DER signature");
-            var len = der[pos++];
-            if (der[pos++] != 0x02) throw new FormatException("Invalid DER signature");
-            var rLen = der[pos++];
-            var rBytes = new byte[rLen];
-            Array.Copy(der, pos, rBytes, 0, rLen);
-            pos += rLen;
-            if (der[pos++] != 0x02) throw new FormatException("Invalid DER signature");
-            var sLen = der[pos++];
-            var sBytes = new byte[sLen];
-            Array.Copy(der, pos, sBytes, 0, sLen);
-            return new BigInteger[] { new BigInteger(1, rBytes), new BigInteger(1, sBytes) };
         }
 
         public static string decrypt(string encryptedText, string privateKeyString)
@@ -167,6 +151,126 @@ namespace Crossmool.Crypto
             var plain = decrypt(cipherBytes, privBytes);
             return EncodingUtils.Utf8GetString(plain);
         }
+
+        #endregion
+
+        #region Sign
+
+        public static byte[] sign(byte[] messageBytes, byte[] privateKeyBytes)
+        {
+            if (messageBytes == null) throw new ArgumentNullException(nameof(messageBytes));
+            if (privateKeyBytes == null) throw new ArgumentNullException(nameof(privateKeyBytes));
+
+            var privKey = ParsePrivateKey(privateKeyBytes);
+            var signer = new SM2Signer();
+            var parameters = new ParametersWithID(privKey, UserId);
+            signer.Init(true, parameters);
+            signer.BlockUpdate(messageBytes, 0, messageBytes.Length);
+            return signer.GenerateSignature();
+        }
+
+        public static string sign(string message, string privateKeyString)
+        {
+            var messageBytes = EncodingUtils.Utf8GetBytes(message ?? string.Empty);
+            var privBytes = EncodingUtils.ParseBase64OrHex(privateKeyString);
+            var signature = sign(messageBytes, privBytes);
+            return EncodingUtils.ToHex(signature);
+        }
+
+        #endregion
+
+        #region Verify
+
+        public static bool verify(byte[] messageBytes, byte[] signatureBytes, byte[] publicKeyBytes)
+        {
+            if (messageBytes == null) throw new ArgumentNullException(nameof(messageBytes));
+            if (signatureBytes == null) throw new ArgumentNullException(nameof(signatureBytes));
+            if (publicKeyBytes == null) throw new ArgumentNullException(nameof(publicKeyBytes));
+
+            var pubKey = ParsePublicKey(publicKeyBytes);
+            var signer = new SM2Signer();
+            var parameters = new ParametersWithID(pubKey, UserId);
+            signer.Init(false, parameters);
+            signer.BlockUpdate(messageBytes, 0, messageBytes.Length);
+
+            // Try raw signature first (DER or 64-byte RS)
+            if (signer.VerifySignature(signatureBytes))
+                return true;
+
+            // If DER format, convert to 64-byte RS and try again
+            if (signatureBytes.Length != 64 && signatureBytes.Length > 0 && signatureBytes[0] == 0x30)
+            {
+                try
+                {
+                    var rs = FromDerSignature(signatureBytes);
+                    var rBytes = PadToLength(rs[0].ToByteArrayUnsigned(), 32);
+                    var sBytes = PadToLength(rs[1].ToByteArrayUnsigned(), 32);
+                    var sigBytes = new byte[64];
+                    Array.Copy(rBytes, 0, sigBytes, 0, 32);
+                    Array.Copy(sBytes, 0, sigBytes, 32, 32);
+
+                    var signer2 = new SM2Signer();
+                    signer2.Init(false, parameters);
+                    signer2.BlockUpdate(messageBytes, 0, messageBytes.Length);
+                    return signer2.VerifySignature(sigBytes);
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+
+            return false;
+        }
+
+        public static bool verify(string message, string signatureHex, string publicKeyString)
+        {
+            var messageBytes = EncodingUtils.Utf8GetBytes(message ?? string.Empty);
+            var signatureBytes = EncodingUtils.FromHex(signatureHex);
+            var pubBytes = EncodingUtils.ParseBase64OrHex(publicKeyString);
+            return verify(messageBytes, signatureBytes, pubBytes);
+        }
+
+        #endregion
+
+        #region EncryptSign
+
+        public static (byte[] ciphertext, byte[] signature) encryptSign(byte[] messageBytes, byte[] publicKeyBytes, byte[] privateKeyBytes)
+        {
+            var ciphertext = encrypt(messageBytes, publicKeyBytes);
+            // Sign the ciphertext hex string (UTF8 encoded), matching Java's behavior
+            var ciphertextHex = EncodingUtils.ToHex(ciphertext);
+            var signature = sign(EncodingUtils.Utf8GetBytes(ciphertextHex), privateKeyBytes);
+            return (ciphertext, signature);
+        }
+
+        public static (string ciphertextHex, string signatureHex) encryptSign(string message, string publicKeyString, string privateKeyString)
+        {
+            var messageBytes = EncodingUtils.Utf8GetBytes(message ?? string.Empty);
+            var pubBytes = EncodingUtils.ParseBase64OrHex(publicKeyString);
+            var privBytes = EncodingUtils.ParseBase64OrHex(privateKeyString);
+            var (ciphertext, signature) = encryptSign(messageBytes, pubBytes, privBytes);
+            return (EncodingUtils.ToHex(ciphertext), EncodingUtils.ToHex(signature));
+        }
+
+        #endregion
+
+        #region VerifyDecrypt
+
+        public static string verifyDecrypt(string ciphertextHex, string signatureHex, string signPublicKeyString, string decPrivateKeyString)
+        {
+            // Verify signature against ciphertext hex string (UTF8 encoded), matching Java's behavior
+            bool verified = verify(ciphertextHex, signatureHex, signPublicKeyString);
+            if (!verified)
+            {
+                throw new RuntimeException("SM2 verify failed: " + ciphertextHex);
+            }
+            return decryptFromHex(ciphertextHex, decPrivateKeyString);
+        }
+
+        #endregion
+
+        #region Key Generation
 
         public static string generateKeyPair()
         {
@@ -186,21 +290,23 @@ namespace Crossmool.Crypto
             return $"{{\"privateKeyHex\":\"{privHex}\",\"publicKeyHex\":\"{pubHex}\"}}";
         }
 
+        #endregion
+
+        #region PEM Import/Export
+
         public static string exportPrivateKeyPem(byte[] privateKeyBytes)
         {
             if (privateKeyBytes == null) throw new ArgumentNullException(nameof(privateKeyBytes));
-            var d = new BigInteger(1, privateKeyBytes);
-            var priv = new ECPrivateKeyParameters(d, Sm2Domain);
-            var info = PrivateKeyInfoFactory.CreatePrivateKeyInfo(priv);
+            var privKey = ParsePrivateKey(privateKeyBytes);
+            var info = PrivateKeyInfoFactory.CreatePrivateKeyInfo(privKey);
             return ToPem("PRIVATE KEY", info.GetEncoded());
         }
 
         public static string exportPublicKeyPem(byte[] publicKeyBytes)
         {
             if (publicKeyBytes == null) throw new ArgumentNullException(nameof(publicKeyBytes));
-            var q = Sm2Domain.Curve.DecodePoint(publicKeyBytes);
-            var pub = new ECPublicKeyParameters(q, Sm2Domain);
-            var info = SubjectPublicKeyInfoFactory.CreateSubjectPublicKeyInfo(pub);
+            var pubKey = ParsePublicKey(publicKeyBytes);
+            var info = SubjectPublicKeyInfoFactory.CreateSubjectPublicKeyInfo(pubKey);
             return ToPem("PUBLIC KEY", info.GetEncoded());
         }
 
@@ -220,6 +326,46 @@ namespace Crossmool.Crypto
             var info = SubjectPublicKeyInfo.GetInstance(der);
             var key = (ECPublicKeyParameters)PublicKeyFactory.CreateKey(info);
             return key.Q.GetEncoded(false);
+        }
+
+        #endregion
+
+        #region Private Helpers
+
+        private static BigInteger[] FromDerSignature(byte[] der)
+        {
+            int pos = 0;
+            if (der[pos++] != 0x30) throw new FormatException("Invalid DER signature");
+            ReadDerLength(der, ref pos);
+            if (der[pos++] != 0x02) throw new FormatException("Invalid DER signature");
+            int rLen = ReadDerLength(der, ref pos);
+            var rBytes = new byte[rLen];
+            Array.Copy(der, pos, rBytes, 0, rLen);
+            pos += rLen;
+            if (der[pos++] != 0x02) throw new FormatException("Invalid DER signature");
+            int sLen = ReadDerLength(der, ref pos);
+            var sBytes = new byte[sLen];
+            Array.Copy(der, pos, sBytes, 0, sLen);
+            return new BigInteger[] { new BigInteger(1, rBytes), new BigInteger(1, sBytes) };
+        }
+
+        private static int ReadDerLength(byte[] buf, ref int pos)
+        {
+            int b = buf[pos++];
+            if (b < 0x80) return b;
+            int numBytes = b & 0x7f;
+            int len = 0;
+            for (int i = 0; i < numBytes; i++)
+                len = (len << 8) | buf[pos++];
+            return len;
+        }
+
+        private static byte[] PadToLength(byte[] data, int targetLength)
+        {
+            if (data.Length >= targetLength) return data;
+            var result = new byte[targetLength];
+            Array.Copy(data, 0, result, targetLength - data.Length, data.Length);
+            return result;
         }
 
         private static string ToPem(string type, byte[] der)
@@ -249,5 +395,13 @@ namespace Crossmool.Crypto
             base64 = base64.Replace("\r", string.Empty).Replace("\n", string.Empty).Trim();
             return Convert.FromBase64String(base64);
         }
+
+        #endregion
+    }
+
+    public class RuntimeException : Exception
+    {
+        public RuntimeException(string message) : base(message) { }
+        public RuntimeException(string message, Exception inner) : base(message, inner) { }
     }
 }

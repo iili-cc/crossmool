@@ -1,8 +1,44 @@
 {
   "summary": {
     "total": 5,
-    "success": 0,
-    "failed": 5
+    "success": 5,
+    "failed": 0
   },
-  "results": []
+  "results": [
+    {
+      "test_case_id": 1,
+      "test_case_name": "simple_text",
+      "plaintext": "Hello, Crossmool!",
+      "ciphertext_hex": "048da625784c0331da7c21511c2ff5e8a15b9c8ea8b514b32ba97f903de6ea6e24542272f776ed44ffbd788ec9f909658fad1546c5b28b3607d48c5becd0da3c3890a4d7f17d62c2241d73f7a811aa918e42c069983a152bbbeb319312d8ad8755141e241b24d908dbd4fa44650711f1e427",
+      "signature_hex": "304402207eda6a3254be515249bc8fb194359b5095702c5e649dea6b9305b4d8f94bf57502203ea331ed99e8b639bfb4175710568c6fa90148c4b8c426eaa3b1399674a9a686"
+    },
+    {
+      "test_case_id": 2,
+      "test_case_name": "chinese_text",
+      "plaintext": "跨语言互操作性测试",
+      "ciphertext_hex": "04f5c3e8334002ef329b2d5a6c11a272041200ed241af8acf7d8b8def2adceccd71794f2cc1003632a6bada78beabb78e2ec13968320e1b70b24bd36a4c6d07fdc41f60b6f4e0f168c853f71831db0e4b21a70e2ec2cfcf758a8fdf704914dd448f405f0e13a6d29c41b91085392f4964182c971f95ce89778cdc5f4",
+      "signature_hex": "3044022077858d006d1b60fc7facf078a8ffb6ee0c4bad3dfbdf8bc0a11bb6ddbf57b7c2022026c3bde465977d7fbf4eb8fc70a6804ca7d5a29528592e437235b46b61316cf2"
+    },
+    {
+      "test_case_id": 3,
+      "test_case_name": "mixed_content",
+      "plaintext": "Test 测试 123!@#",
+      "ciphertext_hex": "04f698c2265af2edc0a656ba7058d56972f37f7abf6ed610a2a06d1d2e42c7285e3b5b40aaee97f496c03fbe34b075e0a94aed408e300bae4be47f10d83654d22ab40657c95290102cc394de671fada84681ad33e8acc0f767e0d193b4e34b66476a7f91501492ae05371113b0ced3790c0e0c",
+      "signature_hex": "304602210087afd3e69d0d0c18c38cd64a23887b6f0d836dda3d2ebcd04764a6f9a745413c022100ae6c9a935c81334af602a1e38406dd9681881a01f6f95e71bc54f08c100847b9"
+    },
+    {
+      "test_case_id": 4,
+      "test_case_name": "longer_text",
+      "plaintext": "This is a longer text for testing SM2 encryption and signature interoperability across multiple programming languages including Java, C, C++, C#, Go, JavaScript, Python, and Rust.",
+      "ciphertext_hex": "04aeab0dd562c370c8c2833ac3e243c1b8d192be299d3a4200402f0e2fb837595d01fedfb4298874cd627a56d79264688e9169bdc42767ea9e4de1b422b7cdfc5d7e7d434361bd0bd914d8488fd9913443d23de5eef011f6517932733290e5bf2d8e6876548f4469276da0101f89bfde9e37fdc94c21171d5f96b0f2f52fc722fd7ca3c31eac851968faf34fd9487a3b61efdabe12781decfa59738fe6e82350cb178d9ee72c12438b2060e0f05b409f94b577c0c0a03ce18a24a0db9409d2708c995bff19c17f442d504cbdbdfdaf93dbdbaf5d7120fdc10038c9a06c71ffc90f1cd6be03ee57af5eaf70e98680e83dba66cec428a466f0ed240c653a97ec99e19e3722ccb4817b9a2d0654101d039e54aee085",
+      "signature_hex": "3046022100c58988d743d32999842bae56896743f2012748d5b8d7713d9be2d4eecb0e5455022100ecb10fc033d9f00a561e9429f6d5d949735fc7a3ed090a4b9ae46331515f68a9"
+    },
+    {
+      "test_case_id": 5,
+      "test_case_name": "special_characters",
+      "plaintext": "Special chars: \n\t\r\"'<>{}[]|\\^~`",
+      "ciphertext_hex": "04ee41f212eb0dcba88515db40ee8d243c22bed6b2db915571b3d0753ddee81248660694f21b4c9768b139f94c38437cb447155d2f1a54636f36a2b122c464087e8564141fea6f4196ad57b60fe105ab3b42b48348d4790a47534d64322f01a41a67e60b2b14577dc460c92da509f3165a622d481f7b7df40644a42f1ae526b3",
+      "signature_hex": "3046022100dcdac6e67ba5a53e72849384eaa8e8fe3c4b581119dcac2b6fad8cb22f407986022100806b2e54e808a37b88a302c98275f3d3908f9f7944d4e078d996c6ae373362f4"
+    }
+  ]
 }

@@ -1,0 +1,5 @@
+D:\workspaces\git\corssmool\crossmool\testcase\.csharp_keygen\obj\Release\net8.0\KeyGen.csproj.AssemblyReference.cache
+D:\workspaces\git\corssmool\crossmool\testcase\.csharp_keygen\obj\Release\net8.0\KeyGen.GeneratedMSBuildEditorConfig.editorconfig
+D:\workspaces\git\corssmool\crossmool\testcase\.csharp_keygen\obj\Release\net8.0\KeyGen.AssemblyInfoInputs.cache
+D:\workspaces\git\corssmool\crossmool\testcase\.csharp_keygen\obj\Release\net8.0\KeyGen.AssemblyInfo.cs
+D:\workspaces\git\corssmool\crossmool\testcase\.csharp_keygen\obj\Release\net8.0\KeyGen.csproj.CoreCompileInputs.cache

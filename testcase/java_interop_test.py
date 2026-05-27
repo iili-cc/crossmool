@@ -14,10 +14,11 @@ import json
 import os
 import subprocess
 import sys
+import base64
 from pathlib import Path
 
 # 配置路径
-JDK_HOME = r"H:\Programs\Java\jdk-21.0.1+12"
+JDK_HOME = r"D:\Programs\Java\jdk-17.0.9+9"
 JAVA_EXECUTABLE = os.path.join(JDK_HOME, "bin", "java.exe")
 JAR_PATH = "java/crossmool/target/crossmool-1.1.0.jar"
 CLASSPATH_FILE = "java/crossmool/classpath.txt"
@@ -26,240 +27,155 @@ TEST_DATA_FILE = "testcase/test_data.json"
 OUTPUT_DIR = "testcase/results/java_encrypt"
 
 def load_json_file(file_path):
-    """加载 JSON 文件"""
     with open(file_path, 'r', encoding='utf-8') as f:
         return json.load(f)
 
 def save_json_file(file_path, data):
-    """保存 JSON 文件"""
     os.makedirs(os.path.dirname(file_path), exist_ok=True)
     with open(file_path, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
-def run_java_command(content, enc_public_key_hex, sign_private_key_hex):
-    """
-    运行 Java 命令执行加密和签名
-    
-    参数:
-        content: 要加密和签名的内容
-        enc_public_key_hex: 加密公钥 (Hex 格式)
-        sign_private_key_hex: 签名私钥 (Hex 格式)
-    
-    返回:
-        dict: 包含 ciphertext 和 signature 的字典
-    """
-    # 创建临时 Java 类来执行操作
-    java_code = f'''
-import cc.iili.tools.crossmool.tool.SM2Util;
-import cc.iili.tools.crossmool.bean.CiphertextSignaturePair;
+def get_full_classpath():
+    if not os.path.exists(CLASSPATH_FILE):
+        return JAR_PATH
+    with open(CLASSPATH_FILE, 'r', encoding='utf-8') as f:
+        dependency_classpath = f.read().strip()
+    return f"{JAR_PATH};{dependency_classpath}"
 
-public class SM2TestRunner {{
-    public static void main(String[] args) {{
-        String content = "{content}";
-        String encPublicKey = "{enc_public_key_hex}";
-        String signPrivateKey = "{sign_private_key_hex}";
-        
-        try {{
-            CiphertextSignaturePair result = SM2Util.encryptSign(content, encPublicKey, signPrivateKey, false);
-            System.out.println(result.getCiphertext() + "\\t" + result.getSignature());
-        }} catch (Exception e) {{
-            System.err.println("ERROR:" + e.getMessage());
-            e.printStackTrace();
-            System.exit(1);
-        }}
-    }}
-}}
-'''
-    # 写入临时 Java 文件
-    temp_java_file = "SM2TestRunner.java"
-    with open(temp_java_file, 'w', encoding='utf-8') as f:
-        f.write(java_code)
-    
-    try:
-        # 编译 Java 文件
-        compile_cmd = [
-            JAVA_EXECUTABLE,
-            "-cp", JAR_PATH,
-            "javac",
-            "-cp", JAR_PATH,
-            temp_java_file
-        ]
-        
-        # 使用 javac 编译
-        javac_path = os.path.join(JDK_HOME, "bin", "javac.exe")
-        compile_result = subprocess.run(
-            [javac_path, "-cp", JAR_PATH, temp_java_file],
-            capture_output=True,
-            text=True,
-            encoding='utf-8'
-        )
-        
-        if compile_result.returncode != 0:
-            print(f"编译失败：{compile_result.stderr}")
-            return None
-        
-        # 运行 Java 程序
-        run_result = subprocess.run(
-            [JAVA_EXECUTABLE, "-cp", f".:{JAR_PATH}", "SM2TestRunner"],
-            capture_output=True,
-            text=True
-        )
-        
-        if run_result.returncode != 0:
-            print(f"运行失败：{run_result.stderr}")
-            return None
-        
-        # 解析输出
-        output = run_result.stdout.strip()
-        parts = output.split('\t')
-        if len(parts) == 2:
-            return {
-                "ciphertext": parts[0],
-                "signature": parts[1]
-            }
-        else:
-            print(f"输出格式错误：{output}")
-            return None
-            
-    finally:
-        # 清理临时文件
-        for f in [temp_java_file, "SM2TestRunner.class"]:
-            if os.path.exists(f):
-                os.remove(f)
-
-def run_java_command_v2(content, enc_public_key_hex, sign_private_key_hex):
-    """
-    运行 Java 命令执行加密和签名 (v2 版本 - 使用独立的测试类)
-    
-    参数:
-        content: 要加密和签名的内容
-        enc_public_key_hex: 加密公钥 (Hex 格式)
-        sign_private_key_hex: 签名私钥 (Hex 格式)
-    
-    返回:
-        dict: 包含 ciphertext 和 signature 的字典
-    """
-    # 创建测试类目录
+def ensure_java_encrypt_class():
+    """Ensure the SM2InteropTest.java is compiled and ready."""
     test_class_dir = "testcase/java_test_classes"
     os.makedirs(test_class_dir, exist_ok=True)
     
-    # 创建 Java 测试类
     java_class_file = os.path.join(test_class_dir, "SM2InteropTest.java")
+    class_file = os.path.join(test_class_dir, "testcase", "SM2InteropTest.class")
     
-    # 转义内容中的特殊字符
-    escaped_content = content.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n').replace('\t', '\\t').replace('\r', '\\r')
+    # Check if already compiled
+    if os.path.exists(class_file):
+        return test_class_dir
     
-    java_code = f'''package testcase;
+    java_code = '''package testcase;
 
 import cc.iili.tools.crossmool.tool.SM2Util;
 import cc.iili.tools.crossmool.bean.CiphertextSignaturePair;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Base64;
 
-public class SM2InteropTest {{
-    public static void main(String[] args) {{
-        if (args.length != 3) {{
-            System.err.println("Usage: SM2InteropTest <content> <encPublicKey> <signPrivateKey>");
-            System.exit(1);
-        }}
+public class SM2InteropTest {
+    public static void main(String[] args) throws Exception {
+        String mode = args[0];
         
-        String content = args[0];
-        String encPublicKey = args[1];
-        String signPrivateKey = args[2];
-        
-        try {{
+        if (mode.equals("encrypt")) {
+            // Read content from file (base64 encoded to preserve special chars)
+            String contentB64 = args[1];
+            String encPublicKey = args[2];
+            String signPrivateKey = args[3];
+            
+            String content = new String(Base64.getDecoder().decode(contentB64), "UTF-8");
             CiphertextSignaturePair result = SM2Util.encryptSign(content, encPublicKey, signPrivateKey, false);
             System.out.println(result.getCiphertext() + "\\t" + result.getSignature());
-        }} catch (Exception e) {{
-            System.err.println("ERROR:" + e.getMessage());
-            e.printStackTrace();
-            System.exit(1);
-        }}
-    }}
-}}
+            
+        } else if (mode.equals("verify_decrypt")) {
+            // Read input from JSON file
+            String inputFile = args[1];
+            String inputJson = new String(Files.readAllBytes(Paths.get(inputFile)), "UTF-8");
+            
+            // Simple JSON parsing
+            String ciphertextHex = extractJsonField(inputJson, "ciphertext_hex");
+            String signatureHex = extractJsonField(inputJson, "signature_hex");
+            String signPublicKey = extractJsonField(inputJson, "sign_public_key_hex");
+            String decPrivateKey = extractJsonField(inputJson, "dec_private_key_hex");
+            
+            String decrypted = SM2Util.verifyDecrypt(ciphertextHex, signatureHex, signPublicKey, decPrivateKey);
+            // Output as Base64 to preserve special chars
+            String b64 = Base64.getEncoder().encodeToString(decrypted.getBytes("UTF-8"));
+            System.out.println("SUCCESS:" + b64);
+        }
+    }
+    
+    static String extractJsonField(String json, String key) {
+        String searchKey = "\\"" + key + "\\":\\u0020*\\"";
+        int idx = json.indexOf("\\"" + key + "\\"");
+        if (idx < 0) throw new RuntimeException("Field not found: " + key);
+        // Find the colon after key
+        int colon = json.indexOf(':', idx);
+        // Find the opening quote of value
+        int openQuote = json.indexOf('"', colon);
+        // Find the closing quote
+        int closeQuote = json.indexOf('"', openQuote + 1);
+        // Handle escaped quotes
+        while (closeQuote > 0 && json.charAt(closeQuote - 1) == '\\\\' && json.charAt(closeQuote - 2) != '\\\\') {
+            closeQuote = json.indexOf('"', closeQuote + 1);
+        }
+        return json.substring(openQuote + 1, closeQuote);
+    }
+}
 '''
     
     with open(java_class_file, 'w', encoding='utf-8') as f:
         f.write(java_code)
     
-    try:
-        # 读取 classpath 文件
-        if not os.path.exists(CLASSPATH_FILE):
-            print(f"错误：找不到 classpath 文件：{CLASSPATH_FILE}")
-            return None
-        
-        with open(CLASSPATH_FILE, 'r', encoding='utf-8') as f:
-            dependency_classpath = f.read().strip()
-        
-        # 完整 classpath = 测试类目录 + JAR + 依赖
-        full_classpath = f"{test_class_dir};{JAR_PATH};{dependency_classpath}"
-        
-        # 编译 Java 文件
-        javac_path = os.path.join(JDK_HOME, "bin", "javac.exe")
-        compile_result = subprocess.run(
-            [javac_path, "-d", test_class_dir, "-cp", f"{JAR_PATH};{dependency_classpath}", java_class_file],
-            capture_output=True,
-            text=True
-        )
-        
-        if compile_result.returncode != 0:
-            print(f"编译失败：{compile_result.stderr}")
-            return None
-        
-        # 运行 Java 程序 - 使用完整 classpath
-        # 在 Windows 上，需要使用 shell=True 来正确处理分号分隔的 classpath
-        run_result = subprocess.run(
-            f'"{JAVA_EXECUTABLE}" -cp "{full_classpath}" testcase.SM2InteropTest "{content}" "{enc_public_key_hex}" "{sign_private_key_hex}"',
-            capture_output=True,
-            text=True,
-            shell=True
-        )
-        
-        if run_result.returncode != 0:
-            print(f"运行失败：{run_result.stderr}")
-            return None
-        
-        # 解析输出
-        output = run_result.stdout.strip()
-        parts = output.split('\t')
-        if len(parts) == 2:
-            return {
-                "ciphertext": parts[0],
-                "signature": parts[1]
-            }
-        else:
-            print(f"输出格式错误：{output}")
-            return None
-            
-    finally:
-        # 不清理编译后的类文件，可以复用
-        pass
+    full_cp = get_full_classpath()
+    javac_path = os.path.join(JDK_HOME, "bin", "javac.exe")
+    compile_result = subprocess.run(
+        [javac_path, "-d", test_class_dir, "-cp", full_cp, java_class_file],
+        capture_output=True, text=True
+    )
+    
+    if compile_result.returncode != 0:
+        print(f"编译失败：{compile_result.stderr}")
+        sys.exit(1)
+    
+    return test_class_dir
+
+def run_java_encrypt(content, enc_public_key_hex, sign_private_key_hex):
+    """Run Java encrypt+sign, using base64 to pass content safely."""
+    test_class_dir = ensure_java_encrypt_class()
+    full_cp = f"{test_class_dir};{get_full_classpath()}"
+    
+    # Encode content as base64 to avoid command-line special char issues
+    content_b64 = base64.b64encode(content.encode('utf-8')).decode('ascii')
+    
+    run_result = subprocess.run(
+        [JAVA_EXECUTABLE, "-cp", full_cp, "testcase.SM2InteropTest",
+         "encrypt", content_b64, enc_public_key_hex, sign_private_key_hex],
+        capture_output=True, text=True
+    )
+    
+    if run_result.returncode != 0:
+        print(f"运行失败：{run_result.stderr}")
+        return None
+    
+    output = run_result.stdout.strip()
+    parts = output.split('\t')
+    if len(parts) == 2:
+        return {"ciphertext": parts[0], "signature": parts[1]}
+    else:
+        print(f"输出格式错误：{output}")
+        return None
 
 def main():
-    """主函数"""
     print("=" * 60)
     print("Java SM2 加密和签名互操作性测试")
     print("=" * 60)
     
-    # 检查 Java 可执行文件
     if not os.path.exists(JAVA_EXECUTABLE):
         print(f"错误：找不到 Java 可执行文件：{JAVA_EXECUTABLE}")
         sys.exit(1)
     
-    # 检查 JAR 文件
     if not os.path.exists(JAR_PATH):
         print(f"错误：找不到 JAR 文件：{JAR_PATH}")
         sys.exit(1)
     
-    # 检查密钥文件
     if not os.path.exists(KEYS_FILE):
         print(f"错误：找不到密钥文件：{KEYS_FILE}")
         sys.exit(1)
     
-    # 检查测试数据文件
     if not os.path.exists(TEST_DATA_FILE):
         print(f"错误：找不到测试数据文件：{TEST_DATA_FILE}")
         sys.exit(1)
     
-    # 加载密钥
     print(f"\n加载密钥文件：{KEYS_FILE}")
     keys = load_json_file(KEYS_FILE)
     enc_public_key_hex = keys["encryption_public_key"]["hex"]
@@ -267,17 +183,14 @@ def main():
     print(f"  加密公钥 (Hex): {enc_public_key_hex[:40]}...")
     print(f"  签名私钥 (Hex): {sign_private_key_hex[:40]}...")
     
-    # 加载测试数据
     print(f"\n加载测试数据：{TEST_DATA_FILE}")
     test_data = load_json_file(TEST_DATA_FILE)
     test_cases = test_data["test_cases"]
     print(f"  测试用例数量：{len(test_cases)}")
     
-    # 创建输出目录
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     print(f"\n输出目录：{OUTPUT_DIR}")
     
-    # 处理每个测试用例
     results = []
     success_count = 0
     fail_count = 0
@@ -291,8 +204,7 @@ def main():
         print(f"  明文：{plaintext[:50]}{'...' if len(plaintext) > 50 else ''}")
         
         try:
-            # 执行加密和签名
-            result = run_java_command_v2(plaintext, enc_public_key_hex, sign_private_key_hex)
+            result = run_java_encrypt(plaintext, enc_public_key_hex, sign_private_key_hex)
             
             if result is None:
                 raise Exception("Java 命令执行失败")
@@ -300,7 +212,6 @@ def main():
             ciphertext = result["ciphertext"]
             signature = result["signature"]
             
-            # 保存结果
             result_data = {
                 "test_case_id": test_id,
                 "test_case_name": test_name,
@@ -322,7 +233,6 @@ def main():
             print(f"  错误：{e}")
             fail_count += 1
     
-    # 保存汇总结果
     summary_data = {
         "summary": {
             "total": len(test_cases),
@@ -336,7 +246,6 @@ def main():
     save_json_file(summary_file, summary_data)
     print(f"\n汇总结果已保存到：{summary_file}")
     
-    # 打印总结
     print("\n" + "=" * 60)
     print("测试总结")
     print("=" * 60)

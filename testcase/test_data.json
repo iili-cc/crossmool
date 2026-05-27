@@ -8,5 +8,32 @@
   "hmac_key_hex": "0123456789abcdef0123456789abcdef",
   "hmac_sm3": "00e9bd6012151a7ba4a1701b5ce4bdf81f8d44fcaaa2cc41c0f1c088a962daf3",
   "sm4_key_hex": "9bac79cd836f9ff36d795d9d96b3304f",
-  "sm4_ciphertext": "40e7984272876a52b4f3d2f89b14684c695fb9bbdebdd8c15ca03f44fcfdc7dc89dbc8bfacdabcf7348d866c8e1a0c64"
+  "sm4_ciphertext": "40e7984272876a52b4f3d2f89b14684c695fb9bbdebdd8c15ca03f44fcfdc7dc89dbc8bfacdabcf7348d866c8e1a0c64",
+  "test_cases": [
+    {
+      "id": 1,
+      "name": "simple_text",
+      "plaintext": "Hello, Crossmool!"
+    },
+    {
+      "id": 2,
+      "name": "chinese_text",
+      "plaintext": "跨语言互操作性测试"
+    },
+    {
+      "id": 3,
+      "name": "mixed_content",
+      "plaintext": "Test 测试 123!@#"
+    },
+    {
+      "id": 4,
+      "name": "longer_text",
+      "plaintext": "This is a longer text for testing SM2 encryption and signature interoperability across multiple programming languages including Java, C, C++, C#, Go, JavaScript, Python, and Rust."
+    },
+    {
+      "id": 5,
+      "name": "special_characters",
+      "plaintext": "Special chars: \n\t\r\"'<>{}[]|\\^~`"
+    }
+  ]
 }

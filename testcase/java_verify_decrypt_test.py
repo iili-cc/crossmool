@@ -1,139 +1,184 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Java SM2 解密验签互操作性测试脚本
+"""Java SM2 解密验签互操作性测试脚本
 
-功能：
-1. 读取 testcase/keys/java/keys.json 中的解密私钥和验签公钥
-2. 读取其他语言加密生成的密文和签名 JSON 文件
-3. 调用 Java SM2Util.verifyDecrypt 方法验证并解密
-4. 输出验证和解密结果到 testcase/results/java_verify 目录
+验证其他语言加密签名的数据，Java能否正确验签解密。
 """
 
 import json
 import os
-import subprocess
 import sys
+import subprocess
+import base64
 from pathlib import Path
 
-# 配置路径
-JDK_HOME = r"H:\Programs\Java\jdk-21.0.1+12"
+JDK_HOME = r"D:\Programs\Java\jdk-17.0.9+9"
 JAVA_EXECUTABLE = os.path.join(JDK_HOME, "bin", "java.exe")
 JAR_PATH = "java/crossmool/target/crossmool-1.1.0.jar"
 CLASSPATH_FILE = "java/crossmool/classpath.txt"
-KEYS_FILE = "testcase/keys/java/keys.json"
-TEST_CLASS_DIR = "testcase/java_test_classes"
-VERIFY_TEST_CLASS_FILE = os.path.join(TEST_CLASS_DIR, "SM2VerifyDecryptTest.java")
+KEYS_DIR = "testcase/keys"
+TEMP_DIR = "testcase/.java_verify_temp"
 
 def load_json_file(file_path):
-    """加载 JSON 文件"""
     with open(file_path, 'r', encoding='utf-8') as f:
         return json.load(f)
 
 def save_json_file(file_path, data):
-    """保存 JSON 文件"""
     os.makedirs(os.path.dirname(file_path), exist_ok=True)
     with open(file_path, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2, ensure_ascii=False)
 
-def compile_java_test_class():
-    """编译 Java 测试类"""
-    javac_path = os.path.join(JDK_HOME, "bin", "javac.exe")
-    
+def get_full_classpath():
     if not os.path.exists(CLASSPATH_FILE):
-        print(f"错误：找不到 classpath 文件：{CLASSPATH_FILE}")
-        return False
-    
+        return JAR_PATH
     with open(CLASSPATH_FILE, 'r', encoding='utf-8') as f:
         dependency_classpath = f.read().strip()
+    return f"{JAR_PATH};{dependency_classpath}"
+
+def get_keys_for_language(language):
+    keys_file = os.path.join(KEYS_DIR, language, "keys.json")
+    if not os.path.exists(keys_file):
+        return None
+    keys = load_json_file(keys_file)
+    if "signature_public_key" not in keys or "encryption_private_key" not in keys:
+        return None
+    return {
+        "sign_public_key_hex": keys["signature_public_key"]["hex"],
+        "dec_private_key_hex": keys["encryption_private_key"]["hex"],
+    }
+
+def ensure_java_verify_class():
+    """Ensure the SM2VerifyDecryptTest.java is compiled and ready."""
+    test_class_dir = "testcase/java_test_classes"
+    os.makedirs(test_class_dir, exist_ok=True)
     
+    class_file = os.path.join(test_class_dir, "testcase", "SM2VerifyDecryptTest.class")
+    if os.path.exists(class_file):
+        return test_class_dir
+    
+    java_class_file = os.path.join(test_class_dir, "SM2VerifyDecryptTest.java")
+    java_code = '''package testcase;
+
+import cc.iili.tools.crossmool.tool.SM2Util;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Base64;
+
+public class SM2VerifyDecryptTest {
+    public static void main(String[] args) throws Exception {
+        String inputFile = args[0];
+        String inputJson = new String(Files.readAllBytes(Paths.get(inputFile)), "UTF-8");
+        
+        String ciphertextHex = extractField(inputJson, "ciphertext_hex");
+        String signatureHex = extractField(inputJson, "signature_hex");
+        String signPublicKey = extractField(inputJson, "sign_public_key_hex");
+        String decPrivateKey = extractField(inputJson, "dec_private_key_hex");
+        
+        String decrypted = SM2Util.verifyDecrypt(ciphertextHex, signatureHex, signPublicKey, decPrivateKey);
+        String b64 = Base64.getEncoder().encodeToString(decrypted.getBytes("UTF-8"));
+        System.out.println("SUCCESS:" + b64);
+    }
+    
+    static String extractField(String json, String key) {
+        int idx = json.indexOf("\\\"" + key + "\\\"");
+        if (idx < 0) throw new RuntimeException("Field not found: " + key);
+        int colon = json.indexOf(':', idx);
+        int openQuote = json.indexOf('"', colon);
+        int closeQuote = openQuote + 1;
+        while (closeQuote < json.length()) {
+            if (json.charAt(closeQuote) == '"' && json.charAt(closeQuote - 1) != '\\\\') break;
+            if (json.charAt(closeQuote) == '"' && json.charAt(closeQuote - 1) == '\\\\' && json.charAt(closeQuote - 2) == '\\\\') break;
+            closeQuote++;
+        }
+        return json.substring(openQuote + 1, closeQuote);
+    }
+}
+'''
+    
+    with open(java_class_file, 'w', encoding='utf-8') as f:
+        f.write(java_code)
+    
+    full_cp = get_full_classpath()
+    javac_path = os.path.join(JDK_HOME, "bin", "javac.exe")
     compile_result = subprocess.run(
-        [javac_path, "-d", TEST_CLASS_DIR, "-cp", f"{JAR_PATH};{dependency_classpath}", VERIFY_TEST_CLASS_FILE],
-        capture_output=True,
-        text=True
+        [javac_path, "-d", test_class_dir, "-cp", full_cp, java_class_file],
+        capture_output=True, text=True
     )
     
     if compile_result.returncode != 0:
         print(f"编译失败：{compile_result.stderr}")
-        return False
+        sys.exit(1)
     
-    return True
+    return test_class_dir
 
 def run_java_verify_decrypt(ciphertext_hex, signature_hex, sign_public_key_hex, dec_private_key_hex):
-    """
-    运行 Java 命令执行验签和解密
+    test_class_dir = ensure_java_verify_class()
+    full_cp = f"{test_class_dir};{get_full_classpath()}"
     
-    参数:
-        ciphertext_hex: 密文 (Hex 格式)
-        signature_hex: 签名 (Hex 格式)
-        sign_public_key_hex: 验签公钥 (Hex 格式)
-        dec_private_key_hex: 解密私钥 (Hex 格式)
+    temp_path = Path(TEMP_DIR)
+    temp_path.mkdir(exist_ok=True)
     
-    返回:
-        tuple: (success: bool, decrypted_text: str or error_message: str)
-    """
-    full_classpath = f"{TEST_CLASS_DIR};{JAR_PATH}"
+    input_file = temp_path / "input_data.json"
+    input_data = {
+        "ciphertext_hex": ciphertext_hex,
+        "signature_hex": signature_hex,
+        "sign_public_key_hex": sign_public_key_hex,
+        "dec_private_key_hex": dec_private_key_hex
+    }
+    input_file.write_text(json.dumps(input_data, ensure_ascii=False), encoding='utf-8')
     
-    if os.path.exists(CLASSPATH_FILE):
-        with open(CLASSPATH_FILE, 'r', encoding='utf-8') as f:
-            dependency_classpath = f.read().strip()
-        full_classpath = f"{full_classpath};{dependency_classpath}"
+    try:
+        run_result = subprocess.run(
+            [JAVA_EXECUTABLE, "-cp", full_cp, "testcase.SM2VerifyDecryptTest", str(input_file)],
+            capture_output=True, text=True, timeout=30
+        )
+        
+        if run_result.returncode != 0:
+            error_msg = run_result.stderr.strip()
+            if "ERROR:" in error_msg:
+                error_msg = error_msg.split("ERROR:")[1].split("\n")[0]
+            return False, error_msg
+        
+        output = run_result.stdout.strip()
+        if output.startswith("SUCCESS:"):
+            b64_text = output[8:]
+            decrypted_text = base64.b64decode(b64_text).decode('utf-8')
+            return True, decrypted_text
+        else:
+            return False, f"unknown output: {output}"
     
-    run_result = subprocess.run(
-        f'"{JAVA_EXECUTABLE}" -cp "{full_classpath}" testcase.SM2VerifyDecryptTest "{ciphertext_hex}" "{signature_hex}" "{sign_public_key_hex}" "{dec_private_key_hex}"',
-        capture_output=True,
-        text=True,
-        shell=True
-    )
-    
-    if run_result.returncode != 0:
-        error_msg = run_result.stderr.strip()
-        if "ERROR:" in error_msg:
-            error_msg = error_msg.split("ERROR:")[1].split("\n")[0]
-        return False, error_msg
-    
-    output = run_result.stdout.strip()
-    if output.startswith("SUCCESS:"):
-        decrypted_text = output[8:]  # 去掉 "SUCCESS:" 前缀
-        return True, decrypted_text
-    else:
-        return False, f"未知输出格式：{output}"
+    except subprocess.TimeoutExpired:
+        return False, "Java program timeout"
+    except Exception as e:
+        return False, f"Java program exception: {e}"
 
 def verify_language_results(language, output_dir):
-    """
-    验证指定语言的加密结果
-    
-    参数:
-        language: 语言名称 (c, cpp, csharp, golang, javascript, python, rust)
-        output_dir: 该语言的加密结果目录
-    
-    返回:
-        dict: 验证结果统计
-    """
     results = []
     success_count = 0
     fail_count = 0
     
-    # 加载 Java 密钥
-    keys = load_json_file(KEYS_FILE)
-    sign_public_key_hex = keys["encryption_public_key"]["hex"]
-    dec_private_key_hex = keys["signature_private_key"]["hex"]
+    keys = get_keys_for_language(language)
+    if keys is None:
+        print(f"\n  warn: missing required keys for language: {language}, skipping")
+        return {"total": 0, "success": 0, "failed": 0, "results": []}
     
-    # 遍历加密结果目录
+    sign_public_key_hex = keys["sign_public_key_hex"]
+    dec_private_key_hex = keys["dec_private_key_hex"]
+    
     if not os.path.exists(output_dir):
-        print(f"\n警告：加密结果目录不存在：{output_dir}")
+        print(f"\n  warn: encrypt result dir not found: {output_dir}")
         return {"total": 0, "success": 0, "failed": 0, "results": []}
     
     json_files = sorted(Path(output_dir).glob("test_*.json"))
     
     if not json_files:
-        print(f"\n警告：在 {output_dir} 中未找到测试用例文件")
+        print(f"\n  warn: no test case files in {output_dir}")
         return {"total": 0, "success": 0, "failed": 0, "results": []}
     
-    print(f"\n找到 {len(json_files)} 个加密结果文件")
+    print(f"\n  found {len(json_files)} encrypt result files")
+    print(f"  using keys from: {language}")
     
     for json_file in json_files:
-        # 跳过汇总文件
         if json_file.name.startswith("summary"):
             continue
         
@@ -145,20 +190,16 @@ def verify_language_results(language, output_dir):
             ciphertext_hex = result_data.get("ciphertext_hex", "")
             signature_hex = result_data.get("signature_hex", "")
             
-            print(f"\n  测试用例 {test_id}: {test_name}")
-            print(f"    来源语言：{language}")
-            print(f"    密文 (Hex): {ciphertext_hex[:60]}...")
+            print(f"\n  test case {test_id}: {test_name}")
+            print(f"    source language: {language}")
             
-            # 执行验签和解密
             success, decrypted_or_error = run_java_verify_decrypt(
                 ciphertext_hex, signature_hex, sign_public_key_hex, dec_private_key_hex
             )
             
             if success:
-                # 验证解密结果是否与原始明文一致
                 if decrypted_or_error == expected_plaintext:
-                    print(f"    ✓ 验签成功，解密结果匹配")
-                    print(f"    解密文本：{decrypted_or_error[:50]}{'...' if len(decrypted_or_error) > 50 else ''}")
+                    print(f"    [OK] verify success, decrypt result matches")
                     success_count += 1
                     result_entry = {
                         "test_case_id": test_id,
@@ -170,9 +211,9 @@ def verify_language_results(language, output_dir):
                         "match": True
                     }
                 else:
-                    print(f"    ✗ 验签成功，但解密结果不匹配")
-                    print(f"    期望：{expected_plaintext[:50]}{'...' if len(expected_plaintext) > 50 else ''}")
-                    print(f"    实际：{decrypted_or_error[:50]}{'...' if len(decrypted_or_error) > 50 else ''}")
+                    print(f"    [FAIL] verify success, but decrypt result mismatch")
+                    print(f"    expected: {repr(expected_plaintext[:50])}")
+                    print(f"    actual: {repr(decrypted_or_error[:50])}")
                     fail_count += 1
                     result_entry = {
                         "test_case_id": test_id,
@@ -184,7 +225,7 @@ def verify_language_results(language, output_dir):
                         "match": False
                     }
             else:
-                print(f"    ✗ 验签失败：{decrypted_or_error}")
+                print(f"    [FAIL] verify failed: {decrypted_or_error}")
                 fail_count += 1
                 result_entry = {
                     "test_case_id": test_id,
@@ -197,9 +238,9 @@ def verify_language_results(language, output_dir):
                 }
             
             results.append(result_entry)
-            
+        
         except Exception as e:
-            print(f"\n  处理文件 {json_file.name} 时出错：{e}")
+            print(f"\n  error processing file {json_file.name}: {e}")
             fail_count += 1
     
     return {
@@ -210,42 +251,13 @@ def verify_language_results(language, output_dir):
     }
 
 def main():
-    """主函数"""
     print("=" * 70)
-    print("Java SM2 解密验签互操作性测试")
+    print("Java SM2 Verify-Decrypt Interop Test")
     print("=" * 70)
     
-    # 检查 Java 可执行文件
-    if not os.path.exists(JAVA_EXECUTABLE):
-        print(f"错误：找不到 Java 可执行文件：{JAVA_EXECUTABLE}")
-        sys.exit(1)
+    OUTPUT_DIR = "testcase/results/java_verify"
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
     
-    # 检查 JAR 文件
-    if not os.path.exists(JAR_PATH):
-        print(f"错误：找不到 JAR 文件：{JAR_PATH}")
-        sys.exit(1)
-    
-    # 检查密钥文件
-    if not os.path.exists(KEYS_FILE):
-        print(f"错误：找不到密钥文件：{KEYS_FILE}")
-        sys.exit(1)
-    
-    # 加载密钥
-    print(f"\n加载密钥文件：{KEYS_FILE}")
-    keys = load_json_file(KEYS_FILE)
-    sign_public_key_hex = keys["encryption_public_key"]["hex"]
-    dec_private_key_hex = keys["signature_private_key"]["hex"]
-    print(f"  验签公钥 (Hex): {sign_public_key_hex[:40]}...")
-    print(f"  解密私钥 (Hex): {dec_private_key_hex[:40]}...")
-    
-    # 编译 Java 测试类
-    print(f"\n编译 Java 测试类：{VERIFY_TEST_CLASS_FILE}")
-    if not compile_java_test_class():
-        print("Java 测试类编译失败")
-        sys.exit(1)
-    print("  编译成功")
-    
-    # 定义要测试的语言及其加密结果目录
     languages = [
         ("c", "testcase/results/c_encrypt"),
         ("cpp", "testcase/results/cpp_encrypt"),
@@ -257,12 +269,6 @@ def main():
         ("rust", "testcase/results/rust_encrypt"),
     ]
     
-    # 创建输出目录
-    OUTPUT_DIR = "testcase/results/java_verify"
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
-    print(f"\n验证结果输出目录：{OUTPUT_DIR}")
-    
-    # 处理每种语言
     all_results = {}
     total_tests = 0
     total_success = 0
@@ -270,7 +276,7 @@ def main():
     
     for language, encrypt_dir in languages:
         print(f"\n{'=' * 70}")
-        print(f"验证 {language.upper()} 语言的加密结果")
+        print(f"Verifying {language.upper()} encrypt results with Java")
         print(f"{'=' * 70}")
         
         lang_result = verify_language_results(language, encrypt_dir)
@@ -280,14 +286,12 @@ def main():
         total_success += lang_result["success"]
         total_failed += lang_result["failed"]
         
-        # 保存该语言的验证结果
         if lang_result["total"] > 0:
             lang_output_file = os.path.join(OUTPUT_DIR, f"{language}_verify_summary.json")
             save_json_file(lang_output_file, lang_result)
-            print(f"\n  {language} 语言验证结果已保存到：{lang_output_file}")
-            print(f"  总计：{lang_result['total']}, 成功：{lang_result['success']}, 失败：{lang_result['failed']}")
+            print(f"\n  {language} verify result saved to: {lang_output_file}")
+            print(f"  total: {lang_result['total']}, success: {lang_result['success']}, failed: {lang_result['failed']}")
     
-    # 保存汇总结果
     summary_data = {
         "summary": {
             "total": total_tests,
@@ -300,17 +304,16 @@ def main():
     
     summary_file = os.path.join(OUTPUT_DIR, "summary.json")
     save_json_file(summary_file, summary_data)
-    print(f"\n汇总结果已保存到：{summary_file}")
+    print(f"\nsummary saved to: {summary_file}")
     
-    # 打印总结
     print("\n" + "=" * 70)
-    print("测试总结")
+    print("Test Summary")
     print("=" * 70)
-    print(f"总测试用例：{total_tests}")
-    print(f"成功：{total_success}")
-    print(f"失败：{total_failed}")
+    print(f"Total test cases: {total_tests}")
+    print(f"Success: {total_success}")
+    print(f"Failed: {total_failed}")
     if total_tests > 0:
-        print(f"成功率：{total_success / total_tests * 100:.1f}%")
+        print(f"Success rate: {total_success / total_tests * 100:.1f}%")
     print("=" * 70)
     
     return 0 if total_failed == 0 else 1
