@@ -1,23 +1,84 @@
-from gmssl import sm4
+from os import urandom
 from encoding import bytes_to_hex, hex_to_bytes, bytes_to_base64, base64_to_bytes
+from gmssl import sm4
 
-def pkcs7_pad(data: bytes, block_size: int = 16) -> bytes:
-    pad_len = block_size - (len(data) % block_size)
-    return data + bytes([pad_len]) * pad_len
+GCM_IV_SIZE = 12   # 96 bits
+GCM_TAG_SIZE = 16  # 128 bits
+BLOCK_SIZE = 16
 
-def pkcs7_unpad(data: bytes) -> bytes:
-    if not data:
-        return data
-    pad_len = data[-1]
-    if pad_len < 1 or pad_len > 16:
-        raise ValueError('Invalid padding')
-    return data[:-pad_len]
+
+def _xor_bytes(a: bytes, b: bytes) -> bytes:
+    return bytes(x ^ y for x, y in zip(a, b))
+
+
+def _inc32(counter: bytes) -> bytes:
+    """GCM counter increment (increment the rightmost 32 bits)"""
+    counter_int = int.from_bytes(counter, 'big')
+    low_32 = (counter_int & 0xFFFFFFFF) + 1
+    result = (counter_int & ~0xFFFFFFFF) | (low_32 & 0xFFFFFFFF)
+    return result.to_bytes(16, 'big')
+
+
+def _gf128_mul(x: int, y: int) -> int:
+    """Multiply two elements in GF(2^128) with reduction polynomial x^128+x^7+x^2+x+1"""
+    R = 0xE1000000000000000000000000000000
+    MASK = (1 << 128) - 1
+    z = 0
+    v = y
+    for i in range(128):
+        if x & (1 << (127 - i)):
+            z ^= v
+        if v & 1:
+            v = (v >> 1) ^ R
+        else:
+            v >>= 1
+    return z & MASK
+
+
+def _ghash(h: bytes, aad: bytes, ciphertext: bytes) -> bytes:
+    """GHASH computation for GCM"""
+    h_int = int.from_bytes(h, 'big')
+
+    aad_padded = aad + b'\x00' * ((16 - len(aad) % 16) % 16)
+    ct_padded = ciphertext + b'\x00' * ((16 - len(ciphertext) % 16) % 16)
+    len_block = (len(aad) * 8).to_bytes(8, 'big') + (len(ciphertext) * 8).to_bytes(8, 'big')
+
+    y = 0
+    for i in range(0, len(aad_padded), 16):
+        y ^= int.from_bytes(aad_padded[i:i + 16], 'big')
+        y = _gf128_mul(y, h_int)
+    for i in range(0, len(ct_padded), 16):
+        y ^= int.from_bytes(ct_padded[i:i + 16], 'big')
+        y = _gf128_mul(y, h_int)
+    y ^= int.from_bytes(len_block, 'big')
+    y = _gf128_mul(y, h_int)
+
+    return y.to_bytes(16, 'big')
+
+
+def _sm4_ecb_encrypt_block(key: bytes, block: bytes) -> bytes:
+    """Encrypt a single 16-byte block using SM4 ECB (no padding)"""
+    crypt = sm4.CryptSM4()
+    crypt.set_key(key, sm4.SM4_ENCRYPT)
+    # gmssl crypt_ecb uses PKCS7 padding, which adds an extra block
+    # for 16-byte input, resulting in 32 bytes. We only need the first 16.
+    return crypt.crypt_ecb(block)[:16]
+
+
+def _sm4_ctr_encrypt(key: bytes, counter: bytes, plaintext: bytes) -> bytes:
+    """SM4 CTR mode encryption"""
+    result = bytearray()
+    for i in range(0, len(plaintext), BLOCK_SIZE):
+        keystream = _sm4_ecb_encrypt_block(key, counter)
+        block = plaintext[i:i + BLOCK_SIZE]
+        result.extend(_xor_bytes(keystream[:len(block)], block))
+        counter = _inc32(counter)
+    return bytes(result)
+
 
 class SM4Util:
     @staticmethod
     def generate_key() -> bytes:
-        from os import urandom
-
         return urandom(16)
 
     @staticmethod
@@ -25,31 +86,76 @@ class SM4Util:
         return bytes_to_hex(SM4Util.generate_key())
 
     @staticmethod
-    def encrypt_ecb_hex(key: bytes, plain_bytes: bytes) -> str:
+    def parse_hex_key(hex_key: str) -> bytes:
+        return hex_to_bytes(hex_key)
+
+    @staticmethod
+    def encrypt_gcm(key: bytes, plaintext: bytes, aad: bytes = b'') -> str:
+        """
+        SM4 GCM 加密，返回 Base64(IV[12] + 密文 + Tag[16])
+        """
         if len(key) != 16:
             raise ValueError('SM4 key must be 16 bytes')
-        crypt = sm4.CryptSM4()
-        crypt.set_key(key, sm4.SM4_ENCRYPT)
-        data = pkcs7_pad(plain_bytes)
-        enc = crypt.crypt_ecb(data)
-        return bytes_to_hex(enc)
+
+        iv = urandom(GCM_IV_SIZE)
+        j0 = iv + b'\x00\x00\x00\x01'
+        h = _sm4_ecb_encrypt_block(key, b'\x00' * 16)
+        ciphertext = _sm4_ctr_encrypt(key, _inc32(j0), plaintext)
+        ghash_result = _ghash(h, aad, ciphertext)
+        j0_encrypted = _sm4_ecb_encrypt_block(key, j0)
+        tag = _xor_bytes(ghash_result, j0_encrypted)
+
+        return bytes_to_base64(iv + ciphertext + tag)
 
     @staticmethod
-    def decrypt_ecb_hex(key: bytes, hex_cipher: str) -> bytes:
+    def decrypt_gcm(key: bytes, ciphertext_base64: str, aad: bytes = b'') -> bytes:
+        """
+        SM4 GCM 解密，输入 Base64(IV[12] + 密文 + Tag[16])
+        """
         if len(key) != 16:
             raise ValueError('SM4 key must be 16 bytes')
-        crypt = sm4.CryptSM4()
-        crypt.set_key(key, sm4.SM4_DECRYPT)
-        cipher_bytes = hex_to_bytes(hex_cipher)
-        dec = crypt.crypt_ecb(cipher_bytes)
-        return pkcs7_unpad(dec)
+
+        combined = base64_to_bytes(ciphertext_base64)
+        if len(combined) < GCM_IV_SIZE + GCM_TAG_SIZE:
+            raise ValueError('Invalid GCM ciphertext: too short')
+
+        iv = combined[:GCM_IV_SIZE]
+        tag = combined[-GCM_TAG_SIZE:]
+        ciphertext = combined[GCM_IV_SIZE:-GCM_TAG_SIZE]
+
+        j0 = iv + b'\x00\x00\x00\x01'
+        h = _sm4_ecb_encrypt_block(key, b'\x00' * 16)
+        ghash_result = _ghash(h, aad, ciphertext)
+        j0_encrypted = _sm4_ecb_encrypt_block(key, j0)
+        computed_tag = _xor_bytes(ghash_result, j0_encrypted)
+
+        if computed_tag != tag:
+            raise ValueError('SM4 GCM decryption failed (authentication failed)')
+
+        return _sm4_ctr_encrypt(key, _inc32(j0), ciphertext)
 
     @staticmethod
-    def encrypt_ecb_base64(key: bytes, plain_bytes: bytes) -> str:
-        hex_out = SM4Util.encrypt_ecb_hex(key, plain_bytes)
-        return bytes_to_base64(hex_to_bytes(hex_out))
+    def encrypt_gcm_string(key: bytes, plain_text: str) -> str:
+        return SM4Util.encrypt_gcm(key, plain_text.encode('utf-8'))
 
     @staticmethod
-    def decrypt_ecb_base64(key: bytes, b64_cipher: str) -> bytes:
-        cipher = base64_to_bytes(b64_cipher)
-        return SM4Util.decrypt_ecb_hex(key, bytes_to_hex(cipher))
+    def decrypt_gcm_to_string(key: bytes, ciphertext_base64: str) -> str:
+        return SM4Util.decrypt_gcm(key, ciphertext_base64).decode('utf-8')
+
+
+if __name__ == '__main__':
+    key = SM4Util.generate_key()
+    hex_key = SM4Util.generate_key_hex()
+    print(f'Key (HEX): {hex_key}')
+
+    plain_text = 'Hello, 這是国密SM4測試數據'
+    print(f'Plaintext: {plain_text}')
+
+    encrypted = SM4Util.encrypt_gcm_string(key, plain_text)
+    print(f'Encrypted (Base64): {encrypted}')
+
+    decrypted = SM4Util.decrypt_gcm_to_string(key, encrypted)
+    print(f'Decrypted: {decrypted}')
+
+    assert decrypted == plain_text, 'Decryption failed!'
+    print('GCM test passed!')

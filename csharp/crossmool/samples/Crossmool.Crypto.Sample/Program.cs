@@ -67,17 +67,19 @@ class Program
 		var sm3B64 = SM3Util.digestBase64(message);
 		Console.WriteLine($"SM3 Digest (Base64): {sm3B64}");
 
-		// SM4 with 16-byte key
+		// SM4-GCM with 16-byte key
 		var sm4Key = "00112233445566778899aabbccddeeff"; // hex 16 bytes
-		var sm4CipherB64 = SM4Util.encrypt(message, sm4Key);
-		Console.WriteLine($"SM4 Cipher (Base64): {sm4CipherB64}");
-		var sm4Plain = SM4Util.decrypt(sm4CipherB64, sm4Key);
-		Console.WriteLine($"SM4 Decrypt: {sm4Plain}");
+		var sm4KeyBytes = EncodingUtils.FromHex(sm4Key);
+		var sm4CipherB64 = SM4Util.EncryptGcmString(sm4KeyBytes, message);
+		Console.WriteLine($"SM4-GCM Cipher (Base64): {sm4CipherB64}");
+		var sm4Plain = SM4Util.DecryptGcmToString(sm4KeyBytes, sm4CipherB64);
+		Console.WriteLine($"SM4-GCM Decrypt: {sm4Plain}");
 
-		var sm4CipherHex = SM4Util.encryptToHex(message, sm4Key);
-		Console.WriteLine($"SM4 Cipher (Hex): {sm4CipherHex}");
-		var sm4PlainHex = SM4Util.decryptFromHex(sm4CipherHex, sm4Key);
-		Console.WriteLine($"SM4 Decrypt (Hex input): {sm4PlainHex}");
+		var sm4PlainBytes = EncodingUtils.Utf8GetBytes(message);
+		var sm4CipherB64_2 = SM4Util.EncryptGcm(sm4KeyBytes, sm4PlainBytes);
+		Console.WriteLine($"SM4-GCM Cipher bytes->Base64: {sm4CipherB64_2}");
+		var sm4Decrypted = SM4Util.DecryptGcm(sm4KeyBytes, sm4CipherB64_2);
+		Console.WriteLine($"SM4-GCM Decrypt (bytes): {EncodingUtils.Utf8GetString(sm4Decrypted)}");
 	}
 
 	static string ExtractJson(string json, string key)

@@ -6,40 +6,31 @@
 
 class SM4Util {
 public:
-    /**
-     * Generate random 128-bit (16 bytes) SM4 key
-     */
     static std::vector<unsigned char> generateKey();
 
-    /**
-     * Generate random SM4 key and return as hex string
-     */
     static std::string generateKeyAsHex();
 
-    /**
-     * Parse hex string to SM4 key byte array
-     */
     static std::vector<unsigned char> parseHexKey(const std::string& hexKey);
 
     /**
-     * Encrypt using ECB mode with native implementation, return as hex string
+     * SM4 GCM 加密，返回 Base64(IV[12] + 密文 + Tag[16])
      */
-    static std::string encryptEcbNative(const std::vector<unsigned char>& key, const std::vector<unsigned char>& input);
+    static std::string encryptGcm(const std::vector<unsigned char>& key, const std::vector<unsigned char>& input);
 
     /**
-     * Decrypt using ECB mode with native implementation
+     * SM4 GCM 解密，输入 Base64(IV[12] + 密文 + Tag[16])
      */
-    static std::string decryptEcbNative(const std::vector<unsigned char>& key, const std::string& hexCipherText);
+    static std::vector<unsigned char> decryptGcm(const std::vector<unsigned char>& key, const std::string& ciphertextBase64);
 
     /**
-     * Encrypt using ECB mode with JCA-equivalent implementation, return as hex string
+     * SM4 GCM 加密（字符串输入），返回 Base64(IV[12] + 密文 + Tag[16])
      */
-    static std::string encryptEcbJca(const std::vector<unsigned char>& key, const std::string& plainText);
+    static std::string encryptGcmString(const std::vector<unsigned char>& key, const std::string& plainText);
 
     /**
-     * Decrypt using ECB mode with JCA-equivalent implementation
+     * SM4 GCM 解密返回字符串
      */
-    static std::string decryptEcbJca(const std::vector<unsigned char>& key, const std::string& hexCipherText);
+    static std::string decryptGcmToString(const std::vector<unsigned char>& key, const std::string& ciphertextBase64);
 };
 
 #endif // SM4UTIL_H

@@ -261,9 +261,9 @@ void runSm3HmacCommand(const std::string& inputFile, const std::string& outputFi
 }
 
 // ======================================================================
-// SM4 ECB 加密 命令
+// SM4 GCM 加密 命令
 // 输入文件：{"sm4_key_hex": "...", "plaintext": "..."}
-// 输出文件：{"ciphertext_hex": "..."}
+// 输出文件：{"ciphertext_base64": "..."}
 // ======================================================================
 
 void runSm4EncryptCommand(const std::string& inputFile, const std::string& outputFile) {
@@ -279,39 +279,39 @@ void runSm4EncryptCommand(const std::string& inputFile, const std::string& outpu
     
     try {
         auto key = SM4Util::parseHexKey(keyHex);
-        std::string ciphertextHex = SM4Util::encryptEcbJca(key, plaintext);
+        std::string ciphertextBase64 = SM4Util::encryptGcmString(key, plaintext);
         
         std::string outputJson = "{\n";
-        outputJson += "  \"ciphertext_hex\": \"" + ciphertextHex + "\"\n";
+        outputJson += "  \"ciphertext_base64\": \"" + ciphertextBase64 + "\"\n";
         outputJson += "}\n";
         
         writeJsonFile(outputFile, outputJson);
-        std::cout << "SM4 ECB encrypt completed: " << ciphertextHex << "\n";
+        std::cout << "SM4 GCM encrypt completed: " << ciphertextBase64 << "\n";
     } catch (const std::exception& e) {
-        std::cerr << "Error during SM4 ECB encrypt: " << e.what() << std::endl;
+        std::cerr << "Error during SM4 GCM encrypt: " << e.what() << std::endl;
     }
 }
 
 // ======================================================================
-// SM4 ECB 解密 命令
-// 输入文件：{"sm4_key_hex": "...", "ciphertext_hex": "..."}
+// SM4 GCM 解密 命令
+// 输入文件：{"sm4_key_hex": "...", "ciphertext_base64": "..."}
 // 输出文件：{"plaintext": "..."}
 // ======================================================================
 
 void runSm4DecryptCommand(const std::string& inputFile, const std::string& outputFile) {
     std::string inputJson = readJsonFile(inputFile);
     
-    std::string keyHex       = extractJsonValue(inputJson, "sm4_key_hex");
-    std::string ciphertextHex = extractJsonValue(inputJson, "ciphertext_hex");
+    std::string keyHex          = extractJsonValue(inputJson, "sm4_key_hex");
+    std::string ciphertextBase64 = extractJsonValue(inputJson, "ciphertext_base64");
     
-    if (keyHex.empty() || ciphertextHex.empty()) {
-        std::cerr << "Error: sm4_key_hex or ciphertext_hex not found in input JSON" << std::endl;
+    if (keyHex.empty() || ciphertextBase64.empty()) {
+        std::cerr << "Error: sm4_key_hex or ciphertext_base64 not found in input JSON" << std::endl;
         return;
     }
     
     try {
         auto key = SM4Util::parseHexKey(keyHex);
-        std::string plaintext = SM4Util::decryptEcbJca(key, ciphertextHex);
+        std::string plaintext = SM4Util::decryptGcmToString(key, ciphertextBase64);
         
         // Escape special characters for JSON
         std::string escaped;
@@ -329,9 +329,9 @@ void runSm4DecryptCommand(const std::string& inputFile, const std::string& outpu
         outputJson += "}\n";
         
         writeJsonFile(outputFile, outputJson);
-        std::cout << "SM4 ECB decrypt completed: " << plaintext << "\n";
+        std::cout << "SM4 GCM decrypt completed: " << plaintext << "\n";
     } catch (const std::exception& e) {
-        std::cerr << "Error during SM4 ECB decrypt: " << e.what() << std::endl;
+        std::cerr << "Error during SM4 GCM decrypt: " << e.what() << std::endl;
     }
 }
 
@@ -547,9 +547,9 @@ void printUsage(const char* programName) {
     std::cout << "SM4 Commands:\n";
     std::cout << "  sm4_encrypt <input_json> <output_json>\n";
     std::cout << "    input:     {sm4_key_hex, plaintext}\n";
-    std::cout << "    output:    {ciphertext_hex}\n\n";
+    std::cout << "    output:    {ciphertext_base64}\n\n";
     std::cout << "  sm4_decrypt <input_json> <output_json>\n";
-    std::cout << "    input:     {sm4_key_hex, ciphertext_hex}\n";
+    std::cout << "    input:     {sm4_key_hex, ciphertext_base64}\n";
     std::cout << "    output:    {plaintext}\n\n";
     std::cout << "  test\n";
     std::cout << "    Run built-in self-tests\n";
@@ -664,8 +664,8 @@ void testSm4Interoperability() {
 
     for (const auto& input : testInputs) {
         auto inputBytes = StringUtil::stringToBytes(input, "UTF-8");
-        std::string encrypted = SM4Util::encryptEcbNative(key, inputBytes);
-        std::string decrypted = SM4Util::decryptEcbNative(key, encrypted);
+        std::string encrypted = SM4Util::encryptGcm(key, inputBytes);
+        std::string decrypted = SM4Util::decryptGcm(key, encrypted);
         assert(input == decrypted);
     }
 
@@ -674,8 +674,8 @@ void testSm4Interoperability() {
     auto javaKey = SM4Util::parseHexKey(javaKeyHex);
     std::string plaintext = "Hello, \xe9\x80\x99\xe6\x98\xaf\xe5\x9b\xbd\xe5\xaf\x86SM4\xe6\xb8\xac\xe8\xa9\xa6\xe6\x95\xb8\xe6\x93\x9a";  // Hello, 這是国密SM4測試數據
     auto ptBytes = StringUtil::stringToBytes(plaintext, "UTF-8");
-    std::string cipher = SM4Util::encryptEcbNative(javaKey, ptBytes);
-    std::string recovered = SM4Util::decryptEcbNative(javaKey, cipher);
+    std::string cipher = SM4Util::encryptGcm(javaKey, ptBytes);
+    std::string recovered = SM4Util::decryptGcm(javaKey, cipher);
     assert(plaintext == recovered);
 
     std::cout << "All SM4 interoperability tests passed!\n\n";

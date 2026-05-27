@@ -1,20 +1,23 @@
 #include "SM4Util.h"
 #include "StringUtil.h"
 #include "HexUtil.h"
+#include "Base64Util.h"
 #include <vector>
 #include <string>
 #include <random>
 
-// Conditional compilation based on GmSSL availability
 #ifdef USE_GMSSL
 #include <gmssl/sm4.h>
+#include <gmssl/aead.h>
 #else
-// Placeholder for stub implementation
 #include <cstring>
 #endif
 
+static const size_t GCM_IV_SIZE = 12;
+static const size_t GCM_TAG_SIZE = 16;
+
 std::vector<unsigned char> SM4Util::generateKey() {
-    std::vector<unsigned char> key(16); // SM4 key size is 128 bits (16 bytes)
+    std::vector<unsigned char> key(16);
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> dis(0, 255);
@@ -35,100 +38,116 @@ std::vector<unsigned char> SM4Util::parseHexKey(const std::string& hexKey) {
     return HexUtil::decodeHexStr(hexKey);
 }
 
-std::string SM4Util::encryptEcbNative(const std::vector<unsigned char>& key, const std::vector<unsigned char>& input) {
+std::string SM4Util::encryptGcm(const std::vector<unsigned char>& key, const std::vector<unsigned char>& input) {
 #ifdef USE_GMSSL
     if (key.size() != 16) {
         throw std::invalid_argument("SM4 key must be 16 bytes (128 bits)");
     }
+
+    /* 生成随机 IV */
+    std::vector<unsigned char> iv(GCM_IV_SIZE);
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(0, 255);
+    for (auto& b : iv) {
+        b = static_cast<unsigned char>(dis(gen));
+    }
+
+    /* GCM 加密 */
+    std::vector<unsigned char> ciphertext(input.size());
+    unsigned char tag[GCM_TAG_SIZE];
 
     SM4_KEY sm4_key;
     sm4_set_encrypt_key(&sm4_key, key.data());
 
-    // PKCS7 padding: always add padding, even for block-aligned inputs
-    std::vector<unsigned char> paddedInput = input;
-    size_t blockSize = 16;
-    size_t paddingLen = blockSize - (paddedInput.size() % blockSize);
-    for (size_t i = 0; i < paddingLen; ++i) {
-        paddedInput.push_back(static_cast<unsigned char>(paddingLen));
+    int ret = sm4_gcm_encrypt(
+        &sm4_key,
+        iv.data(), iv.size(),
+        NULL, 0,
+        input.data(), input.size(),
+        ciphertext.data(),
+        GCM_TAG_SIZE,
+        tag
+    );
+
+    if (ret != 1) {
+        throw std::runtime_error("SM4 GCM encryption failed");
     }
 
-    std::vector<unsigned char> output(paddedInput.size());
-    size_t numBlocks = paddedInput.size() / blockSize;
+    /* 组合: IV(12) + 密文 + Tag(16) */
+    std::vector<unsigned char> combined;
+    combined.reserve(iv.size() + ciphertext.size() + GCM_TAG_SIZE);
+    combined.insert(combined.end(), iv.begin(), iv.end());
+    combined.insert(combined.end(), ciphertext.begin(), ciphertext.end());
+    combined.insert(combined.end(), tag, tag + GCM_TAG_SIZE);
 
-    for (size_t i = 0; i < numBlocks; ++i) {
-        sm4_encrypt(&sm4_key, paddedInput.data() + i * blockSize, output.data() + i * blockSize);
-    }
-
-    return HexUtil::encodeHexStr(output);
+    return Base64Util::encodeBase64Str(combined);
 #else
-    // Stub implementation for testing
+    /* Stub implementation */
     std::vector<unsigned char> output = input;
-
-    // Simple XOR-based encryption for demonstration
     for (size_t i = 0; i < output.size(); ++i) {
         output[i] ^= key[i % key.size()];
     }
-
-    return HexUtil::encodeHexStr(output);
+    return Base64Util::encodeBase64Str(output);
 #endif
 }
 
-std::string SM4Util::decryptEcbNative(const std::vector<unsigned char>& key, const std::string& hexCipherText) {
+std::vector<unsigned char> SM4Util::decryptGcm(const std::vector<unsigned char>& key, const std::string& ciphertextBase64) {
 #ifdef USE_GMSSL
     if (key.size() != 16) {
         throw std::invalid_argument("SM4 key must be 16 bytes (128 bits)");
     }
 
-    auto cipherBytes = HexUtil::decodeHexStr(hexCipherText);
+    auto combined = Base64Util::decodeBase64Str(ciphertextBase64);
+
+    if (combined.size() < GCM_IV_SIZE + GCM_TAG_SIZE) {
+        throw std::runtime_error("Invalid GCM ciphertext: too short");
+    }
+
+    /* 拆分 IV、密文、Tag */
+    std::vector<unsigned char> iv(combined.begin(), combined.begin() + GCM_IV_SIZE);
+    size_t ciphertextLen = combined.size() - GCM_IV_SIZE - GCM_TAG_SIZE;
+    std::vector<unsigned char> ciphertext(combined.begin() + GCM_IV_SIZE, combined.begin() + GCM_IV_SIZE + ciphertextLen);
+    std::vector<unsigned char> tag(combined.begin() + GCM_IV_SIZE + ciphertextLen, combined.end());
+
+    /* GCM 解密 */
+    std::vector<unsigned char> plaintext(ciphertextLen > 0 ? ciphertextLen : 1);
 
     SM4_KEY sm4_key;
-    sm4_set_decrypt_key(&sm4_key, key.data());
+    sm4_set_encrypt_key(&sm4_key, key.data());
 
-    std::vector<unsigned char> output(cipherBytes.size());
-    size_t blockSize = 16;
-    size_t numBlocks = cipherBytes.size() / blockSize;
+    int ret = sm4_gcm_decrypt(
+        &sm4_key,
+        iv.data(), iv.size(),
+        NULL, 0,
+        ciphertext.data(), ciphertext.size(),
+        tag.data(), tag.size(),
+        plaintext.data()
+    );
 
-    for (size_t i = 0; i < numBlocks; ++i) {
-        sm4_decrypt(&sm4_key, cipherBytes.data() + i * blockSize, output.data() + i * blockSize);
+    if (ret != 1) {
+        throw std::runtime_error("SM4 GCM decryption failed (authentication failed)");
     }
 
-    // Remove PKCS7 padding if present
-    if (!output.empty()) {
-        unsigned char paddingByte = output.back();
-        if (paddingByte <= 16) { // Maximum padding for a 16-byte block
-            bool paddingValid = true;
-            for (size_t i = 0; i < paddingByte; ++i) {
-                if (output[output.size() - 1 - i] != paddingByte) {
-                    paddingValid = false;
-                    break;
-                }
-            }
-            if (paddingValid) {
-                output.resize(output.size() - paddingByte);
-            }
-        }
-    }
-
-    return StringUtil::bytesToString(output, "UTF-8");
+    plaintext.resize(ciphertextLen);
+    return plaintext;
 #else
-    // Stub implementation for testing
-    auto cipherBytes = HexUtil::decodeHexStr(hexCipherText);
-    std::vector<unsigned char> output = cipherBytes;
-
-    // Reverse the simple XOR-based encryption
+    /* Stub implementation */
+    auto combined = Base64Util::decodeBase64Str(ciphertextBase64);
+    std::vector<unsigned char> output = combined;
     for (size_t i = 0; i < output.size(); ++i) {
         output[i] ^= key[i % key.size()];
     }
-
-    return StringUtil::bytesToString(output, "UTF-8");
+    return output;
 #endif
 }
 
-std::string SM4Util::encryptEcbJca(const std::vector<unsigned char>& key, const std::string& plainText) {
+std::string SM4Util::encryptGcmString(const std::vector<unsigned char>& key, const std::string& plainText) {
     auto input = StringUtil::stringToBytes(plainText, "UTF-8");
-    return encryptEcbNative(key, input);
+    return encryptGcm(key, input);
 }
 
-std::string SM4Util::decryptEcbJca(const std::vector<unsigned char>& key, const std::string& hexCipherText) {
-    return decryptEcbNative(key, hexCipherText);
+std::string SM4Util::decryptGcmToString(const std::vector<unsigned char>& key, const std::string& ciphertextBase64) {
+    auto plaintext = decryptGcm(key, ciphertextBase64);
+    return StringUtil::bytesToString(plaintext, "UTF-8");
 }

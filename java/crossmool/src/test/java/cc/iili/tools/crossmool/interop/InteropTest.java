@@ -115,16 +115,16 @@ public class InteropTest {
             System.err.println("✗ SM3 哈希计算失败");
         }
 
-        // SM4 测试
-        System.out.println("测试SM4...");
+        // SM4 GCM 测试
+        System.out.println("测试SM4 GCM...");
         String sm4Key = SM4Util.generateKeyAsHex();
-        String sm4Encrypted = SM4Util.encryptEcbNative(SM4Util.parseHexKey(sm4Key), message.getBytes(StandardCharsets.UTF_8));
-        String sm4Decrypted = SM4Util.decryptEcbNative(SM4Util.parseHexKey(sm4Key), sm4Encrypted);
+        String sm4Encrypted = SM4Util.encryptGcmNative(SM4Util.parseHexKey(sm4Key), message.getBytes(StandardCharsets.UTF_8));
+        String sm4Decrypted = SM4Util.decryptGcmNativeToString(SM4Util.parseHexKey(sm4Key), sm4Encrypted);
 
         if (message.equals(sm4Decrypted)) {
-            System.out.println("✓ SM4 加解密成功");
+            System.out.println("✓ SM4 GCM 加解密成功");
         } else {
-            System.err.println("✗ SM4 加解密失败");
+            System.err.println("✗ SM4 GCM 加解密失败");
         }
 
         System.out.println("Java基础功能测试完成！");
