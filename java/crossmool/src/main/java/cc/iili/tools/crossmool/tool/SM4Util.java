@@ -5,25 +5,25 @@ import java.security.Security;
 import java.util.Base64;
 
 import javax.crypto.Cipher;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.bouncycastle.crypto.engines.SM4Engine;
-import org.bouncycastle.crypto.paddings.PKCS7Padding;
-import org.bouncycastle.crypto.paddings.PaddedBufferedBlockCipher;
+import org.bouncycastle.crypto.modes.GCMBlockCipher;
+import org.bouncycastle.crypto.modes.GCMModeCipher;
+import org.bouncycastle.crypto.params.AEADParameters;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.encoders.Hex;
 
 import cc.iili.tools.crossmool.util.HexUtil;
 
 /**
- * SM4 国密对称加密工具类（支持 ECB/CBC 模式） - 提供 Bouncy Castle 原生 API 和 JCA 标准 API 两种实现 -
+ * SM4 国密对称加密工具类（GCM 模式） - 提供 Bouncy Castle 原生 API 和 JCA 标准 API 两种实现 -
  * 仅依赖 bcprov-jdkXXon，无其他第三方库
  */
 public class SM4Util {
 
 	static {
-		// register Bouncy Castle Provider（avoid duplicate）
 		if (Security.getProvider(BouncyCastleProvider.PROVIDER_NAME) == null) {
 			Security.addProvider(new BouncyCastleProvider());
 		}
@@ -32,6 +32,10 @@ public class SM4Util {
 	private static final String ALGORITHM_NAME = "SM4";
 	private static final int KEY_SIZE_BITS = 128;
 	private static final int KEY_SIZE_BYTES = KEY_SIZE_BITS / 8; // 16 bytes
+
+	// GCM 推荐参数
+	private static final int GCM_IV_LENGTH_BYTES = 12;  // 96 bits，推荐
+	private static final int GCM_TAG_LENGTH_BITS = 128; // 认证标签长度，128 bits
 
 	// ========================
 	// 1. generate key
@@ -60,88 +64,196 @@ public class SM4Util {
 		return HexUtil.decodeHexStr(hexKey);
 	}
 
+	/**
+	 * 生成随机的 GCM IV（初始化向量）
+	 */
+	public static byte[] generateGcmIv() {
+		byte[] iv = new byte[GCM_IV_LENGTH_BYTES];
+		new java.security.SecureRandom().nextBytes(iv);
+		return iv;
+	}
+
 	// ========================
-	// 2. Native Bouncy Castle API Implementation (recommended for high-performance or embedded scenarios)
+	// 2. Native Bouncy Castle API - GCM 模式
 	// ========================
 
 	/**
-	 * Encrypts using the native Bouncy Castle API (ECB mode with PKCS7Padding).
+	 * GCM 加密（原生 API）- 返回格式：Base64(IV + 密文(含认证标签))
 	 *
-	 * @param key       the 16-byte secret key
-	 * @param plainText plaintext in UTF-8 encoding
-	 * @return ciphertext as a hexadecimal string
+	 * @param key   the 16-byte secret key
+	 * @param input plaintext byte array
+	 * @return Base64 编码的 IV+密文
 	 */
-	public static String encryptEcbNative(byte[] key, byte [] input) {
+	public static String encryptGcmNative(byte[] key, byte[] input) {
+		return encryptGcmNative(key, input, null);
+	}
+
+	/**
+	 * GCM 加密（原生 API）
+	 *
+	 * @param key   16字节密钥
+	 * @param input 明文
+	 * @param iv    可选，若为null则自动生成随机IV
+	 * @return Base64 编码的 IV+密文
+	 */
+	public static String encryptGcmNative(byte[] key, byte[] input, byte[] iv) {
 		validateKey(key);
 		try {
-			PaddedBufferedBlockCipher cipher = new PaddedBufferedBlockCipher(new SM4Engine(), new PKCS7Padding());
-			cipher.init(true, new KeyParameter(key));
+			if (iv == null) {
+				iv = generateGcmIv();
+			}
+			if (iv.length != GCM_IV_LENGTH_BYTES) {
+				throw new IllegalArgumentException("GCM IV must be " + GCM_IV_LENGTH_BYTES + " bytes");
+			}
+
+			GCMModeCipher cipher = GCMBlockCipher.newInstance(new SM4Engine());
+			AEADParameters parameters = new AEADParameters(
+				new KeyParameter(key),
+				GCM_TAG_LENGTH_BITS,
+				iv
+			);
+			cipher.init(true, parameters);
+
 			byte[] output = new byte[cipher.getOutputSize(input.length)];
 			int len = cipher.processBytes(input, 0, input.length, output, 0);
-			cipher.doFinal(output, len);
-
-			return Hex.toHexString(output);
-		} catch (Exception e) {
-			throw new RuntimeException("SM4 native encryption failed", e);
-		}
-	}
-
-	/**
-	 * Decrypt using the native Bouncy Castle API (ECB mode with PKCS7Padding).
-	 */
-	public static String decryptEcbNative(byte[] key, String hexCipherText) {
-		validateKey(key);
-		try {
-			byte[] cipherBytes = Hex.decode(hexCipherText);
-			PaddedBufferedBlockCipher cipher = new PaddedBufferedBlockCipher(new SM4Engine(), new PKCS7Padding());
-			cipher.init(false, new KeyParameter(key));
-
-			byte[] output = new byte[cipher.getOutputSize(cipherBytes.length)];
-			int len = cipher.processBytes(cipherBytes, 0, cipherBytes.length, output, 0);
 			len += cipher.doFinal(output, len);
 
-			return new String(output, 0, len, StandardCharsets.UTF_8);
+			byte[] cipherText = new byte[len];
+			System.arraycopy(output, 0, cipherText, 0, len);
+
+			byte[] result = new byte[iv.length + cipherText.length];
+			System.arraycopy(iv, 0, result, 0, iv.length);
+			System.arraycopy(cipherText, 0, result, iv.length, cipherText.length);
+
+			return Base64.getEncoder().encodeToString(result);
 		} catch (Exception e) {
-			throw new RuntimeException("SM4 native decryption failed", e);
-		}
-	}
-
-	// ========================
-	// 3. JCA standard API implement（Compatible Java Cryptography Architecture）
-	// ========================
-
-	/**
-	 * encrypt with JCA API（SM4/ECB/PKCS7Padding）
-	 */
-	public static String encryptEcbJca(byte[] key, String plainText) {
-		validateKey(key);
-		try {
-			Cipher cipher = Cipher.getInstance("SM4/ECB/PKCS7Padding", "BC");
-			SecretKeySpec keySpec = new SecretKeySpec(key, ALGORITHM_NAME);
-			cipher.init(Cipher.ENCRYPT_MODE, keySpec);
-
-			byte[] encrypted = cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8));
-			return Hex.toHexString(encrypted);
-		} catch (Exception e) {
-			throw new RuntimeException("SM4 JCA encryption failed", e);
+			throw new RuntimeException("SM4 GCM native encryption failed", e);
 		}
 	}
 
 	/**
-	 * decrypt with JCA API（SM4/ECB/PKCS7Padding）
+	 * GCM 解密（原生 API）
+	 *
+	 * @param key         16字节密钥
+	 * @param encodedData Base64 编码的（IV + 密文）
+	 * @return 解密后的明文字节数组
 	 */
-	public static String decryptEcbJca(byte[] key, String hexCipherText) {
+	public static byte[] decryptGcmNative(byte[] key, String encodedData) {
 		validateKey(key);
 		try {
-			byte[] cipherBytes = Hex.decode(hexCipherText);
-			Cipher cipher = Cipher.getInstance("SM4/ECB/PKCS7Padding", "BC");
-			SecretKeySpec keySpec = new SecretKeySpec(key, ALGORITHM_NAME);
-			cipher.init(Cipher.DECRYPT_MODE, keySpec);
+			byte[] data = Base64.getDecoder().decode(encodedData);
+			if (data.length < GCM_IV_LENGTH_BYTES) {
+				throw new IllegalArgumentException("Invalid GCM data: too short");
+			}
 
-			byte[] decrypted = cipher.doFinal(cipherBytes);
+			byte[] iv = new byte[GCM_IV_LENGTH_BYTES];
+			byte[] cipherText = new byte[data.length - GCM_IV_LENGTH_BYTES];
+			System.arraycopy(data, 0, iv, 0, GCM_IV_LENGTH_BYTES);
+			System.arraycopy(data, GCM_IV_LENGTH_BYTES, cipherText, 0, cipherText.length);
+
+			GCMModeCipher cipher = GCMBlockCipher.newInstance(new SM4Engine());
+			AEADParameters parameters = new AEADParameters(
+				new KeyParameter(key),
+				GCM_TAG_LENGTH_BITS,
+				iv
+			);
+			cipher.init(false, parameters);
+
+			byte[] output = new byte[cipher.getOutputSize(cipherText.length)];
+			int len = cipher.processBytes(cipherText, 0, cipherText.length, output, 0);
+			len += cipher.doFinal(output, len);
+
+			byte[] result = new byte[len];
+			System.arraycopy(output, 0, result, 0, len);
+			return result;
+		} catch (Exception e) {
+			throw new RuntimeException("SM4 GCM native decryption failed", e);
+		}
+	}
+
+	/**
+	 * GCM 解密返回字符串（原生 API）
+	 */
+	public static String decryptGcmNativeToString(byte[] key, String encodedData) {
+		byte[] decrypted = decryptGcmNative(key, encodedData);
+		return new String(decrypted, StandardCharsets.UTF_8);
+	}
+
+	// ========================
+	// 3. JCA 标准 API - GCM 模式
+	// ========================
+
+	/**
+	 * GCM 加密（JCA API）- 返回 Base64(IV + 密文)
+	 */
+	public static String encryptGcmJca(byte[] key, String plainText) {
+		return encryptGcmJca(key, plainText, null);
+	}
+
+	/**
+	 * GCM 加密（JCA API）
+	 *
+	 * @param key       16字节密钥
+	 * @param plainText 明文字符串
+	 * @param iv        可选，若为null则自动生成随机IV
+	 * @return Base64 编码的 IV+密文
+	 */
+	public static String encryptGcmJca(byte[] key, String plainText, byte[] iv) {
+		validateKey(key);
+		try {
+			if (iv == null) {
+				iv = generateGcmIv();
+			}
+			if (iv.length != GCM_IV_LENGTH_BYTES) {
+				throw new IllegalArgumentException("GCM IV must be " + GCM_IV_LENGTH_BYTES + " bytes");
+			}
+
+			Cipher cipher = Cipher.getInstance("SM4/GCM/NoPadding", "BC");
+			SecretKeySpec keySpec = new SecretKeySpec(key, ALGORITHM_NAME);
+			GCMParameterSpec gcmSpec = new GCMParameterSpec(GCM_TAG_LENGTH_BITS, iv);
+			cipher.init(Cipher.ENCRYPT_MODE, keySpec, gcmSpec);
+
+			byte[] cipherText = cipher.doFinal(plainText.getBytes(StandardCharsets.UTF_8));
+
+			byte[] result = new byte[iv.length + cipherText.length];
+			System.arraycopy(iv, 0, result, 0, iv.length);
+			System.arraycopy(cipherText, 0, result, iv.length, cipherText.length);
+
+			return Base64.getEncoder().encodeToString(result);
+		} catch (Exception e) {
+			throw new RuntimeException("SM4 GCM JCA encryption failed", e);
+		}
+	}
+
+	/**
+	 * GCM 解密（JCA API）
+	 *
+	 * @param key         16字节密钥
+	 * @param encodedData Base64 编码的（IV + 密文）
+	 * @return 解密后的明文字符串
+	 */
+	public static String decryptGcmJca(byte[] key, String encodedData) {
+		validateKey(key);
+		try {
+			byte[] data = Base64.getDecoder().decode(encodedData);
+			if (data.length < GCM_IV_LENGTH_BYTES) {
+				throw new IllegalArgumentException("Invalid GCM data: too short");
+			}
+
+			byte[] iv = new byte[GCM_IV_LENGTH_BYTES];
+			byte[] cipherText = new byte[data.length - GCM_IV_LENGTH_BYTES];
+			System.arraycopy(data, 0, iv, 0, GCM_IV_LENGTH_BYTES);
+			System.arraycopy(data, GCM_IV_LENGTH_BYTES, cipherText, 0, cipherText.length);
+
+			Cipher cipher = Cipher.getInstance("SM4/GCM/NoPadding", "BC");
+			SecretKeySpec keySpec = new SecretKeySpec(key, ALGORITHM_NAME);
+			GCMParameterSpec gcmSpec = new GCMParameterSpec(GCM_TAG_LENGTH_BITS, iv);
+			cipher.init(Cipher.DECRYPT_MODE, keySpec, gcmSpec);
+
+			byte[] decrypted = cipher.doFinal(cipherText);
 			return new String(decrypted, StandardCharsets.UTF_8);
 		} catch (Exception e) {
-			throw new RuntimeException("SM4 JCA decryption failed", e);
+			throw new RuntimeException("SM4 GCM JCA decryption failed", e);
 		}
 	}
 
@@ -162,31 +274,41 @@ public class SM4Util {
 		String plainText = "Hello, 這是国密SM4測試數據";
 		String hexKey = generateKeyAsHex();
 		byte[] key = parseHexKey(hexKey);
-		
-		String encode = Base64.getEncoder().encodeToString(key);
 
-		System.out.println("original text" + plainText);
-		System.out.println("encryption key(HEX): " + hexKey);
-		System.out.println("encryption key(Base64): " + encode);
+		System.out.println("原文: " + plainText);
+		System.out.println("密钥(HEX): " + hexKey);
+
+		// ========== GCM 模式测试 ==========
+		System.out.println("\n========== GCM 模式 ==========");
 
 		// 原生 API
-		byte[] bytes = plainText.getBytes(StandardCharsets.UTF_8);
-		String enc1 = encryptEcbNative(key, bytes);
-		String dec1 = decryptEcbNative(key, enc1);
-		System.out.println("\n[Native API]");
-		System.out.println("encrypt result:" + enc1);
-		System.out.println("decrypt result:" + dec1);
+		byte[] plainBytes = plainText.getBytes(StandardCharsets.UTF_8);
+		String encGcmNative = encryptGcmNative(key, plainBytes);
+		String decGcmNative = decryptGcmNativeToString(key, encGcmNative);
+		System.out.println("[Native API GCM]");
+		System.out.println("  加密结果(Base64): " + encGcmNative);
+		System.out.println("  解密结果: " + decGcmNative);
 
 		// JCA API
-		String enc2 = encryptEcbJca(key, plainText);
-		String dec2 = decryptEcbJca(key, enc2);
-		System.out.println("\n[JCA API]");
-		System.out.println("encrypt result:" + enc2);
-		System.out.println("decrypt result:" + dec2);
+		String encGcmJca = encryptGcmJca(key, plainText);
+		String decGcmJca = decryptGcmJca(key, encGcmJca);
+		System.out.println("[JCA API GCM]");
+		System.out.println("  加密结果(Base64): " + encGcmJca);
+		System.out.println("  解密结果: " + decGcmJca);
 
-		// 验证一致性
-		assert enc1.equals(enc2);
-		assert plainText.equals(dec1) && plainText.equals(dec2);
-		System.out.println("\n✅ test pass");
+		// 验证
+		assert plainText.equals(decGcmNative) && plainText.equals(decGcmJca);
+
+		// ========== GCM 防篡改测试 ==========
+		System.out.println("\n========== GCM 防篡改测试 ==========");
+		String tampered = encGcmJca.substring(0, encGcmJca.length() - 2) + "XX";
+		try {
+			String hacked = decryptGcmJca(key, tampered);
+			System.out.println("❌ 篡改后仍能解密: " + hacked);
+		} catch (Exception e) {
+			System.out.println("✅ 篡改后解密失败（认证失败，GCM 自动检测到篡改）: " + e.getMessage());
+		}
+
+		System.out.println("\n✅ GCM 测试通过");
 	}
 }
