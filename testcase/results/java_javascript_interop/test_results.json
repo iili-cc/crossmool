@@ -4,21 +4,21 @@
       {
         "test_id": 1,
         "status": "success",
-        "java_cipher": "041430c4317584e9d9656a1898cb7417456919708130fbd7ed48f0b89f1b...",
+        "java_cipher": "04c066078a630b84ea49c16b57418a64eb18e5c2dc753848f2d51a564013...",
         "js_decrypt_ok": true,
         "java_decrypt_ok": true
       },
       {
         "test_id": 2,
         "status": "success",
-        "java_cipher": "0402a2ba2c4c8805a115fb416855df640c48d9c0b683ff6ab93043ff0049...",
+        "java_cipher": "042c82f9abe6d0f00a2932533b1422ea3ef6a10fb3b6b8f1bba55a270dea...",
         "js_decrypt_ok": true,
         "java_decrypt_ok": true
       },
       {
         "test_id": 3,
         "status": "success",
-        "java_cipher": "0467406975207ca7f8cad1d8180a61116bfa8afede13d60d2e9f4797f443...",
+        "java_cipher": "04acb0160db86b8a3e728a2ec19183dc1771e407fc5858a945c79396a5d0...",
         "js_decrypt_ok": true,
         "java_decrypt_ok": true
       }
@@ -28,21 +28,21 @@
       {
         "test_id": 1,
         "status": "success",
-        "java_sig": "3046022100f84ee5e35abb5d534ee3071a87cd6215e7ebd8a2d316a4908e...",
+        "java_sig": "3046022100e3023eaf4ffd9a4cdecb173b19b8a0c4e76193dd755fe44f97...",
         "java_verify_ok": true,
         "js_verify_ok": true
       },
       {
         "test_id": 2,
         "status": "success",
-        "java_sig": "3046022100ba730e0a2bee5ef0d7c2542125ea9d05be4d4e89d33c6b4c44...",
+        "java_sig": "3046022100866bd0c78895a9803d6d1f7e1f7a7e2b72749be74f2120e9cd...",
         "java_verify_ok": true,
         "js_verify_ok": true
       },
       {
         "test_id": 3,
         "status": "success",
-        "java_sig": "3045022000dd90a3432708dda1d05949f435956759a902f6e5127429e77d...",
+        "java_sig": "304502207b667becce519fcc99d5a088257c2a1194b1b52017df4902ca58...",
         "java_verify_ok": true,
         "js_verify_ok": true
       }
@@ -54,19 +54,19 @@
       {
         "test_id": 1,
         "status": "success",
-        "java_cipher": "048b2a82cf72b92c9e55b613a48e653b6965695af60e07aec3d0204da821...",
+        "java_cipher": "04a167359781d450d68f417b5c2a857e2cf5738c50fca79eb5f13726b27d...",
         "js_verify_decrypt_ok": true
       },
       {
         "test_id": 2,
         "status": "success",
-        "java_cipher": "040ddc5852cc4124f95f5bd2f72686f44896f2e316b94bd7d728c872221e...",
+        "java_cipher": "04a171666224f362cc48efdea5cb509e2f49db9f5eb36bc9acbb614d6752...",
         "js_verify_decrypt_ok": true
       },
       {
         "test_id": 3,
         "status": "success",
-        "java_cipher": "04fe4c2ae3e6cc977d06eafc442f4ccfad20234eb71282348a1a208fc140...",
+        "java_cipher": "04760a7200568d1011e39e6ae135198c61e058711ad22d72ee84e82e5394...",
         "js_verify_decrypt_ok": true
       }
     ],
@@ -108,9 +108,9 @@
       },
       {
         "test_id": 3,
-        "status": "failed",
-        "java_error": "exception decoding Hex string: a hexadecimal encoding must have an even number of characters",
-        "js_error": null
+        "status": "success",
+        "hmac": "63c01eda0753a7121f54dcf5836b9ac24a092b653031b8f13dd2de80faf2...",
+        "match": true
       }
     ]
   },
@@ -119,19 +119,19 @@
       {
         "test_id": 1,
         "status": "success",
-        "java_cipher": "XdMYeUngG392lOozR7Ydm+bUyo7QOA5HtOLcxRk0QvvWP1ENc+qto/cPb2HE...",
+        "java_cipher": "fSwALKQl0xNmEM8j++N2gUTF3PqWUAqIm20JYIy5LzYro+JpNEnC18Z5rirH...",
         "js_decrypt_ok": true
       },
       {
         "test_id": 2,
         "status": "success",
-        "java_cipher": "xpdmD62162sRubpDI9beSIxZX/CNtIpWTmSt1MoYxPiKJiD33SXLg8Jyp3Ma...",
+        "java_cipher": "6eBkQDovKhS+EVV72pLqupDFH5OmytFPwVJyJWK70Pt7COEIdyq6EGEEPFfv...",
         "js_decrypt_ok": true
       },
       {
         "test_id": 3,
         "status": "success",
-        "java_cipher": "fwCGb/WLEG4OyiuxM4FEBvwEVDIIPT1bG1kPOMhan2xgmI3EU6pwFioMQDK6...",
+        "java_cipher": "J7dQvKmaNE3s6PBnLUeqBgSX1kYZ8vXPVv+C1suct+0U5EouGOwvAvUB+sZI...",
         "js_decrypt_ok": true
       }
     ]
