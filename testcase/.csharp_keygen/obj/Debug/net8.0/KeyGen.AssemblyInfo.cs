@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("KeyGen")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f76b6a3d79669be03cb99b9aae1bed4942e826a3")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fbb62594a5384f5cfb9736b6a8d204712710a0d6")]
 [assembly: System.Reflection.AssemblyProductAttribute("KeyGen")]
 [assembly: System.Reflection.AssemblyTitleAttribute("KeyGen")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

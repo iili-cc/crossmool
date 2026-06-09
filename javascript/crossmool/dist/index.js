@@ -410,12 +410,104 @@ var SM3Util = class {
 // src/SM4Util.ts
 var import_sm_crypto_v23 = require("sm-crypto-v2");
 var KEY_SIZE_BYTES = 16;
+var GCM_IV_SIZE = 12;
+var GCM_TAG_SIZE = 16;
+var BLOCK_SIZE = 16;
 function normalizeKeyBytes(key) {
   const keyBytes = typeof key === "string" ? decodeHexOrBase64ToBytes(key) : key;
   if (keyBytes.length !== KEY_SIZE_BYTES) throw new Error("SM4 key must be 16 bytes (128 bits)");
   return keyBytes;
 }
-var SM4Util = class {
+function xorBytes(a, b) {
+  const len = Math.min(a.length, b.length);
+  const out = new Uint8Array(len);
+  for (let i = 0; i < len; i++) out[i] = a[i] ^ b[i];
+  return out;
+}
+function inc32(counter) {
+  const c = new Uint8Array(counter);
+  for (let i = 15; i >= 12; i--) {
+    c[i] = c[i] + 1 & 255;
+    if (c[i] !== 0) break;
+  }
+  return c;
+}
+function gf128Mul(x, y) {
+  const R = /* @__PURE__ */ BigInt("0xE1000000000000000000000000000000");
+  const MASK = (/* @__PURE__ */ BigInt("1") << /* @__PURE__ */ BigInt("128")) - /* @__PURE__ */ BigInt("1");
+  let z = /* @__PURE__ */ BigInt("0");
+  let v = y;
+  for (let i = 0; i < 128; i++) {
+    if (x & /* @__PURE__ */ BigInt("1") << BigInt(127 - i)) {
+      z ^= v;
+    }
+    if (v & /* @__PURE__ */ BigInt("1")) {
+      v = v >> /* @__PURE__ */ BigInt("1") ^ R;
+    } else {
+      v >>= /* @__PURE__ */ BigInt("1");
+    }
+  }
+  return z & MASK;
+}
+function bytesToBigint(b) {
+  let n = /* @__PURE__ */ BigInt("0");
+  for (let i = 0; i < b.length; i++) n = n << /* @__PURE__ */ BigInt("8") | BigInt(b[i]);
+  return n;
+}
+function bigintToBytes(n, len) {
+  const out = new Uint8Array(len);
+  for (let i = len - 1; i >= 0; i--) {
+    out[i] = Number(n & /* @__PURE__ */ BigInt("0xff"));
+    n >>= /* @__PURE__ */ BigInt("8");
+  }
+  return out;
+}
+function ghash(h, aad, ciphertext) {
+  const hInt = bytesToBigint(h);
+  const aadPadLen = (16 - aad.length % 16) % 16;
+  const aadPadded = new Uint8Array(aad.length + aadPadLen);
+  aadPadded.set(aad);
+  const ctPadLen = (16 - ciphertext.length % 16) % 16;
+  const ctPadded = new Uint8Array(ciphertext.length + ctPadLen);
+  ctPadded.set(ciphertext);
+  const lenBlock = new Uint8Array(16);
+  const aadBitLen = BigInt(aad.length * 8);
+  const ctBitLen = BigInt(ciphertext.length * 8);
+  for (let i = 7; i >= 0; i--) {
+    lenBlock[i] = Number(aadBitLen >> BigInt(7 - i) * /* @__PURE__ */ BigInt("8") & /* @__PURE__ */ BigInt("0xff"));
+    lenBlock[8 + i] = Number(ctBitLen >> BigInt(7 - i) * /* @__PURE__ */ BigInt("8") & /* @__PURE__ */ BigInt("0xff"));
+  }
+  let y = /* @__PURE__ */ BigInt("0");
+  for (let i = 0; i < aadPadded.length; i += 16) {
+    y ^= bytesToBigint(aadPadded.subarray(i, i + 16));
+    y = gf128Mul(y, hInt);
+  }
+  for (let i = 0; i < ctPadded.length; i += 16) {
+    y ^= bytesToBigint(ctPadded.subarray(i, i + 16));
+    y = gf128Mul(y, hInt);
+  }
+  y ^= bytesToBigint(lenBlock);
+  y = gf128Mul(y, hInt);
+  return bigintToBytes(y, 16);
+}
+function sm4EcbEncryptBlock(key, block) {
+  const encrypted = import_sm_crypto_v23.sm4.encrypt(block, key, { mode: "ecb", padding: "pkcs#7", output: "array" });
+  return new Uint8Array(encrypted.buffer, 0, 16);
+}
+function sm4CtrEncrypt(key, counter, plaintext) {
+  const result = new Uint8Array(plaintext.length);
+  let ctr = counter;
+  for (let i = 0; i < plaintext.length; i += BLOCK_SIZE) {
+    const keystream = sm4EcbEncryptBlock(key, ctr);
+    const block = plaintext.subarray(i, Math.min(i + BLOCK_SIZE, plaintext.length));
+    for (let j = 0; j < block.length; j++) {
+      result[i + j] = block[j] ^ keystream[j];
+    }
+    ctr = inc32(ctr);
+  }
+  return result;
+}
+var SM4Util = class _SM4Util {
   static generateKeyBytes() {
     var _a;
     const key = new Uint8Array(KEY_SIZE_BYTES);
@@ -431,30 +523,121 @@ var SM4Util = class {
   static generateKeyBase64() {
     return bytesToBase64(this.generateKeyBytes());
   }
+  static parseHexKey(hexKey) {
+    return hexToBytes(hexKey);
+  }
+  static generateGcmIV() {
+    var _a;
+    const iv = new Uint8Array(GCM_IV_SIZE);
+    if ((_a = globalThis.crypto) == null ? void 0 : _a.getRandomValues) {
+      globalThis.crypto.getRandomValues(iv);
+      return iv;
+    }
+    throw new Error("No secure RNG available");
+  }
+  /**
+   * SM4 GCM encryption.
+   * Returns Base64(IV[12] + ciphertext + Tag[16])
+   */
+  static encryptGcm(plaintext, key, iv) {
+    const k = normalizeKeyBytes(key);
+    if (iv === void 0) {
+      iv = _SM4Util.generateGcmIV();
+    }
+    if (iv.length !== GCM_IV_SIZE) {
+      throw new Error(`GCM IV must be ${GCM_IV_SIZE} bytes`);
+    }
+    const j0 = new Uint8Array(16);
+    j0.set(iv, 0);
+    j0[15] = 1;
+    const h = sm4EcbEncryptBlock(k, new Uint8Array(16));
+    const ciphertext = sm4CtrEncrypt(k, inc32(j0), plaintext);
+    const ghashResult = ghash(h, new Uint8Array(0), ciphertext);
+    const j0Encrypted = sm4EcbEncryptBlock(k, j0);
+    const tag = xorBytes(ghashResult, j0Encrypted);
+    const combined = new Uint8Array(iv.length + ciphertext.length + tag.length);
+    combined.set(iv, 0);
+    combined.set(ciphertext, iv.length);
+    combined.set(tag, iv.length + ciphertext.length);
+    return bytesToBase64(combined);
+  }
+  /**
+   * SM4 GCM decryption.
+   * Input: Base64(IV[12] + ciphertext + Tag[16])
+   * Returns plaintext bytes.
+   */
+  static decryptGcm(ciphertextBase64, key) {
+    const k = normalizeKeyBytes(key);
+    const data = base64ToBytes(ciphertextBase64);
+    if (data.length < GCM_IV_SIZE + GCM_TAG_SIZE) {
+      throw new Error("Invalid GCM ciphertext: too short");
+    }
+    const iv = data.subarray(0, GCM_IV_SIZE);
+    const tag = data.subarray(data.length - GCM_TAG_SIZE);
+    const ciphertext = data.subarray(GCM_IV_SIZE, data.length - GCM_TAG_SIZE);
+    const j0 = new Uint8Array(16);
+    j0.set(iv, 0);
+    j0[15] = 1;
+    const h = sm4EcbEncryptBlock(k, new Uint8Array(16));
+    const ghashResult = ghash(h, new Uint8Array(0), ciphertext);
+    const j0Encrypted = sm4EcbEncryptBlock(k, j0);
+    const computedTag = xorBytes(ghashResult, j0Encrypted);
+    if (!tagEquals(computedTag, tag)) {
+      throw new Error("SM4 GCM decryption failed (authentication failed)");
+    }
+    return sm4CtrEncrypt(k, inc32(j0), ciphertext);
+  }
+  /**
+   * SM4 GCM encrypt a UTF-8 string, returns Base64(IV[12] + ciphertext + Tag[16])
+   */
+  static encryptGcmString(plainText, key, iv) {
+    return _SM4Util.encryptGcm(utf8ToBytes(plainText), key, iv);
+  }
+  /**
+   * SM4 GCM decrypt to UTF-8 string
+   */
+  static decryptGcmToString(ciphertextBase64, key) {
+    return bytesToUtf8(_SM4Util.decryptGcm(ciphertextBase64, key));
+  }
+  // ========================
+  // Legacy ECB methods (deprecated, kept for backward compatibility)
+  // ========================
+  /** @deprecated Use encryptGcm instead */
   static encryptEcbToBytes(input, key) {
     const k = normalizeKeyBytes(key);
     return import_sm_crypto_v23.sm4.encrypt(input, k, { mode: "ecb", padding: "pkcs#7", output: "array" });
   }
+  /** @deprecated Use decryptGcm instead */
   static decryptEcbToBytes(cipher, key) {
     const k = normalizeKeyBytes(key);
     return import_sm_crypto_v23.sm4.decrypt(cipher, k, { mode: "ecb", padding: "pkcs#7", output: "array" });
   }
+  /** @deprecated Use encryptGcmString instead */
   static encryptEcbToHex(plainText, key) {
     const ct = this.encryptEcbToBytes(utf8ToBytes(plainText), key);
     return bytesToHex(ct);
   }
+  /** @deprecated Use encryptGcmString instead */
   static encryptEcbToBase64(plainText, key) {
     const ct = this.encryptEcbToBytes(utf8ToBytes(plainText), key);
     return bytesToBase64(ct);
   }
+  /** @deprecated Use decryptGcmToString instead */
   static decryptEcbToUtf8(cipherHexOrBase64, key) {
     const cipherBytes = decodeHexOrBase64ToBytes(cipherHexOrBase64);
     const pt = this.decryptEcbToBytes(cipherBytes, key);
     return bytesToUtf8(pt);
   }
+  /** @deprecated Use decryptGcmToString instead */
   static decryptEcbHexToUtf8(cipherHex, key) {
     const pt = this.decryptEcbToBytes(hexToBytes(cipherHex), key);
     return bytesToUtf8(pt);
   }
 };
+function tagEquals(a, b) {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a[i] ^ b[i];
+  return diff === 0;
+}
 //# sourceMappingURL=index.js.map

@@ -24,12 +24,70 @@ describe('SM3', () => {
 });
 
 describe('SM4', () => {
-  test('ECB pkcs#7 roundtrip', () => {
+  test('ECB pkcs#7 roundtrip (legacy)', () => {
     const keyHex = '0123456789abcdeffedcba9876543210';
     const plain = 'Hello, 這是国密SM4測試數據';
     const cipherHex = SM4Util.encryptEcbToHex(plain, keyHex);
     const out = SM4Util.decryptEcbHexToUtf8(cipherHex, keyHex);
     expect(out).toBe(plain);
+  });
+
+  test('GCM roundtrip (bytes)', () => {
+    const key = SM4Util.generateKeyBytes();
+    const plain = utf8ToBytes('Hello, 這是国密SM4測試數據');
+    const encrypted = SM4Util.encryptGcm(plain, key);
+    const decrypted = SM4Util.decryptGcm(encrypted, key);
+    expect(bytesToUtf8(decrypted)).toBe('Hello, 這是国密SM4測試數據');
+  });
+
+  test('GCM roundtrip (string)', () => {
+    const key = SM4Util.generateKeyBytes();
+    const plain = 'Hello, 這是国密SM4測試數據';
+    const encrypted = SM4Util.encryptGcmString(plain, key);
+    const decrypted = SM4Util.decryptGcmToString(encrypted, key);
+    expect(decrypted).toBe(plain);
+  });
+
+  test('GCM deterministic with same IV', () => {
+    const key = hexToBytes('0123456789abcdeffedcba9876543210');
+    const iv = new Uint8Array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+    const plain = utf8ToBytes('Hello, 這是国密SM4測試數據');
+
+    const encrypted1 = SM4Util.encryptGcm(plain, key, iv);
+    const encrypted2 = SM4Util.encryptGcm(plain, key, iv);
+    expect(encrypted1).toBe(encrypted2);
+
+    const decrypted = SM4Util.decryptGcm(encrypted1, key);
+    expect(bytesToUtf8(decrypted)).toBe('Hello, 這是国密SM4測試數據');
+  });
+
+  test('GCM tamper detection', () => {
+    const key = hexToBytes('0123456789abcdeffedcba9876543210');
+    const plain = utf8ToBytes('Hello, 這是国密SM4測試數據');
+    const encrypted = SM4Util.encryptGcm(plain, key);
+
+    const tampered = encrypted.slice(0, -2) + 'XX';
+    expect(() => SM4Util.decryptGcm(tampered, key)).toThrow();
+  });
+
+  test('GCM with hex key string', () => {
+    const keyHex = '0123456789abcdeffedcba9876543210';
+    const plain = 'Hello, 這是国密SM4測試數據';
+    const encrypted = SM4Util.encryptGcmString(plain, keyHex);
+    const decrypted = SM4Util.decryptGcmToString(encrypted, keyHex);
+    expect(decrypted).toBe(plain);
+  });
+
+  // Cross-language interop: decrypt ciphertext produced by Java/Go/Rust
+  // Key (hex) = 0123456789abcdeffedcba9876543210
+  // IV (hex)  = 000102030405060708090a0b
+  // Plaintext = "Hello, 這是国密SM4測試數據"
+  // Output    = Base64(IV + ciphertext + Tag)
+  test('GCM decrypt Java ciphertext', () => {
+    const key = hexToBytes('0123456789abcdeffedcba9876543210');
+    const javaCipherBase64 = 'AAECAwQFBgcICQoLHUR0/d6difbkGWUzdLn96G1Wr/4NZVgH6lwAiXZ4q53any/1ebT8w7FURBOKOUB3W+c=';
+    const decrypted = SM4Util.decryptGcm(javaCipherBase64, key);
+    expect(bytesToUtf8(decrypted)).toBe('Hello, 這是国密SM4測試數據');
   });
 });
 

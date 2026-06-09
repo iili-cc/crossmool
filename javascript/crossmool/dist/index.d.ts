@@ -37,11 +37,38 @@ declare class SM4Util {
     static generateKeyBytes(): Uint8Array;
     static generateKeyHex(): string;
     static generateKeyBase64(): string;
+    static parseHexKey(hexKey: string): Uint8Array;
+    static generateGcmIV(): Uint8Array;
+    /**
+     * SM4 GCM encryption.
+     * Returns Base64(IV[12] + ciphertext + Tag[16])
+     */
+    static encryptGcm(plaintext: Uint8Array, key: Uint8Array | string, iv?: Uint8Array): string;
+    /**
+     * SM4 GCM decryption.
+     * Input: Base64(IV[12] + ciphertext + Tag[16])
+     * Returns plaintext bytes.
+     */
+    static decryptGcm(ciphertextBase64: string, key: Uint8Array | string): Uint8Array;
+    /**
+     * SM4 GCM encrypt a UTF-8 string, returns Base64(IV[12] + ciphertext + Tag[16])
+     */
+    static encryptGcmString(plainText: string, key: Uint8Array | string, iv?: Uint8Array): string;
+    /**
+     * SM4 GCM decrypt to UTF-8 string
+     */
+    static decryptGcmToString(ciphertextBase64: string, key: Uint8Array | string): string;
+    /** @deprecated Use encryptGcm instead */
     static encryptEcbToBytes(input: Uint8Array, key: Uint8Array | string): Uint8Array;
+    /** @deprecated Use decryptGcm instead */
     static decryptEcbToBytes(cipher: Uint8Array, key: Uint8Array | string): Uint8Array;
+    /** @deprecated Use encryptGcmString instead */
     static encryptEcbToHex(plainText: string, key: Uint8Array | string): string;
+    /** @deprecated Use encryptGcmString instead */
     static encryptEcbToBase64(plainText: string, key: Uint8Array | string): string;
+    /** @deprecated Use decryptGcmToString instead */
     static decryptEcbToUtf8(cipherHexOrBase64: string, key: Uint8Array | string): string;
+    /** @deprecated Use decryptGcmToString instead */
     static decryptEcbHexToUtf8(cipherHex: string, key: Uint8Array | string): string;
 }
 

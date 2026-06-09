@@ -105,20 +105,22 @@ namespace Crossmool.Crypto
             return engine.ProcessBlock(originalTextBytes, 0, originalTextBytes.Length);
         }
 
-        public static string encrypt(string originalText, string publicKeyString)
+        public static string encrypt(string originalText, string publicKeyString, bool toBase64 = false)
         {
             var input = EncodingUtils.Utf8GetBytes(originalText ?? string.Empty);
             var pubBytes = EncodingUtils.ParseBase64OrHex(publicKeyString);
             var output = encrypt(input, pubBytes);
-            return EncodingUtils.ToBase64(output);
+            return toBase64 ? EncodingUtils.ToBase64(output) : EncodingUtils.ToHex(output);
         }
 
         public static string encryptToHex(string originalText, string publicKeyString)
         {
-            var input = EncodingUtils.Utf8GetBytes(originalText ?? string.Empty);
-            var pubBytes = EncodingUtils.ParseBase64OrHex(publicKeyString);
-            var output = encrypt(input, pubBytes);
-            return EncodingUtils.ToHex(output);
+            return encrypt(originalText, publicKeyString, false);
+        }
+
+        public static string encryptToBase64(string originalText, string publicKeyString)
+        {
+            return encrypt(originalText, publicKeyString, true);
         }
 
         #endregion
@@ -169,12 +171,22 @@ namespace Crossmool.Crypto
             return signer.GenerateSignature();
         }
 
-        public static string sign(string message, string privateKeyString)
+        public static string sign(string message, string privateKeyString, bool toBase64 = false)
         {
             var messageBytes = EncodingUtils.Utf8GetBytes(message ?? string.Empty);
             var privBytes = EncodingUtils.ParseBase64OrHex(privateKeyString);
             var signature = sign(messageBytes, privBytes);
-            return EncodingUtils.ToHex(signature);
+            return toBase64 ? EncodingUtils.ToBase64(signature) : EncodingUtils.ToHex(signature);
+        }
+
+        public static string signToHex(string message, string privateKeyString)
+        {
+            return sign(message, privateKeyString, false);
+        }
+
+        public static string signToBase64(string message, string privateKeyString)
+        {
+            return sign(message, privateKeyString, true);
         }
 
         #endregion
@@ -223,10 +235,10 @@ namespace Crossmool.Crypto
             return false;
         }
 
-        public static bool verify(string message, string signatureHex, string publicKeyString)
+        public static bool verify(string message, string signatureString, string publicKeyString)
         {
             var messageBytes = EncodingUtils.Utf8GetBytes(message ?? string.Empty);
-            var signatureBytes = EncodingUtils.FromHex(signatureHex);
+            var signatureBytes = EncodingUtils.ParseBase64OrHex(signatureString);
             var pubBytes = EncodingUtils.ParseBase64OrHex(publicKeyString);
             return verify(messageBytes, signatureBytes, pubBytes);
         }
@@ -244,28 +256,31 @@ namespace Crossmool.Crypto
             return (ciphertext, signature);
         }
 
-        public static (string ciphertextHex, string signatureHex) encryptSign(string message, string publicKeyString, string privateKeyString)
+        public static (string ciphertext, string signature) encryptSign(string message, string publicKeyString, string privateKeyString, bool toBase64 = false)
         {
             var messageBytes = EncodingUtils.Utf8GetBytes(message ?? string.Empty);
             var pubBytes = EncodingUtils.ParseBase64OrHex(publicKeyString);
             var privBytes = EncodingUtils.ParseBase64OrHex(privateKeyString);
-            var (ciphertext, signature) = encryptSign(messageBytes, pubBytes, privBytes);
-            return (EncodingUtils.ToHex(ciphertext), EncodingUtils.ToHex(signature));
+            var (cipherBytes, sigBytes) = encryptSign(messageBytes, pubBytes, privBytes);
+            return (
+                toBase64 ? EncodingUtils.ToBase64(cipherBytes) : EncodingUtils.ToHex(cipherBytes),
+                toBase64 ? EncodingUtils.ToBase64(sigBytes) : EncodingUtils.ToHex(sigBytes)
+            );
         }
 
         #endregion
 
         #region VerifyDecrypt
 
-        public static string verifyDecrypt(string ciphertextHex, string signatureHex, string signPublicKeyString, string decPrivateKeyString)
+        public static string verifyDecrypt(string ciphertextString, string signatureString, string signPublicKeyString, string decPrivateKeyString)
         {
-            // Verify signature against ciphertext hex string (UTF8 encoded), matching Java's behavior
-            bool verified = verify(ciphertextHex, signatureHex, signPublicKeyString);
+            // Verify signature against ciphertext string (UTF8 encoded), matching Java's behavior
+            bool verified = verify(ciphertextString, signatureString, signPublicKeyString);
             if (!verified)
             {
-                throw new RuntimeException("SM2 verify failed: " + ciphertextHex);
+                throw new RuntimeException("SM2 verify failed: " + ciphertextString);
             }
-            return decryptFromHex(ciphertextHex, decPrivateKeyString);
+            return decrypt(ciphertextString, decPrivateKeyString);
         }
 
         #endregion

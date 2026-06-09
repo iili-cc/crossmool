@@ -167,6 +167,7 @@ dependencies = [
  "sm2",
  "sm3",
  "sm4",
+ "subtle",
 ]
 
 [[package]]
