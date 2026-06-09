@@ -1,0 +1,139 @@
+{
+  "sm2": {
+    "encrypt_hex": [
+      {
+        "test_id": 1,
+        "status": "success",
+        "java_cipher": "041430c4317584e9d9656a1898cb7417456919708130fbd7ed48f0b89f1b...",
+        "js_decrypt_ok": true,
+        "java_decrypt_ok": true
+      },
+      {
+        "test_id": 2,
+        "status": "success",
+        "java_cipher": "0402a2ba2c4c8805a115fb416855df640c48d9c0b683ff6ab93043ff0049...",
+        "js_decrypt_ok": true,
+        "java_decrypt_ok": true
+      },
+      {
+        "test_id": 3,
+        "status": "success",
+        "java_cipher": "0467406975207ca7f8cad1d8180a61116bfa8afede13d60d2e9f4797f443...",
+        "js_decrypt_ok": true,
+        "java_decrypt_ok": true
+      }
+    ],
+    "encrypt_base64": [],
+    "sign_hex": [
+      {
+        "test_id": 1,
+        "status": "success",
+        "java_sig": "3046022100f84ee5e35abb5d534ee3071a87cd6215e7ebd8a2d316a4908e...",
+        "java_verify_ok": true,
+        "js_verify_ok": true
+      },
+      {
+        "test_id": 2,
+        "status": "success",
+        "java_sig": "3046022100ba730e0a2bee5ef0d7c2542125ea9d05be4d4e89d33c6b4c44...",
+        "java_verify_ok": true,
+        "js_verify_ok": true
+      },
+      {
+        "test_id": 3,
+        "status": "success",
+        "java_sig": "3045022000dd90a3432708dda1d05949f435956759a902f6e5127429e77d...",
+        "java_verify_ok": true,
+        "js_verify_ok": true
+      }
+    ],
+    "sign_base64": [],
+    "verify_hex": [],
+    "verify_base64": [],
+    "encrypt_sign_hex": [
+      {
+        "test_id": 1,
+        "status": "success",
+        "java_cipher": "048b2a82cf72b92c9e55b613a48e653b6965695af60e07aec3d0204da821...",
+        "js_verify_decrypt_ok": true
+      },
+      {
+        "test_id": 2,
+        "status": "success",
+        "java_cipher": "040ddc5852cc4124f95f5bd2f72686f44896f2e316b94bd7d728c872221e...",
+        "js_verify_decrypt_ok": true
+      },
+      {
+        "test_id": 3,
+        "status": "success",
+        "java_cipher": "04fe4c2ae3e6cc977d06eafc442f4ccfad20234eb71282348a1a208fc140...",
+        "js_verify_decrypt_ok": true
+      }
+    ],
+    "encrypt_sign_base64": []
+  },
+  "sm3": {
+    "digest": [
+      {
+        "test_id": 1,
+        "status": "success",
+        "digest": "5734b51e82e73e19184399030f436e5668812dd25a09d50ce039a9d7d639...",
+        "match": true
+      },
+      {
+        "test_id": 2,
+        "status": "success",
+        "digest": "667d35e72c6615cc21d2e60d97c46d95d49d5559ea6c1bdca8221411e218...",
+        "match": true
+      },
+      {
+        "test_id": 3,
+        "status": "success",
+        "digest": "66c7f0f462eeedd9d1f2d46bdc10e4e24167c4875cf2f7a2297da02b8f4b...",
+        "match": true
+      }
+    ],
+    "hmac": [
+      {
+        "test_id": 1,
+        "status": "success",
+        "hmac": "26d4c72082a9872f56fadfe479aa41204af4d4bad48ac86406161ddb6518...",
+        "match": true
+      },
+      {
+        "test_id": 2,
+        "status": "success",
+        "hmac": "3e327bf9c53824834cd7520093a606334cf8370010644da1975774112d8c...",
+        "match": true
+      },
+      {
+        "test_id": 3,
+        "status": "failed",
+        "java_error": "exception decoding Hex string: a hexadecimal encoding must have an even number of characters",
+        "js_error": null
+      }
+    ]
+  },
+  "sm4": {
+    "encrypt_decrypt": [
+      {
+        "test_id": 1,
+        "status": "success",
+        "java_cipher": "XdMYeUngG392lOozR7Ydm+bUyo7QOA5HtOLcxRk0QvvWP1ENc+qto/cPb2HE...",
+        "js_decrypt_ok": true
+      },
+      {
+        "test_id": 2,
+        "status": "success",
+        "java_cipher": "xpdmD62162sRubpDI9beSIxZX/CNtIpWTmSt1MoYxPiKJiD33SXLg8Jyp3Ma...",
+        "js_decrypt_ok": true
+      },
+      {
+        "test_id": 3,
+        "status": "success",
+        "java_cipher": "fwCGb/WLEG4OyiuxM4FEBvwEVDIIPT1bG1kPOMhan2xgmI3EU6pwFioMQDK6...",
+        "js_decrypt_ok": true
+      }
+    ]
+  }
+}

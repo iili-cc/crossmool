@@ -291,9 +291,18 @@ var USER_ID = "1234567812345678";
 var CIPHER_MODE_C1C3C2 = 1;
 function normalizeCiphertextToHex(ciphertext) {
   const enc = detectStringEncoding(ciphertext);
-  if (enc === "hex") return ciphertext.trim().toLowerCase();
-  if (enc === "base64") return bytesToHex(decodeHexOrBase64ToBytes(ciphertext));
-  throw new Error("Ciphertext must be hex or base64");
+  let hex;
+  if (enc === "hex") {
+    hex = ciphertext.trim().toLowerCase();
+  } else if (enc === "base64") {
+    hex = bytesToHex(decodeHexOrBase64ToBytes(ciphertext));
+  } else {
+    throw new Error("Ciphertext must be hex or base64");
+  }
+  if (hex.startsWith("04") && hex.length > 130) {
+    hex = hex.substring(2);
+  }
+  return hex;
 }
 function normalizeSignatureToHex(signature) {
   const enc = detectStringEncoding(signature);
@@ -321,17 +330,17 @@ var SM2Util = class {
   static decryptToBytes(cipherBytes, privateKey) {
     const privHex = sm2PrivateKeyToRawHex(privateKey);
     const cipherHex = bytesToHex(cipherBytes);
-    return import_sm_crypto_v2.sm2.doDecrypt(cipherHex, privHex, CIPHER_MODE_C1C3C2, { output: "array" });
+    return import_sm_crypto_v2.sm2.doDecrypt(cipherHex, privHex, CIPHER_MODE_C1C3C2, { output: "array", asn1: false });
   }
   static decryptToUtf8(cipherHexOrBase64, privateKey) {
     const privHex = sm2PrivateKeyToRawHex(privateKey);
     const cipherHex = normalizeCiphertextToHex(cipherHexOrBase64);
-    return import_sm_crypto_v2.sm2.doDecrypt(cipherHex, privHex, CIPHER_MODE_C1C3C2, { output: "string" });
+    return import_sm_crypto_v2.sm2.doDecrypt(cipherHex, privHex, CIPHER_MODE_C1C3C2, { output: "string", asn1: false });
   }
   static decryptToBytesFromString(cipherHexOrBase64, privateKey) {
     const privHex = sm2PrivateKeyToRawHex(privateKey);
     const cipherHex = normalizeCiphertextToHex(cipherHexOrBase64);
-    return import_sm_crypto_v2.sm2.doDecrypt(cipherHex, privHex, CIPHER_MODE_C1C3C2, { output: "array" });
+    return import_sm_crypto_v2.sm2.doDecrypt(cipherHex, privHex, CIPHER_MODE_C1C3C2, { output: "array", asn1: false });
   }
   static decrypt(cipherHexOrBase64, privateKey) {
     return this.decryptToUtf8(cipherHexOrBase64, privateKey);
@@ -389,6 +398,7 @@ var SM2Util = class {
 
 // src/SM3Util.ts
 var import_sm_crypto_v22 = require("sm-crypto-v2");
+var HMAC_KEY_MIN_LENGTH = 32;
 var SM3Util = class {
   static digestToBytes(input) {
     const hex = (0, import_sm_crypto_v22.sm3)(input);
@@ -404,6 +414,92 @@ var SM3Util = class {
   }
   static digestFromBase64ToHex(base64) {
     return bytesToHex(this.digestToBytes(base64ToBytes(base64)));
+  }
+  static digest(input, toBase64 = false) {
+    return toBase64 ? this.digestToBase64(input) : this.digestToHex(input);
+  }
+  static hmacBytes(key, data) {
+    const blockSize = 64;
+    let k = key;
+    if (k.length > blockSize) {
+      k = this.digestToBytes(k);
+    }
+    if (k.length < blockSize) {
+      const padded = new Uint8Array(blockSize);
+      padded.set(k);
+      k = padded;
+    }
+    const ipad = new Uint8Array(blockSize);
+    const opad = new Uint8Array(blockSize);
+    for (let i = 0; i < blockSize; i++) {
+      ipad[i] = k[i] ^ 54;
+      opad[i] = k[i] ^ 92;
+    }
+    const innerData = new Uint8Array(blockSize + data.length);
+    innerData.set(ipad);
+    innerData.set(data, blockSize);
+    const innerHash = this.digestToBytes(innerData);
+    const outerData = new Uint8Array(blockSize + innerHash.length);
+    outerData.set(opad);
+    outerData.set(innerHash, blockSize);
+    return this.digestToBytes(outerData);
+  }
+  static hmacToHex(key, data) {
+    const keyBytes = typeof key === "string" ? decodeHexOrBase64ToBytes(key) : key;
+    const dataBytes = typeof data === "string" ? utf8ToBytes(data) : data;
+    return bytesToHex(this.hmacBytes(keyBytes, dataBytes));
+  }
+  static hmacToBase64(key, data) {
+    const keyBytes = typeof key === "string" ? decodeHexOrBase64ToBytes(key) : key;
+    const dataBytes = typeof data === "string" ? utf8ToBytes(data) : data;
+    return bytesToBase64(this.hmacBytes(keyBytes, dataBytes));
+  }
+  static hmac(key, data, toBase64 = false) {
+    return toBase64 ? this.hmacToBase64(key, data) : this.hmacToHex(key, data);
+  }
+  static generateHmacKeyBytes(keyLength = HMAC_KEY_MIN_LENGTH) {
+    var _a;
+    if (keyLength < HMAC_KEY_MIN_LENGTH) {
+      throw new Error(`HMAC key length must be at least ${HMAC_KEY_MIN_LENGTH} bytes`);
+    }
+    const key = new Uint8Array(keyLength);
+    if ((_a = globalThis.crypto) == null ? void 0 : _a.getRandomValues) {
+      globalThis.crypto.getRandomValues(key);
+      return key;
+    }
+    throw new Error("No secure RNG available: globalThis.crypto.getRandomValues is missing");
+  }
+  static generateHmacKeyHex(keyLength = HMAC_KEY_MIN_LENGTH) {
+    return bytesToHex(this.generateHmacKeyBytes(keyLength));
+  }
+  static generateHmacKeyBase64(keyLength = HMAC_KEY_MIN_LENGTH) {
+    return bytesToBase64(this.generateHmacKeyBytes(keyLength));
+  }
+  static generateHmacKeyToStr(keyLength = HMAC_KEY_MIN_LENGTH, toBase64 = false) {
+    if (typeof keyLength === "boolean") {
+      return this.generateHmacKeyToStr(HMAC_KEY_MIN_LENGTH, keyLength);
+    }
+    const keyBytes = this.generateHmacKeyBytes(keyLength);
+    return toBase64 ? bytesToBase64(keyBytes) : bytesToHex(keyBytes);
+  }
+  static hmacVerify(key, data, receivedHmac) {
+    const computed = this.hmacBytes(
+      typeof key === "string" ? decodeHexOrBase64ToBytes(key) : key,
+      typeof data === "string" ? utf8ToBytes(data) : data
+    );
+    const enc = detectStringEncoding(receivedHmac);
+    let receivedBytes;
+    if (enc === "hex") {
+      receivedBytes = hexToBytes(receivedHmac);
+    } else if (enc === "base64") {
+      receivedBytes = base64ToBytes(receivedHmac);
+    } else {
+      throw new Error("receivedHmac must be hex or base64 string");
+    }
+    if (computed.length !== receivedBytes.length) return false;
+    let diff = 0;
+    for (let i = 0; i < computed.length; i++) diff |= computed[i] ^ receivedBytes[i];
+    return diff === 0;
   }
 };
 
@@ -507,6 +603,40 @@ function sm4CtrEncrypt(key, counter, plaintext) {
   }
   return result;
 }
+function gcmEncryptCore(plaintext, key, iv) {
+  const j0 = new Uint8Array(16);
+  j0.set(iv, 0);
+  j0[15] = 1;
+  const h = sm4EcbEncryptBlock(key, new Uint8Array(16));
+  const ciphertext = sm4CtrEncrypt(key, inc32(j0), plaintext);
+  const ghashResult = ghash(h, new Uint8Array(0), ciphertext);
+  const j0Encrypted = sm4EcbEncryptBlock(key, j0);
+  const tag = xorBytes(ghashResult, j0Encrypted);
+  const combined = new Uint8Array(iv.length + ciphertext.length + tag.length);
+  combined.set(iv, 0);
+  combined.set(ciphertext, iv.length);
+  combined.set(tag, iv.length + ciphertext.length);
+  return { combined, ciphertext, tag };
+}
+function gcmDecryptCore(data, key) {
+  if (data.length < GCM_IV_SIZE + GCM_TAG_SIZE) {
+    throw new Error("Invalid GCM ciphertext: too short");
+  }
+  const iv = data.subarray(0, GCM_IV_SIZE);
+  const tag = data.subarray(data.length - GCM_TAG_SIZE);
+  const ciphertext = data.subarray(GCM_IV_SIZE, data.length - GCM_TAG_SIZE);
+  const j0 = new Uint8Array(16);
+  j0.set(iv, 0);
+  j0[15] = 1;
+  const h = sm4EcbEncryptBlock(key, new Uint8Array(16));
+  const ghashResult = ghash(h, new Uint8Array(0), ciphertext);
+  const j0Encrypted = sm4EcbEncryptBlock(key, j0);
+  const computedTag = xorBytes(ghashResult, j0Encrypted);
+  if (!tagEquals(computedTag, tag)) {
+    throw new Error("SM4 GCM decryption failed (authentication failed)");
+  }
+  return sm4CtrEncrypt(key, inc32(j0), ciphertext);
+}
 var SM4Util = class _SM4Util {
   static generateKeyBytes() {
     var _a;
@@ -537,67 +667,59 @@ var SM4Util = class _SM4Util {
   }
   /**
    * SM4 GCM encryption.
-   * Returns Base64(IV[12] + ciphertext + Tag[16])
+   * Returns Hex(IV[12] + ciphertext + Tag[16]) by default, or Base64 if toBase64=true
    */
-  static encryptGcm(plaintext, key, iv) {
+  static encryptGcm(plaintext, key, iv, toBase64 = false) {
     const k = normalizeKeyBytes(key);
-    if (iv === void 0) {
-      iv = _SM4Util.generateGcmIV();
-    }
-    if (iv.length !== GCM_IV_SIZE) {
+    const actualIv = iv != null ? iv : _SM4Util.generateGcmIV();
+    if (actualIv.length !== GCM_IV_SIZE) {
       throw new Error(`GCM IV must be ${GCM_IV_SIZE} bytes`);
     }
-    const j0 = new Uint8Array(16);
-    j0.set(iv, 0);
-    j0[15] = 1;
-    const h = sm4EcbEncryptBlock(k, new Uint8Array(16));
-    const ciphertext = sm4CtrEncrypt(k, inc32(j0), plaintext);
-    const ghashResult = ghash(h, new Uint8Array(0), ciphertext);
-    const j0Encrypted = sm4EcbEncryptBlock(k, j0);
-    const tag = xorBytes(ghashResult, j0Encrypted);
-    const combined = new Uint8Array(iv.length + ciphertext.length + tag.length);
-    combined.set(iv, 0);
-    combined.set(ciphertext, iv.length);
-    combined.set(tag, iv.length + ciphertext.length);
-    return bytesToBase64(combined);
+    const { combined } = gcmEncryptCore(plaintext, k, actualIv);
+    return toBase64 ? bytesToBase64(combined) : bytesToHex(combined);
+  }
+  /**
+   * SM4 GCM encryption, always returns Hex.
+   */
+  static encryptGcmHex(plaintext, key, iv) {
+    return this.encryptGcm(plaintext, key, iv, false);
+  }
+  /**
+   * SM4 GCM encryption, always returns Base64.
+   */
+  static encryptGcmBase64(plaintext, key, iv) {
+    return this.encryptGcm(plaintext, key, iv, true);
   }
   /**
    * SM4 GCM decryption.
-   * Input: Base64(IV[12] + ciphertext + Tag[16])
+   * Input: Hex or Base64 encoded (IV[12] + ciphertext + Tag[16]), auto-detected
    * Returns plaintext bytes.
    */
-  static decryptGcm(ciphertextBase64, key) {
+  static decryptGcm(ciphertextHexOrBase64, key) {
     const k = normalizeKeyBytes(key);
-    const data = base64ToBytes(ciphertextBase64);
-    if (data.length < GCM_IV_SIZE + GCM_TAG_SIZE) {
-      throw new Error("Invalid GCM ciphertext: too short");
-    }
-    const iv = data.subarray(0, GCM_IV_SIZE);
-    const tag = data.subarray(data.length - GCM_TAG_SIZE);
-    const ciphertext = data.subarray(GCM_IV_SIZE, data.length - GCM_TAG_SIZE);
-    const j0 = new Uint8Array(16);
-    j0.set(iv, 0);
-    j0[15] = 1;
-    const h = sm4EcbEncryptBlock(k, new Uint8Array(16));
-    const ghashResult = ghash(h, new Uint8Array(0), ciphertext);
-    const j0Encrypted = sm4EcbEncryptBlock(k, j0);
-    const computedTag = xorBytes(ghashResult, j0Encrypted);
-    if (!tagEquals(computedTag, tag)) {
-      throw new Error("SM4 GCM decryption failed (authentication failed)");
-    }
-    return sm4CtrEncrypt(k, inc32(j0), ciphertext);
+    const data = decodeHexOrBase64ToBytes(ciphertextHexOrBase64);
+    return gcmDecryptCore(data, k);
   }
   /**
-   * SM4 GCM encrypt a UTF-8 string, returns Base64(IV[12] + ciphertext + Tag[16])
+   * SM4 GCM decryption from Hex input only.
    */
-  static encryptGcmString(plainText, key, iv) {
-    return _SM4Util.encryptGcm(utf8ToBytes(plainText), key, iv);
+  static decryptGcmFromHex(ciphertextHex, key) {
+    const k = normalizeKeyBytes(key);
+    const data = hexToBytes(ciphertextHex);
+    return gcmDecryptCore(data, k);
+  }
+  /**
+   * SM4 GCM decrypt a UTF-8 string, returns Hex by default or Base64 if toBase64=true
+   */
+  static encryptGcmString(plainText, key, iv, toBase64 = false) {
+    return _SM4Util.encryptGcm(utf8ToBytes(plainText), key, iv, toBase64);
   }
   /**
    * SM4 GCM decrypt to UTF-8 string
+   * Input: Hex or Base64 encoded, auto-detected
    */
-  static decryptGcmToString(ciphertextBase64, key) {
-    return bytesToUtf8(_SM4Util.decryptGcm(ciphertextBase64, key));
+  static decryptGcmToString(ciphertextHexOrBase64, key) {
+    return bytesToUtf8(_SM4Util.decryptGcm(ciphertextHexOrBase64, key));
   }
   // ========================
   // Legacy ECB methods (deprecated, kept for backward compatibility)

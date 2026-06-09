@@ -20,9 +20,24 @@ const CIPHER_MODE_C1C3C2 = 1;
 
 function normalizeCiphertextToHex(ciphertext: string): string {
   const enc = detectStringEncoding(ciphertext);
-  if (enc === 'hex') return ciphertext.trim().toLowerCase();
-  if (enc === 'base64') return bytesToHex(decodeHexOrBase64ToBytes(ciphertext));
-  throw new Error('Ciphertext must be hex or base64');
+  let hex: string;
+  if (enc === 'hex') {
+    hex = ciphertext.trim().toLowerCase();
+  } else if (enc === 'base64') {
+    hex = bytesToHex(decodeHexOrBase64ToBytes(ciphertext));
+  } else {
+    throw new Error('Ciphertext must be hex or base64');
+  }
+  
+  // 处理 Bouncy Castle 输出的带 04 前缀的密文格式
+  // sm-crypto-v2 期望的格式：X(64 字符) + Y(64 字符) + C3(64 字符) + C2
+  // Bouncy Castle 输出格式：04 + X(64 字符) + Y(64 字符) + C3(64 字符) + C2
+  if (hex.startsWith('04') && hex.length > 130) {
+    // 去掉 04 前缀
+    hex = hex.substring(2);
+  }
+  
+  return hex;
 }
 
 function normalizeSignatureToHex(signature: string): string {
@@ -56,19 +71,19 @@ export class SM2Util {
   static decryptToBytes(cipherBytes: Uint8Array, privateKey: KeyInput): Uint8Array {
     const privHex = sm2PrivateKeyToRawHex(privateKey);
     const cipherHex = bytesToHex(cipherBytes);
-    return sm2.doDecrypt(cipherHex, privHex, CIPHER_MODE_C1C3C2, { output: 'array' });
+    return sm2.doDecrypt(cipherHex, privHex, CIPHER_MODE_C1C3C2, { output: 'array', asn1: false });
   }
 
   static decryptToUtf8(cipherHexOrBase64: string, privateKey: KeyInput): string {
     const privHex = sm2PrivateKeyToRawHex(privateKey);
     const cipherHex = normalizeCiphertextToHex(cipherHexOrBase64);
-    return sm2.doDecrypt(cipherHex, privHex, CIPHER_MODE_C1C3C2, { output: 'string' });
+    return sm2.doDecrypt(cipherHex, privHex, CIPHER_MODE_C1C3C2, { output: 'string', asn1: false });
   }
 
   static decryptToBytesFromString(cipherHexOrBase64: string, privateKey: KeyInput): Uint8Array {
     const privHex = sm2PrivateKeyToRawHex(privateKey);
     const cipherHex = normalizeCiphertextToHex(cipherHexOrBase64);
-    return sm2.doDecrypt(cipherHex, privHex, CIPHER_MODE_C1C3C2, { output: 'array' });
+    return sm2.doDecrypt(cipherHex, privHex, CIPHER_MODE_C1C3C2, { output: 'array', asn1: false });
   }
 
   static decrypt(cipherHexOrBase64: string, privateKey: KeyInput): string {

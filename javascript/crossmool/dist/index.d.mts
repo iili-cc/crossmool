@@ -31,6 +31,16 @@ declare class SM3Util {
     static digestToHex(input: Uint8Array | string): string;
     static digestToBase64(input: Uint8Array | string): string;
     static digestFromBase64ToHex(base64: string): string;
+    static digest(input: Uint8Array | string, toBase64?: boolean): string;
+    static hmacBytes(key: Uint8Array, data: Uint8Array): Uint8Array;
+    static hmacToHex(key: Uint8Array | string, data: Uint8Array | string): string;
+    static hmacToBase64(key: Uint8Array | string, data: Uint8Array | string): string;
+    static hmac(key: Uint8Array | string, data: Uint8Array | string, toBase64?: boolean): string;
+    static generateHmacKeyBytes(keyLength?: number): Uint8Array;
+    static generateHmacKeyHex(keyLength?: number): string;
+    static generateHmacKeyBase64(keyLength?: number): string;
+    static generateHmacKeyToStr(keyLength?: number | boolean, toBase64?: boolean): string;
+    static hmacVerify(key: Uint8Array | string, data: Uint8Array | string, receivedHmac: string): boolean;
 }
 
 declare class SM4Util {
@@ -41,23 +51,36 @@ declare class SM4Util {
     static generateGcmIV(): Uint8Array;
     /**
      * SM4 GCM encryption.
-     * Returns Base64(IV[12] + ciphertext + Tag[16])
+     * Returns Hex(IV[12] + ciphertext + Tag[16]) by default, or Base64 if toBase64=true
      */
-    static encryptGcm(plaintext: Uint8Array, key: Uint8Array | string, iv?: Uint8Array): string;
+    static encryptGcm(plaintext: Uint8Array, key: Uint8Array | string, iv?: Uint8Array, toBase64?: boolean): string;
+    /**
+     * SM4 GCM encryption, always returns Hex.
+     */
+    static encryptGcmHex(plaintext: Uint8Array, key: Uint8Array | string, iv?: Uint8Array): string;
+    /**
+     * SM4 GCM encryption, always returns Base64.
+     */
+    static encryptGcmBase64(plaintext: Uint8Array, key: Uint8Array | string, iv?: Uint8Array): string;
     /**
      * SM4 GCM decryption.
-     * Input: Base64(IV[12] + ciphertext + Tag[16])
+     * Input: Hex or Base64 encoded (IV[12] + ciphertext + Tag[16]), auto-detected
      * Returns plaintext bytes.
      */
-    static decryptGcm(ciphertextBase64: string, key: Uint8Array | string): Uint8Array;
+    static decryptGcm(ciphertextHexOrBase64: string, key: Uint8Array | string): Uint8Array;
     /**
-     * SM4 GCM encrypt a UTF-8 string, returns Base64(IV[12] + ciphertext + Tag[16])
+     * SM4 GCM decryption from Hex input only.
      */
-    static encryptGcmString(plainText: string, key: Uint8Array | string, iv?: Uint8Array): string;
+    static decryptGcmFromHex(ciphertextHex: string, key: Uint8Array | string): Uint8Array;
+    /**
+     * SM4 GCM decrypt a UTF-8 string, returns Hex by default or Base64 if toBase64=true
+     */
+    static encryptGcmString(plainText: string, key: Uint8Array | string, iv?: Uint8Array, toBase64?: boolean): string;
     /**
      * SM4 GCM decrypt to UTF-8 string
+     * Input: Hex or Base64 encoded, auto-detected
      */
-    static decryptGcmToString(ciphertextBase64: string, key: Uint8Array | string): string;
+    static decryptGcmToString(ciphertextHexOrBase64: string, key: Uint8Array | string): string;
     /** @deprecated Use encryptGcm instead */
     static encryptEcbToBytes(input: Uint8Array, key: Uint8Array | string): Uint8Array;
     /** @deprecated Use decryptGcm instead */
