@@ -113,6 +113,7 @@ function ghash(h: Uint8Array, aad: Uint8Array, ciphertext: Uint8Array): Uint8Arr
 }
 
 // Encrypt a single 16-byte block using SM4 ECB (no padding)
+// Internal helper for GCM - NOT a user-facing ECB mode
 function sm4EcbEncryptBlock(key: Uint8Array, block: Uint8Array): Uint8Array {
   // sm-crypto-v2's sm4.encrypt with ECB mode adds PKCS7 padding,
   // so for a 16-byte input it produces 32 bytes. We only need the first 16.
@@ -282,47 +283,6 @@ export class SM4Util {
    */
   static decryptGcmToString(ciphertextHexOrBase64: string, key: Uint8Array | string): string {
     return bytesToUtf8(SM4Util.decryptGcm(ciphertextHexOrBase64, key));
-  }
-
-  // ========================
-  // Legacy ECB methods (deprecated, kept for backward compatibility)
-  // ========================
-
-  /** @deprecated Use encryptGcm instead */
-  static encryptEcbToBytes(input: Uint8Array, key: Uint8Array | string): Uint8Array {
-    const k = normalizeKeyBytes(key);
-    return sm4.encrypt(input, k, { mode: 'ecb', padding: 'pkcs#7', output: 'array' });
-  }
-
-  /** @deprecated Use decryptGcm instead */
-  static decryptEcbToBytes(cipher: Uint8Array, key: Uint8Array | string): Uint8Array {
-    const k = normalizeKeyBytes(key);
-    return sm4.decrypt(cipher, k, { mode: 'ecb', padding: 'pkcs#7', output: 'array' });
-  }
-
-  /** @deprecated Use encryptGcmString instead */
-  static encryptEcbToHex(plainText: string, key: Uint8Array | string): string {
-    const ct = this.encryptEcbToBytes(utf8ToBytes(plainText), key);
-    return bytesToHex(ct);
-  }
-
-  /** @deprecated Use encryptGcmString instead */
-  static encryptEcbToBase64(plainText: string, key: Uint8Array | string): string {
-    const ct = this.encryptEcbToBytes(utf8ToBytes(plainText), key);
-    return bytesToBase64(ct);
-  }
-
-  /** @deprecated Use decryptGcmToString instead */
-  static decryptEcbToUtf8(cipherHexOrBase64: string, key: Uint8Array | string): string {
-    const cipherBytes = decodeHexOrBase64ToBytes(cipherHexOrBase64);
-    const pt = this.decryptEcbToBytes(cipherBytes, key);
-    return bytesToUtf8(pt);
-  }
-
-  /** @deprecated Use decryptGcmToString instead */
-  static decryptEcbHexToUtf8(cipherHex: string, key: Uint8Array | string): string {
-    const pt = this.decryptEcbToBytes(hexToBytes(cipherHex), key);
-    return bytesToUtf8(pt);
   }
 }
 

@@ -190,25 +190,4 @@ func TestSM4_Gcm_HexConvenience(t *testing.T) {
 	}
 }
 
-// ========================
-// Legacy ECB tests
-// ========================
-
-func TestSM4_ECB_RoundTrip(t *testing.T) {
-	key, _ := hex.DecodeString("0123456789abcdeffedcba9876543210")
-	plain := []byte("Hello, 這是国密SM4測試數據")
-
-	encrypted, err := EncryptECB(key, plain)
-	if err != nil {
-		t.Fatalf("EncryptECB failed: %v", err)
-	}
-
-	decrypted, err := DecryptECB(key, encrypted)
-	if err != nil {
-		t.Fatalf("DecryptECB failed: %v", err)
-	}
-
-	if !bytes.Equal(decrypted, plain) {
-		t.Fatalf("decrypted mismatch: got %s want %s", decrypted, plain)
-	}
-}
+// Legacy ECB tests removed. SM4-GCM is the only supported mode.

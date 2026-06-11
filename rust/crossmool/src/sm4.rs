@@ -337,71 +337,9 @@ fn gcm_decrypt(cipher: &mut Sm4, iv: &[u8], aad: &[u8], ciphertext: &[u8], tag: 
     Ok(plain)
 }
 
-// ========================
-// Legacy ECB mode
-// ========================
-
-/// Encrypt using SM4-ECB with PKCS#7 padding, return hex string
-pub fn encrypt_ecb_hex(key: &[u8], plain: &[u8]) -> Result<String, String> {
-    let mut cipher = Sm4::new_from_slice(key).map_err(|e| format!("invalid key: {}", e))?;
-    let padded = pkcs7_pad(plain);
-    let mut result = vec![0u8; padded.len()];
-
-    for (i, chunk) in padded.chunks(16).enumerate() {
-        let mut block = generic_array::GenericArray::clone_from_slice(chunk);
-        cipher.encrypt_block_mut(&mut block);
-        result[i * 16..(i + 1) * 16].copy_from_slice(&block);
-    }
-
-    Ok(hex::encode(&result))
-}
-
-/// Decrypt SM4-ECB hex ciphertext, return raw bytes
-pub fn decrypt_ecb_hex(key: &[u8], cipher_hex: &str) -> Result<Vec<u8>, String> {
-    let data = hex::decode(cipher_hex).map_err(|e| format!("hex decode error: {}", e))?;
-    decrypt_ecb_bytes(key, &data)
-}
-
-/// Encrypt using SM4-ECB with PKCS#7 padding, return base64 string
-pub fn encrypt_ecb_base64(key: &[u8], plain: &[u8]) -> Result<String, String> {
-    let mut cipher = Sm4::new_from_slice(key).map_err(|e| format!("invalid key: {}", e))?;
-    let padded = pkcs7_pad(plain);
-    let mut result = vec![0u8; padded.len()];
-
-    for (i, chunk) in padded.chunks(16).enumerate() {
-        let mut block = generic_array::GenericArray::clone_from_slice(chunk);
-        cipher.encrypt_block_mut(&mut block);
-        result[i * 16..(i + 1) * 16].copy_from_slice(&block);
-    }
-
-    Ok(general_purpose::STANDARD.encode(&result))
-}
-
-/// Decrypt SM4-ECB base64 ciphertext, return raw bytes
-pub fn decrypt_ecb_base64(key: &[u8], cipher_b64: &str) -> Result<Vec<u8>, String> {
-    let data = general_purpose::STANDARD
-        .decode(cipher_b64)
-        .map_err(|e| format!("base64 decode error: {}", e))?;
-    decrypt_ecb_bytes(key, &data)
-}
-
-/// Decrypt SM4-ECB raw bytes with PKCS#7 unpadding
-pub fn decrypt_ecb_bytes(key: &[u8], data: &[u8]) -> Result<Vec<u8>, String> {
-    if data.len() % 16 != 0 {
-        return Err("invalid ECB data: not a multiple of block size".into());
-    }
-
-    let mut cipher = Sm4::new_from_slice(key).map_err(|e| format!("invalid key: {}", e))?;
-    let mut plain = vec![0u8; data.len()];
-
-    for (i, chunk) in data.chunks(16).enumerate() {
-        let mut block = generic_array::GenericArray::clone_from_slice(chunk);
-        cipher.decrypt_block_mut(&mut block);
-        plain[i * 16..(i + 1) * 16].copy_from_slice(&block);
-    }
-
-    pkcs7_unpad(&plain)
-}
+// Legacy ECB mode has been removed.
+// SM4-GCM is the recommended and only supported mode.
+// See git history for the old ECB implementation if needed.
 
 // ========================
 // helpers
@@ -414,31 +352,7 @@ fn validate_key(key: &[u8]) -> Result<(), String> {
     Ok(())
 }
 
-fn pkcs7_pad(data: &[u8]) -> Vec<u8> {
-    let padding = 16 - data.len() % 16;
-    let mut padded = Vec::with_capacity(data.len() + padding);
-    padded.extend_from_slice(data);
-    for _ in 0..padding {
-        padded.push(padding as u8);
-    }
-    padded
-}
-
-fn pkcs7_unpad(data: &[u8]) -> Result<Vec<u8>, String> {
-    if data.is_empty() {
-        return Err("invalid padding: empty data".into());
-    }
-    let padding = data[data.len() - 1] as usize;
-    if padding == 0 || padding > 16 || padding > data.len() {
-        return Err("invalid PKCS#7 padding".into());
-    }
-    for i in 0..padding {
-        if data[data.len() - 1 - i] as usize != padding {
-            return Err("invalid PKCS#7 padding".into());
-        }
-    }
-    Ok(data[..data.len() - padding].to_vec())
-}
+// pkcs7 helpers removed along with legacy ECB code
 
 // ========================
 // Tests
@@ -534,12 +448,5 @@ mod tests {
         assert_eq!(decrypted, plain);
     }
 
-    #[test]
-    fn test_ecb_roundtrip() {
-        let key = hex::decode("0123456789abcdeffedcba9876543210").unwrap();
-        let plain = "Hello, 这是国密 SM4 测试数据";
-        let encrypted = encrypt_ecb_base64(&key, plain.as_bytes()).unwrap();
-        let decrypted = decrypt_ecb_base64(&key, &encrypted).unwrap();
-        assert_eq!(decrypted, plain.as_bytes());
-    }
+// Legacy ECB round-trip test removed. SM4-GCM is the only supported mode.
 }

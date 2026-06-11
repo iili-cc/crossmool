@@ -153,58 +153,6 @@ func DecryptGcmToString(key []byte, encodedData string) (string, error) {
 }
 
 // ========================
-// Legacy ECB mode
-// ========================
-
-// EncryptECB encrypts plaintext using SM4-ECB with PKCS#7 padding.
-func EncryptECB(key, plain []byte) (string, error) {
-	if err := validateKey(key); err != nil {
-		return "", err
-	}
-
-	block, err := sm4.NewCipher(key)
-	if err != nil {
-		return "", fmt.Errorf("failed to create SM4 cipher: %w", err)
-	}
-
-	padded := pkcs7Pad(plain, sm4BlockSize)
-	cipher := make([]byte, len(padded))
-
-	for i := 0; i < len(padded); i += sm4BlockSize {
-		block.Encrypt(cipher[i:i+sm4BlockSize], padded[i:i+sm4BlockSize])
-	}
-
-	return EncodeBase64(cipher), nil
-}
-
-// DecryptECB decrypts SM4-ECB ciphertext with PKCS#7 unpadding.
-func DecryptECB(key []byte, encodedData string) ([]byte, error) {
-	if err := validateKey(key); err != nil {
-		return nil, err
-	}
-
-	data, err := DecodeBase64String(encodedData)
-	if err != nil {
-		return nil, fmt.Errorf("failed to decode base64: %w", err)
-	}
-	if len(data)%sm4BlockSize != 0 {
-		return nil, fmt.Errorf("invalid ECB data: not a multiple of block size")
-	}
-
-	block, err := sm4.NewCipher(key)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create SM4 cipher: %w", err)
-	}
-
-	plain := make([]byte, len(data))
-	for i := 0; i < len(data); i += sm4BlockSize {
-		block.Decrypt(plain[i:i+sm4BlockSize], data[i:i+sm4BlockSize])
-	}
-
-	return pkcs7Unpad(plain)
-}
-
-// ========================
 // helpers
 // ========================
 
@@ -213,29 +161,4 @@ func validateKey(key []byte) error {
 		return fmt.Errorf("SM4 key must be %d bytes (128 bits)", sm4KeySize)
 	}
 	return nil
-}
-
-func pkcs7Pad(data []byte, blockSize int) []byte {
-	padding := blockSize - len(data)%blockSize
-	padText := make([]byte, padding)
-	for i := range padText {
-		padText[i] = byte(padding)
-	}
-	return append(data, padText...)
-}
-
-func pkcs7Unpad(data []byte) ([]byte, error) {
-	if len(data) == 0 {
-		return nil, fmt.Errorf("invalid padding: empty data")
-	}
-	padding := int(data[len(data)-1])
-	if padding == 0 || padding > sm4BlockSize || padding > len(data) {
-		return nil, fmt.Errorf("invalid PKCS#7 padding")
-	}
-	for i := 0; i < padding; i++ {
-		if data[len(data)-1-i] != byte(padding) {
-			return nil, fmt.Errorf("invalid PKCS#7 padding")
-		}
-	}
-	return data[:len(data)-padding], nil
 }

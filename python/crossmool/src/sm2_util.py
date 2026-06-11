@@ -139,10 +139,13 @@ def raw_rs_to_der(r_hex: str, s_hex: str) -> bytes:
     return _der_encode_sequence(r_enc + s_enc)
 
 def der_to_raw_rs(der_sig: bytes) -> (str, str):
-    """将 DER 编码的签名转换为 r||s"""
+    """将 DER 编码的签名转换为 r||s（去除 DER INTEGER 的符号填充）"""
     d = DerReader(der_sig).read_sequence()
     r = d.read_integer_bytes()
     s = d.read_integer_bytes()
+    # 去除 DER INTEGER 可能添加的前导 0x00（用于表示正数）
+    r = r.lstrip(b'\x00') or b'\x00'
+    s = s.lstrip(b'\x00') or b'\x00'
     r_hex = bytes_to_hex(r).rjust(64, '0')
     s_hex = bytes_to_hex(s).rjust(64, '0')
     return r_hex, s_hex
@@ -169,30 +172,13 @@ class SM2Util:
     def encrypt_to_hex(content: bytes, public_key) -> str:
         """
         加密 SM2 明文（C1C3C2 格式，与 Java Bouncy Castle 兼容）
-        Java: SM2Engine(SM2Engine.Mode.C1C3C2)
+        使用 gmssl 库内置的 encrypt 方法
         """
-        from gmssl import sm3
-        from gmssl.func import random_hex
-        
         pub_hex = sm2_public_key_to_raw_hex(public_key)
-        k = int(random_hex(64), 16)
-        
-        temp_crypt = sm2.CryptSM2(public_key=pub_hex, private_key='', mode=1)
-        C1 = temp_crypt._kg(k, temp_crypt.ecc_table['g'])
-        xy = temp_crypt._kg(k, pub_hex)
-        
-        para_len = 64
-        x2 = xy[0:para_len]
-        y2 = xy[para_len:2*para_len]
-        
-        mlen = len(content)
-        t = sm3.sm3_kdf(xy.encode('utf8'), mlen)
-        
-        M_hex = content.hex()
-        C2 = format(int(M_hex, 16) ^ int(t, 16), '0%dx' % mlen)
-        C3 = sm3.sm3_hash([i for i in bytes.fromhex(x2 + M_hex + y2)])
-        
-        return C1 + C3 + C2
+        # 使用临时 CryptSM2 对象进行加密（只需要公钥）
+        crypt = sm2.CryptSM2(public_key=pub_hex, private_key='', mode=1)
+        enc_bytes = crypt.encrypt(content)
+        return enc_bytes.hex()
 
     @staticmethod
     def encrypt_to_base64(content: bytes, public_key) -> str:
@@ -205,10 +191,8 @@ class SM2Util:
         解密 SM2 密文（C1C3C2 格式，与 Java Bouncy Castle 兼容）
         Java: SM2Engine(SM2Engine.Mode.C1C3C2)
         
-        手动实现解密逻辑，确保与 Java 兼容
+        使用 gmssl 库内置的 decrypt 方法（默认 C1C3C2 格式）
         """
-        from gmssl import sm3
-        
         priv_hex = sm2_private_key_to_raw_hex(private_key)
         
         # 获取或推导公钥
@@ -221,43 +205,14 @@ class SM2Util:
             if not pub_hex.startswith('04'):
                 pub_hex = '04' + pub_hex
         
-        # 解析 C1C3C2 格式
-        cipher_bytes = bytes.fromhex(cipher_hex)
-        C1_bytes = cipher_bytes[0:65]
-        C3_bytes = cipher_bytes[65:97]
-        C2_bytes = cipher_bytes[97:]
-        
-        C1_hex = C1_bytes.hex()
-        C3_hex = C3_bytes.hex()
-        C2_hex = C2_bytes.hex()
-        
-        # 使用 gmssl 底层函数计算共享密钥
+        # 使用 gmssl 内置 decrypt 方法 (默认 C1C3C2 格式)
+        # gmssl decrypt 接受 bytes 类型的密文
         crypt = sm2.CryptSM2(private_key=priv_hex, public_key=pub_hex, mode=1)
-        
-        # 从 C1 和私钥计算共享密钥 S = d * C1
-        C1_point = bytes.fromhex(C1_hex)
-        S_hex = crypt._decrypt_point(C1_point)
-        
-        # S_hex 格式为 x||y (各 32 字节，共 64 字节)
-        x2 = S_hex[0:64]
-        y2 = S_hex[64:128]
-        
-        # 计算 t = KDF(x2 || M || y2, mlen)
-        # 但这里 M 未知，需要先解密 C2
-        # 使用 t = KDF(x2 || y2, mlen) 来解密
-        mlen = len(C2_bytes)
-        t = sm3.sm3_kdf((x2 + y2).encode('utf8'), mlen)
-        
-        # M = C2 XOR t
-        M_hex = format(int(C2_hex, 16) ^ int(t, 16), '0%dx' % (mlen * 2))
-        M_bytes = bytes.fromhex(M_hex)
-        
-        # 验证 C3
-        C3_calc = sm3.sm3_hash([i for i in bytes.fromhex(x2 + M_hex + y2)])
-        if C3_calc != C3_hex:
-            raise ValueError("C3 verification failed")
-        
-        return M_bytes
+        cipher_bytes = bytes.fromhex(cipher_hex)
+        result = crypt.decrypt(cipher_bytes)
+        if isinstance(result, str):
+            result = result.encode('latin-1')
+        return bytes(result)
 
     @staticmethod
     def decrypt_from_base64(cipher_b64: str, private_key) -> bytes:
@@ -269,12 +224,19 @@ class SM2Util:
         """
         签名 SM2 明文，返回 DER 编码的签名
         Java: SM2Signer 使用 USER_ID="1234567812345678"
-        gmssl 的 sign 方法默认使用 USER_ID = b"1234567812345678"
+        gmssl 的 sign_with_sm3 方法默认使用 USER_ID = b"1234567812345678"
         """
         priv_hex = sm2_private_key_to_raw_hex(private_key)
         
-        crypt = sm2.CryptSM2(private_key=priv_hex, public_key=None)
-        sig_raw = crypt.sign(content)  # returns hex r||s
+        # gmssl sign 需要 public_key，先从私钥推导公钥
+        temp_crypt = sm2.CryptSM2(private_key=priv_hex, public_key='04' + '00' * 64)
+        pub_hex = temp_crypt._kg(int(priv_hex, 16), temp_crypt.ecc_table['g'])
+        if not pub_hex.startswith('04'):
+            pub_hex = '04' + pub_hex
+        
+        crypt = sm2.CryptSM2(private_key=priv_hex, public_key=pub_hex)
+        # sign_with_sm3 uses SM3 hash and auto-generates random K
+        sig_raw = crypt.sign_with_sm3(content)  # returns hex r||s
         
         if len(sig_raw) % 2 != 0:
             raise ValueError('Invalid signature length')
@@ -321,7 +283,7 @@ class SM2Util:
             sig_raw = sig_bytes.hex()
 
         crypt = sm2.CryptSM2(public_key=pub_hex, private_key=None)
-        return crypt.verify(sig_raw, content)
+        return crypt.verify_with_sm3(sig_raw, content)
 
     # convenience wrappers similar to Java API
     @staticmethod
