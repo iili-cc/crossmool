@@ -1,0 +1,36 @@
+============================================================
+Java-Go SM2/SM3/SM4 Interoperability Test - Go Verifier
+============================================================
+
+--- SM2 Tests ---
+  [Test 1] SM2 Decrypt (Hex)... PASS
+  [Test 2] SM2 Decrypt (Base64)... PASS
+  [Test 3] SM2 Verify (Hex)... PASS
+  [Test 4] SM2 Verify (Base64)... PASS
+
+--- SM3 Tests ---
+  [Test 5] SM3 Digest (Hex)... PASS
+  [Test 6] SM3 Digest (Base64)... PASS
+
+--- HMAC-SM3 Tests ---
+  [Test 7] HMAC-SM3 (Hex)... PASS
+  [Test 8] HMAC-SM3 (Base64)... PASS
+
+--- SM4 GCM Tests ---
+  [Test 9] SM4 GCM Decrypt (Hex)... PASS
+  [Test 10] SM4 GCM Decrypt (Base64)... PASS
+
+============================================================
+Go Verification Summary: 10/10 tests passed
+============================================================
+
+✅ [SUCCESS] All Java-Go interoperability tests passed!
+
+=== Interoperability Notes ===
+✓ SM2: Java and Go use same DER key formats (X.509/PKCS#8)
+✓ SM2: Both use C1C3C2 ciphertext format and SM3 digest
+✓ SM2: Both use same USER_ID "1234567812345678" for signing
+✓ SM3: Direct compatibility - identical digests
+✓ HMAC-SM3: Direct compatibility with Hex/Base64 key parsing
+✓ SM4-GCM: Both use 12-byte IV, 16-byte tag, IV+ciphertext+tag format
+✓ Encoding: Both support Hex and Base64 auto-detection

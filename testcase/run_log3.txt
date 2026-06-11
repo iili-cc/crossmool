@@ -1,0 +1,54 @@
+﻿java.exe : Picked up JAVA_TOOL_OPTIONS: -Djava.net.preferIPv4Stack=true
+所在位置 行:1 字符: 1
++ & 'H:\Programs\Java\jdk-21.0.1+12\bin\java.exe' -cp 'g:\workspaces\gi ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Picked up JAVA_...rIPv4Stack=true:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+=== Java-Go SM Interop Test Data Generator ===
+
+--- SM2 ---
+09:55:45.249 [main] INFO cc.iili.tools.crossmool.tool.SM2Util -- 
+publicKeyStr:3059301306072a8648ce3d020106082a811ccf5501822d0342000484fb7d643c3a4e77874b62556d8791bfc4893667f155b0e738b34a2f22223d0c2273cf12fadcb55b11449dab4c8c0ab4dd9ea45a61921b6e1db901b2a47418e4
+privateKeyStr:308193020100301306072a8648ce3d020106082a811ccf5501822d04793077020101042064e6cfab69a8a3d3742d31e0e8756eb21d6d29f35e678e382fa2923c1521520da00a06082a811ccf5501822da1440342000484fb7d643c3a4e77874b62556d8791bfc4893667f155b0e738b34a2f22223d0c2273cf12fadcb55b11449dab4c8c0ab4dd9ea45a61921b6e1db901b2a47418e4
+SM2 PublicKey (Hex):  3059301306072a8648ce3d020106082a811ccf5501822d0342000484fb7d643c3a4e77874b62556d8791bfc4893667f155b0e738b34a2f22223d0c2273cf12fadcb55b11449dab4c8c0ab4dd9ea45a61921b6e1db901b2a47418e4
+SM2 PrivateKey (Hex): 308193020100301306072a8648ce3d020106082a811ccf5501822d04793077020101042064e6cfab69a8a3d3742d31e0e8756eb21d6d29f35e678e382fa2923c1521520da00a06082a811ccf5501822da1440342000484fb7d643c3a4e77874b62556d8791bfc4893667f155b0e738b34a2f22223d0c2273cf12fadcb55b11449dab4c8c0ab4dd9ea45a61921b6e1db901b2a47418e4
+09:55:45.250 [main] INFO cc.iili.tools.crossmool.tool.SM2Util -- 
+publicKeyStr:MFkwEwYHKoZIzj0CAQYIKoEcz1UBgi0DQgAE5vHk/CK/LG0a6vyEJFAglx+8TdZ+nTX213ZoShHG4FLgxTVJpKttFPpfPvIar8dBkEHxW96XrEq1Rg+3apsMew==
+privateKeyStr:MIGTAgEAMBMGByqGSM49AgEGCCqBHM9VAYItBHkwdwIBAQQgSvAZFv83fNJxLKBRAx5O+ln0c5Y+6lBBUdgcPik05/2gCgYIKoEcz1UBgi2hRANCAATm8eT8Ir8sbRrq/IQkUCCXH7xN1n6dNfbXdmhKEcbgUuDFNUmkq20U+l8+8hqvx0GQQfFb3pesSrVGD7dqmwx7
+SM2 PublicKey (Base64):  MFkwEwYHKoZIzj0CAQYIKoEcz1UBgi0DQgAE5vHk/CK/LG0a6vyEJFAglx+8TdZ+nTX213ZoShHG4FLgxTVJpKttFPpfPvIar8dBkEHxW96XrEq1Rg+3apsMew==
+SM2 PrivateKey (Base64): MIGTAgEAMBMGByqGSM49AgEGCCqBHM9VAYItBHkwdwIBAQQgSvAZFv83fNJxLKBRAx5O+ln0c5Y+6lBBUdgcPik05/2gCgYIKoEcz1UBgi2hRANCAATm8eT8Ir8sbRrq/IQkUCCXH7xN1n6dNfbXdmhKEcbgUuDFNUmkq20U+l8+8hqvx0GQQfFb3pesSrVGD7dqmwx7
+SM2 Ciphertext (Hex): 044cbd0c8ddb456749db04c0be0e8510cf8377e4a53c4444d6f562eecde0a0cbce8dae1a192bca6e560f96fc17dfbff3328bcb4b95055c5c96564a7974d71f7df8bf5c572c56b4339a39b2093312552fd3f92f0e4825fac4f8a4c6da38e07eba05ec3756786de68adbd89db9aa69fce218432b0a4455689ca7c7b92340
+SM2 Ciphertext (Base64): BGQyaZFRViN1KqsI57SHKoaItydoZd97XhT5wHPLku6gMLhHq+ExhMMWnwK8nOjOzcHNQDAtMIaKWpl6793Gc3/70Axs6HxboV8cJXQGW36mSZpc9f9HoCWlb/YstRMPzJonV7tmn9qUfDQu06rrWZS8AnpwPdG7ebVGf2U=
+SM2 Decrypt verify (Hex):    true
+SM2 Decrypt verify (Base64): true
+SM2 Signature (Hex): 3046022100aff0d16c165ee9b44be706c13333a47c814bd4c41ecf028b8c2b01d93b4e4b90022100a10cfd355accd21020b306f2d7efca0a55c1bd0e0efe798c30770de846bfd6fc
+SM2 Signature (Base64): MEYCIQDPfSdjmveObVWhQV3rJay6RsSCVgv5OZUKStyeqYI2kwIhANuZG/ix2BRLW/+Tj+jCqTp16wC73aiQKU984/6/eZ0P
+SM2 Verify (Hex):    true
+SM2 Verify (Base64): true
+SM2 EncryptSign Ciphertext (Hex): 043928e91a88233fddfa632be16ef953559b781db1bc3668bd7d22f7b540ff683e3b03f12506f98b9b0ba615244ba07600ad6f4823d368b5d85bb7331fee60fc6245315135296aa1166c601998dc2ce437fb7407d394a57b56fe12eccf72f7be42a5b78b5b93c98877f3b19e02cd5c4d680a311367e029e45cb2c1c6ae
+SM2 EncryptSign Signature (Hex):  30450220660e3cea4537da7271df106bcf706c56e6b877b6928b12df02b5f984386adc0d022100b14fed04ef846c710d67390ca4fa0d19dcdd8bf125821ab79661a44b746bac56
+SM2 EncryptSign Ciphertext (Base64): BHhYDsu+zXtU5YVf5BaspTpKZ4CI9F/Gpb5VXZ+Z6CSVA27zl2Pdbn/pBVaOLz6uoLpZhdWlA7RhKXThMh7KbJZVoVBVu0WLXH87lGRsTBzINayPh40wYFYsPpcKLYpx4KPqBp7MH8Rt0RwrIo5IMEVB9Em1MKHCjyG8SbE=
+SM2 EncryptSign Signature (Base64):  MEYCIQDcMynuZ5QG21xz5MqqAQ5RoeSz+b+llPASl0cWbeWMDAIhAI+c947eYS0HOyU++wJsxNO2RbYCbTZIF65+TRcf9cyD
+SM2 VerifyDecrypt (Hex):    true
+SM2 VerifyDecrypt (Base64): true
+
+--- SM3 ---
+SM3 Digest (Hex): 5b6812c713c7266d7188e0dd18bb99352417df5f6cc017f474274091d873308a
+SM3 Digest (Base64): W2gSxxPHJm1xiODdGLuZNSQX319swBf0dCdAkdhzMIo=
+HMAC-SM3 (Hex): 4d0a0e1510616a74861544731178b7139ff0b9ebb7f59df4a1dc52d2bccb191a
+HMAC-SM3 (Base64): TQoOFRBhanSGFURzEXi3E5/wueu39Z30odxS0rzLGRo=
+
+--- SM4-GCM ---
+SM4 Key (Hex): a5b392ff9de0c16fb317f53d46704e73
+SM4 Key (Base64): pbOS/53gwW+zF/U9RnBOcw==
+SM4-GCM Ciphertext (Base64, IV+ciphertext+Tag): AQIDBAUGBwgJCgsMK4SDhVU9TzLFCZO4zhKyXPicvpn/5Wy5mzx/IkuO4iBScSfYXgeOhb8sGiE=
+SM4-GCM Ciphertext (Hex, IV+ciphertext+Tag): 0102030405060708090a0b0c2b848385553d4f32c50993b8ce12b25cf89cbe99ffe56cb99b3c7f224b8ee220527127d85e078e85bf2c1a21
+SM4-GCM IV (Hex):              0102030405060708090a0b0c
+SM4-GCM Ciphertext+Tag (Hex):  2b848385553d4f32c50993b8ce12b25cf89cbe99ffe56cb99b3c7f224b8ee220527127d85e078e85bf2c1a21
+SM4-GCM Decrypt verify: true
+SM4-GCM JCA Decrypt verify: true
+
+Test data saved to: g:\workspaces\git\corssmool\crossmool\testcase\java_go_test_data.json
+
+=== Java-Go test data generation complete! ===

@@ -1,71 +1,108 @@
-# Crossmool 跨语言互操作性测试
+# Java-Go SM2/SM3/SM4 互通性测试
 
-## 概述
+本目录包含 Java 和 Go 语言实现的 SM2/SM3/SM4 国密算法互通性测试。
 
-本目录包含 8 种编程语言（Java, C, C++, C#, Go, JavaScript, Python, Rust）实现的 SM2 加解密和签名/验签功能的跨语言互操作性测试脚本。
+## 测试文件
 
-## 测试场景
+- `JavaGoInteropTest.java` - Java 测试数据生成器
+- `run_java_go_interop_test.sh` - 一键运行所有测试的脚本
+- `Java-Go-interop-test-report.md` - 详细测试报告
+- `java_go_test_output.txt` - Java 测试输出（运行后生成）
+- `go_unit_test_output.txt` - Go 单元测试输出（运行后生成）
+- `go_verify_output.txt` - Go 验证输出（运行后生成）
 
-1. **Java 加密和签名，其他 7 种语言解密和验签**
-2. **C 加密和签名，其他 7 种语言解密和验签**
-3. **C++ 加密和签名，其他 7 种语言解密和验签**
-4. **C# 加密和签名，其他 7 种语言解密和验签**
-5. **Go 加密和签名，其他 7 种语言解密和验签**
-6. **JavaScript 加密和签名，其他 7 种语言解密和验签**
-7. **Python 加密和签名，其他 7 种语言解密和验签**
-8. **Rust 加密和签名，其他 7 种语言解密和验签**
+## 快速开始
 
-## 数据格式规范
-
-- **输入参数**: UTF-8 字符串
-- **输出格式**: 优先 Hex 编码，其次 Base64 编码
-- **字符集**: UTF-8
-
-## 测试结构
-
-```
-testcase/
-├── keys/                    # 共享密钥文件
-│   ├── java_keys.json       # Java 生成的密钥对
-│   ├── c_keys.json          # C 生成的密钥对
-│   ├── cpp_keys.json        # C++ 生成的密钥对
-│   ├── csharp_keys.json     # C# 生成的密钥对
-│   ├── golang_keys.json     # Go 生成的密钥对
-│   ├── javascript_keys.json # JavaScript 生成的密钥对
-│   ├── python_keys.json     # Python 生成的密钥对
-│   └── rust_keys.json       # Rust 生成的密钥对
-├── results/                 # 测试结果目录
-│   ├── java_encrypt/        # Java 加密结果
-│   ├── c_encrypt/           # C 加密结果
-│   ├── cpp_encrypt/         # C++ 加密结果
-│   ├── csharp_encrypt/      # C# 加密结果
-│   ├── golang_encrypt/      # Go 加密结果
-│   ├── javascript_encrypt/  # JavaScript 加密结果
-│   ├── python_encrypt/      # Python 加密结果
-│   └── rust_encrypt/        # Rust 加密结果
-├── test_data.json           # 测试数据（明文）
-├── run_all_tests.bat        # Windows 批处理脚本
-├── run_all_tests.sh         # Linux/Mac 脚本
-└── test_report.md           # 测试报告
-```
-
-## 运行测试
-
-### Windows
-
-```batch
-cd testcase
-run_all_tests.bat
-```
-
-### Linux/Mac
+### 方式一：运行测试脚本（推荐）
 
 ```bash
 cd testcase
-chmod +x run_all_tests.sh
-./run_all_tests.sh
+bash run_java_go_interop_test.sh
+```
+
+脚本将自动执行以下步骤：
+1. 编译 Java 项目
+2. 运行 Java 测试数据生成器
+3. 运行 Go 单元测试
+4. 运行 Go 验证程序
+5. 生成测试报告
+
+### 方式二：手动运行
+
+#### 1. 编译并运行 Java 测试
+
+```bash
+cd java/crossmool
+mvn clean compile
+javac -cp "target/classes;$(cat cp.txt)" -d target/classes ../../testcase/JavaGoInteropTest.java
+java -cp "target/classes;$(cat cp.txt)" JavaGoInteropTest
+```
+
+#### 2. 运行 Go 单元测试
+
+```bash
+cd golang/crossmool
+go mod tidy
+go test -v -run "SM4|SM2|SM3"
+```
+
+#### 3. 运行 Go 验证程序
+
+```bash
+cd golang/verify
+go mod tidy
+go run verify_java_interop.go
 ```
 
 ## 测试结果
 
-测试结果将保存在 `testcase/results/` 目录下，最终报告生成在 `testcase/test_report.md`。
+### 测试摘要
+
+| 算法 | 测试项 | Hex 编码 | Base64 编码 | 结果 |
+|------|--------|----------|-------------|------|
+| **SM2** | 加密/解密 | ✅ 通过 | ✅ 通过 | 完全互通 |
+| **SM2** | 签名/验签 | ✅ 通过 | ✅ 通过 | 完全互通 |
+| **SM3** | 摘要计算 | ✅ 通过 | ✅ 通过 | 完全互通 |
+| **HMAC-SM3** | MAC 计算 | ✅ 通过 | ✅ 通过 | 完全互通 |
+| **SM4-GCM** | 加密/解密 | ✅ 通过 | ✅ 通过 | 完全互通 |
+
+**总计**: 10/10 测试项通过，互通性测试成功！
+
+### 详细测试报告
+
+完整测试报告请查看：`Java-Go-interop-test-report.md`
+
+## 技术要点
+
+### SM2
+- 曲线：sm2p256v1
+- 加密模式：C1C3C2
+- 签名 USER_ID: `1234567812345678`
+- 密钥格式：X.509 公钥 / PKCS#8 私钥（DER 编码）
+
+### SM3
+- 摘要长度：32 字节
+- 完全兼容
+
+### HMAC-SM3
+- 支持 Hex/Base64 密钥格式
+- 完全兼容
+
+### SM4-GCM
+- IV 长度：12 字节
+- Tag 长度：16 字节
+- 密文格式：IV + Ciphertext + Tag
+
+## 编码格式支持
+
+- ✅ Hex 编码：Java 和 Go 均支持十六进制字符串
+- ✅ Base64 编码：Java 和 Go 均支持 Base64 字符串
+- ✅ 自动检测：两者都支持自动检测输入字符串的编码格式（Hex 优先）
+
+## 结论
+
+✅ **所有测试通过！** Java 和 Go 的 SM2/SM3/SM4 实现完全互通。
+
+- Go 实现可以直接替换 Java 实现，无需修改接口
+- 可以在混合语言环境中使用（如 Java 加密，Go 解密）
+- 支持 Hex 和 Base64 两种编码格式，便于不同场景使用

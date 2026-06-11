@@ -1,0 +1,39 @@
+{
+  "test_message": "Hello, Go-Java Interop Test!",
+  "sm2": {
+    "public_key_hex": "3059301306072a8648ce3d020106082a811ccf5501822d03420004f506490cb98b52389f198f233b7a78c416c488f222ce83e67d76a0e6f94bd8dc2757785383813023f72cdb5e81cde1cd2aac791c02c5124cc6bbe4926e0011f5",
+    "private_key_hex": "308187020100301306072a8648ce3d020106082a811ccf5501822d046d306b0201010420036b3b8fea9cedc6650f4de5136a2e6c33e1181b42c94334a0d8f7fee3c2c48da14403420004f506490cb98b52389f198f233b7a78c416c488f222ce83e67d76a0e6f94bd8dc2757785383813023f72cdb5e81cde1cd2aac791c02c5124cc6bbe4926e0011f5",
+    "public_key_base64": "MFkwEwYHKoZIzj0CAQYIKoEcz1UBgi0DQgAE3epwZe5FPMATyTP7Eu4t5/4154BGsjxT3Hg/OLzu8s4zIker+Njqw2kTqMpls/xwB25MPzc9lAnp+8OX4olXdQ==",
+    "private_key_base64": "MIGHAgEAMBMGByqGSM49AgEGCCqBHM9VAYItBG0wawIBAQQgTHPyz13LGbH21cMyTRaN2RHufrVY7hDlBNd/M3xUdFqhRANCAATd6nBl7kU8wBPJM/sS7i3n/jXngEayPFPceD84vO7yzjMiR6v42OrDaROoymWz/HAHbkw/Nz2UCen7w5fiiVd1",
+    "ciphertext_hex": "04cb8197eed3217edfb1f24d6d06378f41007628b0cf52d3a88788f797b5d72c20d29d01c3d750dc0019b8145bf61b78daf99c18ad28fdcbe8b6c2bcf48ae9c900c15413f8a02d5577b04841927f8bf7dcff3e27e353184d2c6ff1f4b6065c8e3e4fc96e7a1c4a1a905e574e546fa70dcb81dd025743f0ff548de29c71",
+    "ciphertext_base64": "BCx4KEd1jFjusvqhzMPAmABydSL9r90/cq9P8sbhRQBT2gle42DGZMT9SpqqKvZGKv4G0wFul4lvppzK5K2C7mNXzzHKi/mqdF5mi5o0w+560nla0Clir0HnOTsEfS98Q3zvuikT113dY8JQAL5Bx16Eh6Wlj974kGDq+tY=",
+    "signature_hex": "304402202c5ac455c92052baa8a6b0a5deaaac7c0b2925b5b01734361c31f9ee8d12535d02202bcdf4917a320ab7b335f8dcfb2e74df28e44cde3d3b1f142ea51fde451accf0",
+    "signature_base64": "MEUCIQCFVB6u+aLn844SMeJgjZVKUxOhU2Qn7vuCzSvnPjDvBwIgUT6sUkxNsk6c1s7QoyLuFOfV4hR6ZNmIEzgDM2xtSJ0=",
+    "encrypt_sign": {
+      "hex": {
+        "ciphertext": "04aff2ea49a8b1124e3ebe7e921fa12b2a01f7d9d5dd51dbe4a3c2b1beb1759f1e0f1bdefa4a4c1780c4995b76defa1e0d006f7ee5f69be8e0ec29d0f7c92f0954a6c976aa27a4d5813c850b1b99e48d34a7da78db1076792818a0145128dcc54bd1c90d339f15c04974ce229e820e339a4dbb019e6e6bfcd1e8dc1836",
+        "signature": "3045022023e09ed932ba8364a809dbae17260a489671271e81f79cb7d1e4f91a6251b185022100ba617c81ef85568a9b05c0bfe5305361e5106d2bac980f9e28d9494b0e286f10"
+      },
+      "base64": {
+        "ciphertext": "BCqd8WzApMmdgkNSdsGIbPMjhWdmUVaD3Uhet91EemX9C+E91Tb3r+AqPexGHB7VA84jYx4UYegqxxzniTdHm8d8PJHnMI/9tBF3Wi4x3Cp4H72A/z0P48LBb7MxaM4b09SA9CgVxBu94MUbn6SlCt1ciU9P35S4IiylPNA=",
+        "signature": "MEYCIQChMZvpy8Um5OOPoA+0ZqhC6u/53i3iQ6JM0hSJTGpWxAIhAMX9vlca2y6oYWMt53QXRcdlh5wfnvyFfkkeXpazBruH"
+      }
+    }
+  },
+  "sm3": {
+    "digest_hex": "e1be0e709024bcd47813c20c5ee62b49781862ef915657848275bf2326ffd9dd",
+    "digest_base64": "4b4OcJAkvNR4E8IMXuYrSXgYYu+RVleEgnW/Iyb/2d0=",
+    "hmac_key_hex": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    "hmac_key_base64": "ASNFZ4mrze8BI0VniavN7wEjRWeJq83vASNFZ4mrze8=",
+    "hmac_hex": "3f57ddbef78c6f084f40b826c0829a07932714fbad5882e766ed75acdb958e35",
+    "hmac_base64": "P1fdvveMbwhPQLgmwIKaB5MnFPutWILnZu11rNuVjjU="
+  },
+  "sm4": {
+    "key_hex": "6b36d5befa783fcc27aeeaa0a3943099",
+    "key_base64": "azbVvvp4P8wnruqgo5QwmQ==",
+    "iv_hex": "0102030405060708090a0b0c",
+    "gcm_ciphertext_hex": "0102030405060708090a0b0c9b28d0192906d08e3fa6a097fd37f4cb9e75fd3409f3cfb564d00d99b870cb3de85b2786e8c89fcb20acf9e8",
+    "gcm_ciphertext_base64": "AQIDBAUGBwgJCgsMmyjQGSkG0I4/pqCX/Tf0y551/TQJ88+1ZNANmbhwyz3oWyeG6MifyyCs+eg=",
+    "gcm_ciphertext_tag_hex": "9b28d0192906d08e3fa6a097fd37f4cb9e75fd3409f3cfb564d00d99b870cb3de85b2786e8c89fcb20acf9e8"
+  }
+}

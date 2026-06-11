@@ -1,0 +1,17 @@
+﻿java.exe : Picked up JAVA_TOOL_OPTIONS: -Djava.net.preferIPv4Stack=true
+所在位置 行:1 字符: 145
++ ... le -q 2>&1; & 'H:\Programs\Java\jdk-21.0.1+12\bin\java.exe' -cp 'g:\w ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Picked up JAVA_...rIPv4Stack=true:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+=== Java-Go SM Interop Test Data Generator ===
+
+--- SM2 ---
+Exception in thread "main" java.lang.NoClassDefFoundError: org/bouncycastle/crypto/InvalidCipherTextException
+	at GenerateGoInteropData.main(GenerateGoInteropData.java:36)
+Caused by: java.lang.ClassNotFoundException: org.bouncycastle.crypto.InvalidCipherTextException
+	at java.base/jdk.internal.loader.BuiltinClassLoader.loadClass(BuiltinClassLoader.java:641)
+	at java.base/jdk.internal.loader.ClassLoaders$AppClassLoader.loadClass(ClassLoaders.java:188)
+	at java.base/java.lang.ClassLoader.loadClass(ClassLoader.java:526)
+	... 1 more

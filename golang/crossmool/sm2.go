@@ -114,17 +114,23 @@ func DecryptBytes(ciphertext []byte, privDer []byte) ([]byte, error) {
 	return sm2.Decrypt(priv, ciphertext)
 }
 
+// defaultSM2UserID is the default USER_ID used for SM2 signing/verification,
+// matching Java BouncyCastle's default "1234567812345678" (GB/T 32918 standard).
+var defaultSM2UserID = []byte("1234567812345678")
+
 // SignBytes signs `content` using a private key provided as DER bytes and
 // returns the signature as ASN.1-encoded (r,s) bytes.
 //
 // The private key DER may be PKCS#8 or SEC1 and will be parsed via `smx509`.
+// Signing uses the SM2 standard USER_ID "1234567812345678" to match Java
+// BouncyCastle's behavior.
 func SignBytes(content []byte, privDer []byte) ([]byte, error) {
 	priv, err := parsePrivateKeyFromBytes(privDer)
 	if err != nil {
 		return nil, err
 	}
-	// sm2.Sign returns big.Int r,s (uses *ecdsa.PrivateKey), encode as ASN.1
-	r, s, err := sm2.Sign(rand.Reader, &priv.PrivateKey, content)
+	// sm2.SignWithSM2 follows GB/T 32918.2-2016, includes ZA calculation with uid
+	r, s, err := sm2.SignWithSM2(rand.Reader, &priv.PrivateKey, defaultSM2UserID, content)
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +138,8 @@ func SignBytes(content []byte, privDer []byte) ([]byte, error) {
 }
 
 // VerifyBytes verifies an ASN.1-encoded (r,s) signature against `content`
-// using the public key in DER-encoded PKIX form.
+// using the public key in DER-encoded PKIX form. Verification uses the SM2
+// standard USER_ID "1234567812345678" to match Java BouncyCastle's behavior.
 func VerifyBytes(content []byte, signature []byte, pubDer []byte) (bool, error) {
 	pub, err := parsePublicKeyFromBytes(pubDer)
 	if err != nil {
@@ -142,7 +149,7 @@ func VerifyBytes(content []byte, signature []byte, pubDer []byte) (bool, error) 
 	if _, err := asn1.Unmarshal(signature, &rs); err != nil {
 		return false, err
 	}
-	return sm2.Verify(pub, content, rs.R, rs.S), nil
+	return sm2.VerifyWithSM2(pub, defaultSM2UserID, content, rs.R, rs.S), nil
 }
 
 // CiphertextSignaturePair bundles ciphertext and signature strings as returned
