@@ -1,0 +1,562 @@
+{
+  "matrix": {
+    "C": {
+      "C": {
+        "sm2_encrypt_decrypt": "PASS",
+        "sm2_sign_verify": "PASS",
+        "sm2_encryptSign_verifyDecrypt": "PASS",
+        "sm3": "PASS",
+        "sm3_hmac": "PASS",
+        "sm4_encrypt_decrypt": "PASS"
+      },
+      "CPP": {
+        "sm2_encrypt_decrypt": "PENDING",
+        "sm2_sign_verify": "PENDING",
+        "sm2_encryptSign_verifyDecrypt": "PENDING",
+        "sm3": "PASS",
+        "sm3_hmac": "PASS",
+        "sm4_encrypt_decrypt": "PENDING"
+      },
+      "CSharp": {
+        "sm2_encrypt_decrypt": "PENDING",
+        "sm2_sign_verify": "PENDING",
+        "sm2_encryptSign_verifyDecrypt": "PENDING",
+        "sm3": "CHECK",
+        "sm3_hmac": "CHECK",
+        "sm4_encrypt_decrypt": "PENDING"
+      },
+      "Java": {
+        "sm2_encrypt_decrypt": "PASS",
+        "sm2_sign_verify": "PASS",
+        "sm2_encryptSign_verifyDecrypt": "PASS",
+        "sm3": "PASS",
+        "sm3_hmac": "PASS",
+        "sm4_encrypt_decrypt": "PASS"
+      },
+      "Python": {
+        "sm2_encrypt_decrypt": "PENDING",
+        "sm2_sign_verify": "PENDING",
+        "sm2_encryptSign_verifyDecrypt": "PENDING",
+        "sm3": "CHECK",
+        "sm3_hmac": "CHECK",
+        "sm4_encrypt_decrypt": "PENDING"
+      },
+      "Go": {
+        "sm2_encrypt_decrypt": "PENDING",
+        "sm2_sign_verify": "PENDING",
+        "sm2_encryptSign_verifyDecrypt": "PENDING",
+        "sm3": "CHECK",
+        "sm3_hmac": "CHECK",
+        "sm4_encrypt_decrypt": "PENDING"
+      },
+      "Rust": {
+        "sm2_encrypt_decrypt": "PENDING",
+        "sm2_sign_verify": "PENDING",
+        "sm2_encryptSign_verifyDecrypt": "PENDING",
+        "sm3": "CHECK",
+        "sm3_hmac": "CHECK",
+        "sm4_encrypt_decrypt": "PENDING"
+      },
+      "JavaScript": {
+        "sm2_encrypt_decrypt": "PENDING",
+        "sm2_sign_verify": "PENDING",
+        "sm2_encryptSign_verifyDecrypt": "PENDING",
+        "sm3": "CHECK",
+        "sm3_hmac": "CHECK",
+        "sm4_encrypt_decrypt": "PENDING"
+      }
+    },
+    "CPP": {
+      "C": {
+        "sm2_encrypt_decrypt": "PENDING",
+        "sm2_sign_verify": "PENDING",
+        "sm2_encryptSign_verifyDecrypt": "PENDING",
+        "sm3": "PASS",
+        "sm3_hmac": "PASS",
+        "sm4_encrypt_decrypt": "PENDING"
+      },
+      "CPP": {
+        "sm2_encrypt_decrypt": "PASS",
+        "sm2_sign_verify": "PASS",
+        "sm2_encryptSign_verifyDecrypt": "PASS",
+        "sm3": "PASS",
+        "sm3_hmac": "PASS",
+        "sm4_encrypt_decrypt": "PASS"
+      },
+      "CSharp": {
+        "sm2_encrypt_decrypt": "PENDING",
+        "sm2_sign_verify": "PENDING",
+        "sm2_encryptSign_verifyDecrypt": "PENDING",
+        "sm3": "PASS",
+        "sm3_hmac": "PASS",
+        "sm4_encrypt_decrypt": "PENDING"
+      },
+      "Java": {
+        "sm2_encrypt_decrypt": "PASS",
+        "sm2_sign_verify": "PASS",
+        "sm2_encryptSign_verifyDecrypt": "PASS",
+        "sm3": "PASS",
+        "sm3_hmac": "PASS",
+        "sm4_encrypt_decrypt": "PASS"
+      },
+      "Python": {
+        "sm2_encrypt_decrypt": "PENDING",
+        "sm2_sign_verify": "PENDING",
+        "sm2_encryptSign_verifyDecrypt": "PENDING",
+        "sm3": "PASS",
+        "sm3_hmac": "PASS",
+        "sm4_encrypt_decrypt": "PENDING"
+      },
+      "Go": {
+        "sm2_encrypt_decrypt": "PENDING",
+        "sm2_sign_verify": "PENDING",
+        "sm2_encryptSign_verifyDecrypt": "PENDING",
+        "sm3": "PASS",
+        "sm3_hmac": "PASS",
+        "sm4_encrypt_decrypt": "PENDING"
+      },
+      "Rust": {
+        "sm2_encrypt_decrypt": "PENDING",
+        "sm2_sign_verify": "PENDING",
+        "sm2_encryptSign_verifyDecrypt": "PENDING",
+        "sm3": "PASS",
+        "sm3_hmac": "PASS",
+        "sm4_encrypt_decrypt": "PENDING"
+      },
+      "JavaScript": {
+        "sm2_encrypt_decrypt": "PENDING",
+        "sm2_sign_verify": "PENDING",
+        "sm2_encryptSign_verifyDecrypt": "PENDING",
+        "sm3": "PASS",
+        "sm3_hmac": "PASS",
+        "sm4_encrypt_decrypt": "PENDING"
+      }
+    },
+    "CSharp": {
+      "C": {
+        "sm2_encrypt_decrypt": "PENDING",
+        "sm2_sign_verify": "PENDING",
+        "sm2_encryptSign_verifyDecrypt": "PENDING",
+        "sm3": "CHECK",
+        "sm3_hmac": "CHECK",
+        "sm4_encrypt_decrypt": "PENDING"
+      },
+      "CPP": {
+        "sm2_encrypt_decrypt": "PENDING",
+        "sm2_sign_verify": "PENDING",
+        "sm2_encryptSign_verifyDecrypt": "PENDING",
+        "sm3": "PASS",
+        "sm3_hmac": "PASS",
+        "sm4_encrypt_decrypt": "PENDING"
+      },
+      "CSharp": {
+        "sm2_encrypt_decrypt": "PASS",
+        "sm2_sign_verify": "PASS",
+        "sm2_encryptSign_verifyDecrypt": "PASS",
+        "sm3": "PASS",
+        "sm3_hmac": "PASS",
+        "sm4_encrypt_decrypt": "PASS"
+      },
+      "Java": {
+        "sm2_encrypt_decrypt": "PASS",
+        "sm2_sign_verify": "PASS",
+        "sm2_encryptSign_verifyDecrypt": "PASS",
+        "sm3": "PASS",
+        "sm3_hmac": "PASS",
+        "sm4_encrypt_decrypt": "PASS"
+      },
+      "Python": {
+        "sm2_encrypt_decrypt": "PENDING",
+        "sm2_sign_verify": "PENDING",
+        "sm2_encryptSign_verifyDecrypt": "PENDING",
+        "sm3": "CHECK",
+        "sm3_hmac": "CHECK",
+        "sm4_encrypt_decrypt": "PENDING"
+      },
+      "Go": {
+        "sm2_encrypt_decrypt": "PENDING",
+        "sm2_sign_verify": "PENDING",
+        "sm2_encryptSign_verifyDecrypt": "PENDING",
+        "sm3": "CHECK",
+        "sm3_hmac": "CHECK",
+        "sm4_encrypt_decrypt": "PENDING"
+      },
+      "Rust": {
+        "sm2_encrypt_decrypt": "PENDING",
+        "sm2_sign_verify": "PENDING",
+        "sm2_encryptSign_verifyDecrypt": "PENDING",
+        "sm3": "CHECK",
+        "sm3_hmac": "CHECK",
+        "sm4_encrypt_decrypt": "PENDING"
+      },
+      "JavaScript": {
+        "sm2_encrypt_decrypt": "PENDING",
+        "sm2_sign_verify": "PENDING",
+        "sm2_encryptSign_verifyDecrypt": "PENDING",
+        "sm3": "CHECK",
+        "sm3_hmac": "CHECK",
+        "sm4_encrypt_decrypt": "PENDING"
+      }
+    },
+    "Java": {
+      "C": {
+        "sm2_encrypt_decrypt": "PASS",
+        "sm2_sign_verify": "PASS",
+        "sm2_encryptSign_verifyDecrypt": "PASS",
+        "sm3": "PASS",
+        "sm3_hmac": "PASS",
+        "sm4_encrypt_decrypt": "PASS"
+      },
+      "CPP": {
+        "sm2_encrypt_decrypt": "PASS",
+        "sm2_sign_verify": "PASS",
+        "sm2_encryptSign_verifyDecrypt": "PASS",
+        "sm3": "PASS",
+        "sm3_hmac": "PASS",
+        "sm4_encrypt_decrypt": "PASS"
+      },
+      "CSharp": {
+        "sm2_encrypt_decrypt": "PASS",
+        "sm2_sign_verify": "PASS",
+        "sm2_encryptSign_verifyDecrypt": "PASS",
+        "sm3": "PASS",
+        "sm3_hmac": "PASS",
+        "sm4_encrypt_decrypt": "PASS"
+      },
+      "Java": {
+        "sm2_encrypt_decrypt": "PASS",
+        "sm2_sign_verify": "PASS",
+        "sm2_encryptSign_verifyDecrypt": "PASS",
+        "sm3": "PASS",
+        "sm3_hmac": "PASS",
+        "sm4_encrypt_decrypt": "PASS"
+      },
+      "Python": {
+        "sm2_encrypt_decrypt": "PASS",
+        "sm2_sign_verify": "PASS",
+        "sm2_encryptSign_verifyDecrypt": "PASS",
+        "sm3": "PASS",
+        "sm3_hmac": "PASS",
+        "sm4_encrypt_decrypt": "PASS"
+      },
+      "Go": {
+        "sm2_encrypt_decrypt": "PASS",
+        "sm2_sign_verify": "PASS",
+        "sm2_encryptSign_verifyDecrypt": "PASS",
+        "sm3": "PASS",
+        "sm3_hmac": "PASS",
+        "sm4_encrypt_decrypt": "PASS"
+      },
+      "Rust": {
+        "sm2_encrypt_decrypt": "PASS",
+        "sm2_sign_verify": "PASS",
+        "sm2_encryptSign_verifyDecrypt": "PASS",
+        "sm3": "PASS",
+        "sm3_hmac": "PASS",
+        "sm4_encrypt_decrypt": "PASS"
+      },
+      "JavaScript": {
+        "sm2_encrypt_decrypt": "PASS",
+        "sm2_sign_verify": "PASS",
+        "sm2_encryptSign_verifyDecrypt": "PASS",
+        "sm3": "PASS",
+        "sm3_hmac": "PASS",
+        "sm4_encrypt_decrypt": "PASS"
+      }
+    },
+    "Python": {
+      "C": {
+        "sm2_encrypt_decrypt": "PASS",
+        "sm2_sign_verify": "PASS",
+        "sm2_encryptSign_verifyDecrypt": "PASS",
+        "sm3": "CHECK",
+        "sm3_hmac": "CHECK",
+        "sm4_encrypt_decrypt": "PASS"
+      },
+      "CPP": {
+        "sm2_encrypt_decrypt": "PASS",
+        "sm2_sign_verify": "PASS",
+        "sm2_encryptSign_verifyDecrypt": "PASS",
+        "sm3": "PASS",
+        "sm3_hmac": "PASS",
+        "sm4_encrypt_decrypt": "PASS"
+      },
+      "CSharp": {
+        "sm2_encrypt_decrypt": "PASS",
+        "sm2_sign_verify": "PASS",
+        "sm2_encryptSign_verifyDecrypt": "PASS",
+        "sm3": "CHECK",
+        "sm3_hmac": "CHECK",
+        "sm4_encrypt_decrypt": "PASS"
+      },
+      "Java": {
+        "sm2_encrypt_decrypt": "PASS",
+        "sm2_sign_verify": "PASS",
+        "sm2_encryptSign_verifyDecrypt": "PASS",
+        "sm3": "PASS",
+        "sm3_hmac": "PASS",
+        "sm4_encrypt_decrypt": "PASS"
+      },
+      "Python": {
+        "sm2_encrypt_decrypt": "PASS",
+        "sm2_sign_verify": "PASS",
+        "sm2_encryptSign_verifyDecrypt": "PASS",
+        "sm3": "PASS",
+        "sm3_hmac": "PASS",
+        "sm4_encrypt_decrypt": "PASS"
+      },
+      "Go": {
+        "sm2_encrypt_decrypt": "PASS",
+        "sm2_sign_verify": "PASS",
+        "sm2_encryptSign_verifyDecrypt": "PASS",
+        "sm3": "CHECK",
+        "sm3_hmac": "CHECK",
+        "sm4_encrypt_decrypt": "PASS"
+      },
+      "Rust": {
+        "sm2_encrypt_decrypt": "PASS",
+        "sm2_sign_verify": "PASS",
+        "sm2_encryptSign_verifyDecrypt": "PASS",
+        "sm3": "CHECK",
+        "sm3_hmac": "CHECK",
+        "sm4_encrypt_decrypt": "PASS"
+      },
+      "JavaScript": {
+        "sm2_encrypt_decrypt": "PASS",
+        "sm2_sign_verify": "PASS",
+        "sm2_encryptSign_verifyDecrypt": "PASS",
+        "sm3": "CHECK",
+        "sm3_hmac": "CHECK",
+        "sm4_encrypt_decrypt": "PASS"
+      }
+    },
+    "Go": {
+      "C": {
+        "sm2_encrypt_decrypt": "PENDING",
+        "sm2_sign_verify": "PENDING",
+        "sm2_encryptSign_verifyDecrypt": "PENDING",
+        "sm3": "CHECK",
+        "sm3_hmac": "CHECK",
+        "sm4_encrypt_decrypt": "PENDING"
+      },
+      "CPP": {
+        "sm2_encrypt_decrypt": "PENDING",
+        "sm2_sign_verify": "PENDING",
+        "sm2_encryptSign_verifyDecrypt": "PENDING",
+        "sm3": "PASS",
+        "sm3_hmac": "PASS",
+        "sm4_encrypt_decrypt": "PENDING"
+      },
+      "CSharp": {
+        "sm2_encrypt_decrypt": "PENDING",
+        "sm2_sign_verify": "PENDING",
+        "sm2_encryptSign_verifyDecrypt": "PENDING",
+        "sm3": "CHECK",
+        "sm3_hmac": "CHECK",
+        "sm4_encrypt_decrypt": "PENDING"
+      },
+      "Java": {
+        "sm2_encrypt_decrypt": "PASS",
+        "sm2_sign_verify": "PASS",
+        "sm2_encryptSign_verifyDecrypt": "PASS",
+        "sm3": "PASS",
+        "sm3_hmac": "PASS",
+        "sm4_encrypt_decrypt": "PASS"
+      },
+      "Python": {
+        "sm2_encrypt_decrypt": "PENDING",
+        "sm2_sign_verify": "PENDING",
+        "sm2_encryptSign_verifyDecrypt": "PENDING",
+        "sm3": "CHECK",
+        "sm3_hmac": "CHECK",
+        "sm4_encrypt_decrypt": "PENDING"
+      },
+      "Go": {
+        "sm2_encrypt_decrypt": "PASS",
+        "sm2_sign_verify": "PASS",
+        "sm2_encryptSign_verifyDecrypt": "PASS",
+        "sm3": "PASS",
+        "sm3_hmac": "PASS",
+        "sm4_encrypt_decrypt": "PASS"
+      },
+      "Rust": {
+        "sm2_encrypt_decrypt": "PENDING",
+        "sm2_sign_verify": "PENDING",
+        "sm2_encryptSign_verifyDecrypt": "PENDING",
+        "sm3": "CHECK",
+        "sm3_hmac": "CHECK",
+        "sm4_encrypt_decrypt": "PENDING"
+      },
+      "JavaScript": {
+        "sm2_encrypt_decrypt": "PENDING",
+        "sm2_sign_verify": "PENDING",
+        "sm2_encryptSign_verifyDecrypt": "PENDING",
+        "sm3": "CHECK",
+        "sm3_hmac": "CHECK",
+        "sm4_encrypt_decrypt": "PENDING"
+      }
+    },
+    "Rust": {
+      "C": {
+        "sm2_encrypt_decrypt": "PENDING",
+        "sm2_sign_verify": "PENDING",
+        "sm2_encryptSign_verifyDecrypt": "PENDING",
+        "sm3": "CHECK",
+        "sm3_hmac": "CHECK",
+        "sm4_encrypt_decrypt": "PENDING"
+      },
+      "CPP": {
+        "sm2_encrypt_decrypt": "PENDING",
+        "sm2_sign_verify": "PENDING",
+        "sm2_encryptSign_verifyDecrypt": "PENDING",
+        "sm3": "PASS",
+        "sm3_hmac": "PASS",
+        "sm4_encrypt_decrypt": "PENDING"
+      },
+      "CSharp": {
+        "sm2_encrypt_decrypt": "PENDING",
+        "sm2_sign_verify": "PENDING",
+        "sm2_encryptSign_verifyDecrypt": "PENDING",
+        "sm3": "CHECK",
+        "sm3_hmac": "CHECK",
+        "sm4_encrypt_decrypt": "PENDING"
+      },
+      "Java": {
+        "sm2_encrypt_decrypt": "PASS",
+        "sm2_sign_verify": "PASS",
+        "sm2_encryptSign_verifyDecrypt": "PASS",
+        "sm3": "PASS",
+        "sm3_hmac": "PASS",
+        "sm4_encrypt_decrypt": "PASS"
+      },
+      "Python": {
+        "sm2_encrypt_decrypt": "PENDING",
+        "sm2_sign_verify": "PENDING",
+        "sm2_encryptSign_verifyDecrypt": "PENDING",
+        "sm3": "CHECK",
+        "sm3_hmac": "CHECK",
+        "sm4_encrypt_decrypt": "PENDING"
+      },
+      "Go": {
+        "sm2_encrypt_decrypt": "PENDING",
+        "sm2_sign_verify": "PENDING",
+        "sm2_encryptSign_verifyDecrypt": "PENDING",
+        "sm3": "CHECK",
+        "sm3_hmac": "CHECK",
+        "sm4_encrypt_decrypt": "PENDING"
+      },
+      "Rust": {
+        "sm2_encrypt_decrypt": "PASS",
+        "sm2_sign_verify": "PASS",
+        "sm2_encryptSign_verifyDecrypt": "PASS",
+        "sm3": "PASS",
+        "sm3_hmac": "PASS",
+        "sm4_encrypt_decrypt": "PASS"
+      },
+      "JavaScript": {
+        "sm2_encrypt_decrypt": "PENDING",
+        "sm2_sign_verify": "PENDING",
+        "sm2_encryptSign_verifyDecrypt": "PENDING",
+        "sm3": "CHECK",
+        "sm3_hmac": "CHECK",
+        "sm4_encrypt_decrypt": "PENDING"
+      }
+    },
+    "JavaScript": {
+      "C": {
+        "sm2_encrypt_decrypt": "PENDING",
+        "sm2_sign_verify": "PENDING",
+        "sm2_encryptSign_verifyDecrypt": "PENDING",
+        "sm3": "CHECK",
+        "sm3_hmac": "CHECK",
+        "sm4_encrypt_decrypt": "PENDING"
+      },
+      "CPP": {
+        "sm2_encrypt_decrypt": "PENDING",
+        "sm2_sign_verify": "PENDING",
+        "sm2_encryptSign_verifyDecrypt": "PENDING",
+        "sm3": "PASS",
+        "sm3_hmac": "PASS",
+        "sm4_encrypt_decrypt": "PENDING"
+      },
+      "CSharp": {
+        "sm2_encrypt_decrypt": "PENDING",
+        "sm2_sign_verify": "PENDING",
+        "sm2_encryptSign_verifyDecrypt": "PENDING",
+        "sm3": "CHECK",
+        "sm3_hmac": "CHECK",
+        "sm4_encrypt_decrypt": "PENDING"
+      },
+      "Java": {
+        "sm2_encrypt_decrypt": "PASS",
+        "sm2_sign_verify": "PASS",
+        "sm2_encryptSign_verifyDecrypt": "PASS",
+        "sm3": "PASS",
+        "sm3_hmac": "PASS",
+        "sm4_encrypt_decrypt": "PASS"
+      },
+      "Python": {
+        "sm2_encrypt_decrypt": "PENDING",
+        "sm2_sign_verify": "PENDING",
+        "sm2_encryptSign_verifyDecrypt": "PENDING",
+        "sm3": "CHECK",
+        "sm3_hmac": "CHECK",
+        "sm4_encrypt_decrypt": "PENDING"
+      },
+      "Go": {
+        "sm2_encrypt_decrypt": "PENDING",
+        "sm2_sign_verify": "PENDING",
+        "sm2_encryptSign_verifyDecrypt": "PENDING",
+        "sm3": "CHECK",
+        "sm3_hmac": "CHECK",
+        "sm4_encrypt_decrypt": "PENDING"
+      },
+      "Rust": {
+        "sm2_encrypt_decrypt": "PENDING",
+        "sm2_sign_verify": "PENDING",
+        "sm2_encryptSign_verifyDecrypt": "PENDING",
+        "sm3": "CHECK",
+        "sm3_hmac": "CHECK",
+        "sm4_encrypt_decrypt": "PENDING"
+      },
+      "JavaScript": {
+        "sm2_encrypt_decrypt": "PASS",
+        "sm2_sign_verify": "PASS",
+        "sm2_encryptSign_verifyDecrypt": "PASS",
+        "sm3": "PASS",
+        "sm3_hmac": "PASS",
+        "sm4_encrypt_decrypt": "PASS"
+      }
+    }
+  },
+  "lang_results": {
+    "Python": {
+      "sm3": "0880efb46176002c6cd1d94bcc3d9d9161488e099317d34a4d6b28b7becef36b",
+      "sm3_ok": true,
+      "sm3_hmac": "3e0c629ac18e2ad27415a549707565b0063872d65384e88ee2d1f88735b280f6",
+      "sm3_hmac_ok": true,
+      "sm2_enc": "368053b75656809a3057477fc8f6f4ea60dc9d1217015c8599ff1cadbba767270e4dd799fb45b472f06d9c4e7fd3f3c1eb3e7f4e3d1efb012d2dcaf91f235f6733538f83cb0e7401fdbd1dee88a8309f05a951677dbfab9a25466e0523400e5e8ade7eb700285d9f3ce1836d1297aa0107fe5147f594a704c854f8bdfecaf2b0c758b86f4b9446a15487f1e148d7ed2e38",
+      "sm2_sig": "304602210099339dbffc411b1ced8f7360401c25d27069d42143eb162fa767a35e88a45d44022100d1b9e4cfa35f7e9fd1c5a0df3ef1c8c6932c7b9e65fdcaf930b3d07a178878eb",
+      "sm4_enc": "af5a9a8f6924ac821d1ee5bb7df0f4a1e14d1f2fb4a97fd09da92f02105c13241f54160ce692a0307652d124ff1d0d9ce048a88c0d1686f2e5ac1d70682a1d0955dfd31f0470211b5d446c864c",
+      "sm2_dec_ok": true,
+      "sm2_ver_ok": true,
+      "sm2_esvd_ok": true,
+      "sm4_dec_ok": true
+    },
+    "Go": {
+      "error": "rc=1 err=go: go.mod file not found in current directory or any parent directory; see 'go help modules'"
+    },
+    "JavaScript": {
+      "error": "rc=1 err=file:///D:/workspaces/git/corssmool/crossmool/testcase/output/node_tester.mjs:2\nconst crypto = require('crypto');\n               ^\n\nReferenceError: require is not defined in ES module scope, you can use import instead\n    at file:///D:/workspaces/git/corssmool/crossmool/testcase/output/node_tester.mjs:2:16\n    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)\n    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)\n    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)\n\nNode.js v22.22.2"
+    },
+    "C": {
+      "error": "compile failed: 'NoneType' object has no attribute 'strip'"
+    },
+    "CSharp": {
+      "error": "rc=1 err=找不到要运行的项目。请确保 c:\\Users\\Administrator\\WorkBuddy\\2026-06-11-21-42-28 中存在项目，或使用 --project 传递项目路径。"
+    },
+    "Rust": {
+      "error": "rc=101 err="
+    }
+  }
+}

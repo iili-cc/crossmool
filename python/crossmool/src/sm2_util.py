@@ -171,13 +171,18 @@ class SM2Util:
     @staticmethod
     def encrypt_to_hex(content: bytes, public_key) -> str:
         """
-        加密 SM2 明文（C1C3C2 格式，与 Java Bouncy Castle 兼容）
-        使用 gmssl 库内置的 encrypt 方法
+        加密 SM2 明文（C1C3C2 格式，与 Java/Go 兼容）
+        
+        标准 C1C3C2 格式: 04||X(32)||Y(32)||C3(32)||C2(msg_len)
+        gmssl 内置 encrypt 返回 64 字节 C1（无 04 前缀），
+        这里补上 04 前缀以兼容 Go/Java 的标准 C1C3C2 格式
         """
         pub_hex = sm2_public_key_to_raw_hex(public_key)
-        # 使用临时 CryptSM2 对象进行加密（只需要公钥）
         crypt = sm2.CryptSM2(public_key=pub_hex, private_key='', mode=1)
         enc_bytes = crypt.encrypt(content)
+        # gmssl: C1(64 bytes) + C3(32) + C2(msg_len)
+        # -> 标准: C1(65 bytes with 04) + C3(32) + C2(msg_len)
+        enc_bytes = b'\x04' + enc_bytes[:64] + enc_bytes[64:]
         return enc_bytes.hex()
 
     @staticmethod
@@ -188,10 +193,12 @@ class SM2Util:
     @staticmethod
     def decrypt_from_hex(cipher_hex: str, private_key, public_key=None) -> bytes:
         """
-        解密 SM2 密文（C1C3C2 格式，与 Java Bouncy Castle 兼容）
-        Java: SM2Engine(SM2Engine.Mode.C1C3C2)
+        解密 SM2 密文（C1C3C2 格式，兼容 Java/Go/Python）
         
-        使用 gmssl 库内置的 decrypt 方法（默认 C1C3C2 格式）
+        支持两种 C1C3C2 格式:
+        - 标准格式 (Java/Go): C1(65 bytes, 04+X+Y) + C3(32) + C2(msg_len)
+        - gmssl 格式: C1(64 bytes, X+Y) + C3(32) + C2(msg_len)
+        自动检测并处理
         """
         priv_hex = sm2_private_key_to_raw_hex(private_key)
         
@@ -199,16 +206,21 @@ class SM2Util:
         if public_key is not None:
             pub_hex = sm2_public_key_to_raw_hex(public_key)
         else:
-            # 从私钥推导公钥
             temp_crypt = sm2.CryptSM2(private_key=priv_hex, public_key='04' + '00' * 64)
             pub_hex = temp_crypt._kg(int(priv_hex, 16), temp_crypt.ecc_table['g'])
             if not pub_hex.startswith('04'):
                 pub_hex = '04' + pub_hex
         
-        # 使用 gmssl 内置 decrypt 方法 (默认 C1C3C2 格式)
-        # gmssl decrypt 接受 bytes 类型的密文
-        crypt = sm2.CryptSM2(private_key=priv_hex, public_key=pub_hex, mode=1)
         cipher_bytes = bytes.fromhex(cipher_hex)
+        
+        # gmssl 内置 decrypt 期望 C1 无 04 前缀 (64 bytes)
+        # 如果输入是标准格式 (C1 以 04 开头，共 65 bytes)，去掉 04 前缀
+        if len(cipher_bytes) > 0 and cipher_bytes[0] == 0x04:
+            # 标准: 04||X(32)||Y(32)||C3(32)||C2(msg_len) = 1+32+32+32+msg_len
+            # -> gmssl: X(32)||Y(32)||C3(32)||C2(msg_len) = 32+32+32+msg_len
+            cipher_bytes = cipher_bytes[1:65] + cipher_bytes[65:97] + cipher_bytes[97:]
+        
+        crypt = sm2.CryptSM2(private_key=priv_hex, public_key=pub_hex, mode=1)
         result = crypt.decrypt(cipher_bytes)
         if isinstance(result, str):
             result = result.encode('latin-1')
