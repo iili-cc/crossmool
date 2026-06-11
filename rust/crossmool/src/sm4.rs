@@ -14,7 +14,6 @@ use crate::encoding;
 const GCM_IV_LEN: usize = 12;
 const GCM_TAG_LEN: usize = 16;
 const SM4_KEY_LEN: usize = 16;
-const SM4_BLOCK_LEN: usize = 16;
 
 // ========================
 // Key generation
