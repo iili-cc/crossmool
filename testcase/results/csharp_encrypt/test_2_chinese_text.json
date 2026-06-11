@@ -1,7 +1,0 @@
-{
-  "test_case_id": 2,
-  "test_case_name": "chinese_text",
-  "plaintext": "跨语言互操作性测试",
-  "ciphertext_hex": "04f5c3e8334002ef329b2d5a6c11a272041200ed241af8acf7d8b8def2adceccd71794f2cc1003632a6bada78beabb78e2ec13968320e1b70b24bd36a4c6d07fdc41f60b6f4e0f168c853f71831db0e4b21a70e2ec2cfcf758a8fdf704914dd448f405f0e13a6d29c41b91085392f4964182c971f95ce89778cdc5f4",
-  "signature_hex": "3044022077858d006d1b60fc7facf078a8ffb6ee0c4bad3dfbdf8bc0a11bb6ddbf57b7c2022026c3bde465977d7fbf4eb8fc70a6804ca7d5a29528592e437235b46b61316cf2"
-}

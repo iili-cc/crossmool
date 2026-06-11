@@ -1,7 +1,0 @@
-﻿javac.exe : Picked up JAVA_TOOL_OPTIONS: -Djava.net.preferIPv4Stack=true
-所在位置 行:1 字符: 1
-+ & 'H:\Programs\Java\jdk-21.0.1+12\bin\javac.exe' -encoding UTF-8 -pro ...
-+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: (Picked up JAVA_...rIPv4Stack=true:String) [], RemoteException
-    + FullyQualifiedErrorId : NativeCommandError
- 
