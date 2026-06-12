@@ -56,7 +56,11 @@ export class SM2Util {
 
   static encryptToHex(content: string | Uint8Array, publicKey: KeyInput): string {
     const pubHex = sm2PublicKeyToRawHex(publicKey);
-    return sm2.doEncrypt(typeof content === 'string' ? utf8ToBytes(content) : content, pubHex, CIPHER_MODE_C1C3C2);
+    const cipherHex = sm2.doEncrypt(typeof content === 'string' ? utf8ToBytes(content) : content, pubHex, CIPHER_MODE_C1C3C2);
+    // sm-crypto-v2 produces C1 without 04 prefix (64-byte C1: X+Y).
+    // Go/Java BouncyCastle expects C1 with 04 prefix (65-byte C1: 04+X+Y).
+    // Add 04 prefix for cross-language compatibility.
+    return '04' + cipherHex;
   }
 
   static encryptToBase64(content: string | Uint8Array, publicKey: KeyInput): string {

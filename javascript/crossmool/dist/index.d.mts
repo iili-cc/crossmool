@@ -81,18 +81,6 @@ declare class SM4Util {
      * Input: Hex or Base64 encoded, auto-detected
      */
     static decryptGcmToString(ciphertextHexOrBase64: string, key: Uint8Array | string): string;
-    /** @deprecated Use encryptGcm instead */
-    static encryptEcbToBytes(input: Uint8Array, key: Uint8Array | string): Uint8Array;
-    /** @deprecated Use decryptGcm instead */
-    static decryptEcbToBytes(cipher: Uint8Array, key: Uint8Array | string): Uint8Array;
-    /** @deprecated Use encryptGcmString instead */
-    static encryptEcbToHex(plainText: string, key: Uint8Array | string): string;
-    /** @deprecated Use encryptGcmString instead */
-    static encryptEcbToBase64(plainText: string, key: Uint8Array | string): string;
-    /** @deprecated Use decryptGcmToString instead */
-    static decryptEcbToUtf8(cipherHexOrBase64: string, key: Uint8Array | string): string;
-    /** @deprecated Use decryptGcmToString instead */
-    static decryptEcbHexToUtf8(cipherHex: string, key: Uint8Array | string): string;
 }
 
 type Bytes = Uint8Array;

@@ -318,7 +318,8 @@ var SM2Util = class {
   }
   static encryptToHex(content, publicKey) {
     const pubHex = sm2PublicKeyToRawHex(publicKey);
-    return import_sm_crypto_v2.sm2.doEncrypt(typeof content === "string" ? utf8ToBytes(content) : content, pubHex, CIPHER_MODE_C1C3C2);
+    const cipherHex = import_sm_crypto_v2.sm2.doEncrypt(typeof content === "string" ? utf8ToBytes(content) : content, pubHex, CIPHER_MODE_C1C3C2);
+    return "04" + cipherHex;
   }
   static encryptToBase64(content, publicKey) {
     const hex = this.encryptToHex(content, publicKey);
@@ -720,40 +721,6 @@ var SM4Util = class _SM4Util {
    */
   static decryptGcmToString(ciphertextHexOrBase64, key) {
     return bytesToUtf8(_SM4Util.decryptGcm(ciphertextHexOrBase64, key));
-  }
-  // ========================
-  // Legacy ECB methods (deprecated, kept for backward compatibility)
-  // ========================
-  /** @deprecated Use encryptGcm instead */
-  static encryptEcbToBytes(input, key) {
-    const k = normalizeKeyBytes(key);
-    return import_sm_crypto_v23.sm4.encrypt(input, k, { mode: "ecb", padding: "pkcs#7", output: "array" });
-  }
-  /** @deprecated Use decryptGcm instead */
-  static decryptEcbToBytes(cipher, key) {
-    const k = normalizeKeyBytes(key);
-    return import_sm_crypto_v23.sm4.decrypt(cipher, k, { mode: "ecb", padding: "pkcs#7", output: "array" });
-  }
-  /** @deprecated Use encryptGcmString instead */
-  static encryptEcbToHex(plainText, key) {
-    const ct = this.encryptEcbToBytes(utf8ToBytes(plainText), key);
-    return bytesToHex(ct);
-  }
-  /** @deprecated Use encryptGcmString instead */
-  static encryptEcbToBase64(plainText, key) {
-    const ct = this.encryptEcbToBytes(utf8ToBytes(plainText), key);
-    return bytesToBase64(ct);
-  }
-  /** @deprecated Use decryptGcmToString instead */
-  static decryptEcbToUtf8(cipherHexOrBase64, key) {
-    const cipherBytes = decodeHexOrBase64ToBytes(cipherHexOrBase64);
-    const pt = this.decryptEcbToBytes(cipherBytes, key);
-    return bytesToUtf8(pt);
-  }
-  /** @deprecated Use decryptGcmToString instead */
-  static decryptEcbHexToUtf8(cipherHex, key) {
-    const pt = this.decryptEcbToBytes(hexToBytes(cipherHex), key);
-    return bytesToUtf8(pt);
   }
 };
 function tagEquals(a, b) {

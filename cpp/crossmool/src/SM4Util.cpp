@@ -38,7 +38,7 @@ std::vector<unsigned char> SM4Util::parseHexKey(const std::string& hexKey) {
     return HexUtil::decodeHexStr(hexKey);
 }
 
-std::string SM4Util::encryptGcm(const std::vector<unsigned char>& key, const std::vector<unsigned char>& input) {
+std::string SM4Util::encryptGcm(const std::vector<unsigned char>& key, const std::vector<unsigned char>& input, bool toBase64) {
 #ifdef USE_GMSSL
     if (key.size() != 16) {
         throw std::invalid_argument("SM4 key must be 16 bytes (128 bits)");
@@ -81,24 +81,38 @@ std::string SM4Util::encryptGcm(const std::vector<unsigned char>& key, const std
     combined.insert(combined.end(), ciphertext.begin(), ciphertext.end());
     combined.insert(combined.end(), tag, tag + GCM_TAG_SIZE);
 
-    return Base64Util::encodeBase64Str(combined);
+    if (toBase64) {
+        return Base64Util::encodeBase64Str(combined);
+    }
+    return HexUtil::encodeHexStr(combined);
 #else
     /* Stub implementation */
     std::vector<unsigned char> output = input;
     for (size_t i = 0; i < output.size(); ++i) {
         output[i] ^= key[i % key.size()];
     }
-    return Base64Util::encodeBase64Str(output);
+    if (toBase64) {
+        return Base64Util::encodeBase64Str(output);
+    }
+    return HexUtil::encodeHexStr(output);
 #endif
 }
 
-std::vector<unsigned char> SM4Util::decryptGcm(const std::vector<unsigned char>& key, const std::string& ciphertextBase64) {
+std::vector<unsigned char> SM4Util::decryptGcm(const std::vector<unsigned char>& key, const std::string& ciphertextEncoded) {
 #ifdef USE_GMSSL
     if (key.size() != 16) {
         throw std::invalid_argument("SM4 key must be 16 bytes (128 bits)");
     }
 
-    auto combined = Base64Util::decodeBase64Str(ciphertextBase64);
+    /* 自动检测 Hex 或 Base64 */
+    std::vector<unsigned char> combined;
+    if (HexUtil::isHexString(ciphertextEncoded)) {
+        combined = HexUtil::decodeHexStr(ciphertextEncoded);
+    } else if (Base64Util::isBase64String(ciphertextEncoded)) {
+        combined = Base64Util::decodeBase64Str(ciphertextEncoded);
+    } else {
+        throw std::invalid_argument("ciphertext must be Hex or Base64 encoded string");
+    }
 
     if (combined.size() < GCM_IV_SIZE + GCM_TAG_SIZE) {
         throw std::runtime_error("Invalid GCM ciphertext: too short");
@@ -133,7 +147,12 @@ std::vector<unsigned char> SM4Util::decryptGcm(const std::vector<unsigned char>&
     return plaintext;
 #else
     /* Stub implementation */
-    auto combined = Base64Util::decodeBase64Str(ciphertextBase64);
+    std::vector<unsigned char> combined;
+    if (HexUtil::isHexString(ciphertextEncoded)) {
+        combined = HexUtil::decodeHexStr(ciphertextEncoded);
+    } else {
+        combined = Base64Util::decodeBase64Str(ciphertextEncoded);
+    }
     std::vector<unsigned char> output = combined;
     for (size_t i = 0; i < output.size(); ++i) {
         output[i] ^= key[i % key.size()];
