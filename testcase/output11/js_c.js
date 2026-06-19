@@ -1,0 +1,10 @@
+
+const{SM2Util,SM3Util,SM4Util,hexToBytes}=require("G:/workspaces/git/corssmool/crossmool/javascript/crossmool/dist/index.js");
+const M="Hello, 这是跨语言国密互通性测试数据";const K={"eR": "308187020100301306072a8648ce3d020106082a811ccf5501822d046d306b0201010420b273ef43c6866dd2c8b8a0303748e45dd135573ddb001a47141ff8f20f2a9b03a14403420004c7e07058fb62e2da4c053da10c37af4547650d9092f260ea4304b18dc0845856c539b313de0b676c208a99e21c78dbee410e3805adbb42b42fed8b57446f7356", "sP": "3059301306072a8648ce3d020106082a811ccf5501822d03420004192c000fadd3d2d40be8d4734b91bbfe1316f439077014ffd85959e02daeec3ccbec8c3786dbc431aab82e636a09e0bf752e760fd34e512aba94c5203d617226"};
+const ref={"x_enc": "04d9286b740a8dda65317af21e241296c2176fa397ffd2785b58d13372cf33b512105c77c45a1116c548a331dbe452626f75432b910f73b4caf9f9745eb756225f7731b81d51254c46403311941808b96b28f43ee4d179ed09c5b487a327647ee6803d08cb719c84619fa9f7b5453e0744f7541286af1faec1243bf680fc1821cd2c866e7f3abb13e7adc928a51de5ec5a8f", "x_sig": "304402202c6de018d4e02175271d4e6af962264f5ecf6d92b0f175d23077f484e65d6ea6022062c1e7ab1440e86bc0534503f1cc5daa6555035010aaa8f94efa413a5c29d8a9", "x_sm4": "d2dd06f390863174c0b47ed23c72b901c12e12d7be82f88a77d2cd81e8909696859366640f6bf302c18923359463fdb775eabdc73b896d32c0453f6408daa04dbd188b42e533bd9443c6057bcb"};
+const r={};
+try{if(ref.x_enc){r.enc=SM2Util.decrypt(ref.x_enc,K.eR)===M?"PASS":"FAIL";}}catch(e){r.enc="FAIL:"+e.message;}
+try{if(ref.x_sig){r.sig=SM2Util.verify(M,K.sP,ref.x_sig)?"PASS":"FAIL";}}catch(e){r.sig="FAIL:"+e.message;}
+try{if(ref.x_enc&&ref.x_sig){const d=SM2Util.decrypt(ref.x_enc,K.eR);r.esvd=(d===M&&SM2Util.verify(d,K.sP,ref.x_sig))?"PASS":"FAIL";}}catch(e){r.esvd="FAIL:"+e.message;}
+try{if(ref.x_sm4){const sk=hexToBytes("0123456789abcdeffedcba9876543210");r.sm4=SM4Util.decryptGcmToString(ref.x_sm4,sk)===M?"PASS":"FAIL";}}catch(e){r.sm4="FAIL:"+e.message;}
+console.log(JSON.stringify(r));

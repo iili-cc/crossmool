@@ -483,7 +483,7 @@ static int sm2_der_to_raw_c1c3c2(const unsigned char* der, size_t der_len,
     /* 跳过 SEQUENCE 头部 */
     if (*p != 0x30) return -1;
     p++;
-    if (*p == 0x81) { p++; }
+    if (*p == 0x81) { p += 2; }
     else if (*p == 0x82) { p += 3; }
     else if (*p < 128) { p++; }
     else return -1;
@@ -524,7 +524,7 @@ static int sm2_der_to_raw_c1c3c2(const unsigned char* der, size_t der_len,
     const unsigned char* pp = der;
     /* 跳过 SEQUENCE hdr */
     pp++;
-    if (*pp == 0x81) pp++; else if (*pp == 0x82) pp += 3; else pp++;
+    if (*pp == 0x81) pp += 2; else if (*pp == 0x82) pp += 3; else pp++;
     /* INTEGER x */
     if (*pp++ != 0x02) return -1;
     int xl = *pp++;

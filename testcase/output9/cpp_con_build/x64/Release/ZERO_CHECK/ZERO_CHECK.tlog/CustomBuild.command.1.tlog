@@ -1,0 +1,10 @@
+^G:\WORKSPACES\GIT\CORSSMOOL\CROSSMOOL\TESTCASE\OUTPUT9\CPP_CON_BUILD\CMAKEFILES\9E19DDC21B0E0A8C8E20F7DB3069A848\GENERATE.STAMP.RULE
+setlocal
+H:\Programs\cmake-4.2.5-windows-x86_64\bin\cmake.exe -SG:/workspaces/git/corssmool/crossmool/testcase/output9/cpp_con_build -BG:/workspaces/git/corssmool/crossmool/testcase/output9/cpp_con_build --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file G:/workspaces/git/corssmool/crossmool/testcase/output9/cpp_con_build/cc.slnx
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="18.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="G:\workspaces\git\corssmool\crossmool\testcase\output10\cpp_con_build\CMakeFiles\62ebfc69aa02fb08124821dc3f607f03\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{78AB5603-56E5-3DD5-914C-A1F373C636F0}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

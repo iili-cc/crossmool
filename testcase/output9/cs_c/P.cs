@@ -1,0 +1,9 @@
+using System;using System.Text;using System.Text.Json;using Crossmool.Crypto;
+class P{static string M="Hello, 这是跨语言国密互通性测试数据",SK="0123456789abcdeffedcba9876543210",EPR="308187020100301306072a8648ce3d020106082a811ccf5501822d046d306b0201010420b273ef43c6866dd2c8b8a0303748e45dd135573ddb001a47141ff8f20f2a9b03a14403420004c7e07058fb62e2da4c053da10c37af4547650d9092f260ea4304b18dc0845856c539b313de0b676c208a99e21c78dbee410e3805adbb42b42fed8b57446f7356",SP="3059301306072a8648ce3d020106082a811ccf5501822d03420004192c000fadd3d2d40be8d4734b91bbfe1316f439077014ffd85959e02daeec3ccbec8c3786dbc431aab82e636a09e0bf752e760fd34e512aba94c5203d617226";
+static void Main(string[]a){var js=System.IO.File.ReadAllText(a[0]);using var d=JsonDocument.Parse(js);var r=d.RootElement;var sb=new StringBuilder();sb.Append("{");
+var cs=gs(r,"cross_enc");if(!string.IsNullOrEmpty(cs)){try{sb.Append("\"enc\":\"").Append(SM2Util.decrypt(cs,EPR)==M?"PASS":"FAIL").Append("\"");}catch{sb.Append("\"enc\":\"FAIL\"");}}
+var ss=gs(r,"cross_sig");if(!string.IsNullOrEmpty(ss)){try{sb.Append(",\"sig\":\"").Append(SM2Util.verify(M,ss,SP)?"PASS":"FAIL").Append("\"");}catch{sb.Append(",\"sig\":\"FAIL\"");}}
+var sc=gs(r,"cross_sm4");if(!string.IsNullOrEmpty(sc)){try{var sk=Crossmool.Crypto.Utils.EncodingUtils.FromHex(SK);sb.Append(",\"sm4\":\"").Append(SM4Util.DecryptGcmToString(sk,sc)==M?"PASS":"FAIL").Append("\"");}catch{sb.Append(",\"sm4\":\"FAIL\"");}}
+if(!string.IsNullOrEmpty(cs)&&!string.IsNullOrEmpty(ss)){try{var d2=SM2Util.decrypt(cs,EPR);sb.Append(",\"esvd\":\"").Append(d2==M&&SM2Util.verify(d2,ss,SP)?"PASS":"FAIL").Append("\"");}catch{}}
+sb.Append("}");Console.WriteLine(sb);}
+static string gs(JsonElement r,string k){return r.TryGetProperty(k,out var v)&&v.ValueKind==JsonValueKind.String?v.GetString()??"":"";}}

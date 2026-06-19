@@ -1,0 +1,15 @@
+import java.nio.charset.StandardCharsets;
+import cc.iili.tools.crossmool.tool.SM2Util;
+import cc.iili.tools.crossmool.tool.SM3Util;
+import cc.iili.tools.crossmool.tool.SM4Util;
+import cc.iili.tools.crossmool.util.HexUtil;
+public class S{static String M="Hello, 这是跨语言国密互通性测试数据",SK="0123456789abcdeffedcba9876543210",HK="0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20",EP="3059301306072a8648ce3d020106082a811ccf5501822d03420004c7e07058fb62e2da4c053da10c37af4547650d9092f260ea4304b18dc0845856c539b313de0b676c208a99e21c78dbee410e3805adbb42b42fed8b57446f7356",EPR="308187020100301306072a8648ce3d020106082a811ccf5501822d046d306b0201010420b273ef43c6866dd2c8b8a0303748e45dd135573ddb001a47141ff8f20f2a9b03a14403420004c7e07058fb62e2da4c053da10c37af4547650d9092f260ea4304b18dc0845856c539b313de0b676c208a99e21c78dbee410e3805adbb42b42fed8b57446f7356",SP="3059301306072a8648ce3d020106082a811ccf5501822d03420004192c000fadd3d2d40be8d4734b91bbfe1316f439077014ffd85959e02daeec3ccbec8c3786dbc431aab82e636a09e0bf752e760fd34e512aba94c5203d617226",SPR="308187020100301306072a8648ce3d020106082a811ccf5501822d046d306b0201010420f819b994f4c99bf5bbd47a94b1c23cfee6d67fb21c4ec25c162a2f9a9424c7e3a14403420004192c000fadd3d2d40be8d4734b91bbfe1316f439077014ffd85959e02daeec3ccbec8c3786dbc431aab82e636a09e0bf752e760fd34e512aba94c5203d617226";
+public static void main(String[]a){var sb=new StringBuilder();sb.append("{");
+try{String c=SM2Util.encrypt(M,EP,false);sb.append("\"enc\":\"").append(SM2Util.decrypt(c,EPR).equals(M)?"PASS":"FAIL").append("\",\"cross_enc\":\"").append(esc(c)).append("\"");}catch(Exception e){sb.append("\"enc\":\"FAIL:").append(esc(e.getMessage())).append("\"");}
+try{String s=SM2Util.sign(M,SPR,false);sb.append(",\"sig\":\"").append(SM2Util.verify(M,SP,s)?"PASS":"FAIL").append("\",\"cross_sig\":\"").append(esc(s)).append("\"");}catch(Exception e){sb.append(",\"sig\":\"FAIL:").append(esc(e.getMessage())).append("\"");}
+try{String c2=SM2Util.encrypt(M,EP,false);String s2=SM2Util.sign(M,SPR,false);String d2=SM2Util.decrypt(c2,EPR);boolean ok2=SM2Util.verify(d2,SP,s2);sb.append(",\"esvd\":\"").append(d2.equals(M)&&ok2?"PASS":"FAIL").append("\"");}catch(Exception e){sb.append(",\"esvd\":\"FAIL:").append(esc(e.getMessage())).append("\"");}
+sb.append(",\"sm3\":\"").append(SM3Util.digestToStr(M,false).equals("0880efb46176002c6cd1d94bcc3d9d9161488e099317d34a4d6b28b7becef36b")?"PASS":"FAIL").append("\"");
+sb.append(",\"hmac\":\"").append(SM3Util.hmacToStr(HK,M,false).equals("3e0c629ac18e2ad27415a549707565b0063872d65384e88ee2d1f88735b280f6")?"PASS":"FAIL").append("\"");
+try{byte[]sk=HexUtil.decodeHexStr(SK);String sc=SM4Util.encrypt(sk,M.getBytes(StandardCharsets.UTF_8),false);sb.append(",\"sm4\":\"").append(SM4Util.decrypt(sk,sc).equals(M)?"PASS":"FAIL").append("\",\"cross_sm4\":\"").append(esc(sc)).append("\"");}catch(Exception e){sb.append(",\"sm4\":\"FAIL:").append(esc(e.getMessage())).append("\"");}
+sb.append("}");System.out.println(sb);}
+static String esc(String s){return s.replace("\\","\\\\").replace("\"","\\\"").replace("\n","\\n");}}

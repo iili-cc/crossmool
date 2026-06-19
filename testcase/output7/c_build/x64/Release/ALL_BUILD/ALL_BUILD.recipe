@@ -8,6 +8,9 @@
       <FullPath>G:\workspaces\git\corssmool\crossmool\testcase\output7\c_build\Release\c_self_test.exe</FullPath>
     </ProjectOutput>
     <ProjectOutput>
+      <FullPath>G:\workspaces\git\corssmool\crossmool\testcase\output7\c_build\Release\cpp_self_test.exe</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
       <FullPath>G:\workspaces\git\corssmool\crossmool\testcase\output7\c_build\x64\Release\ALL_BUILD</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
