@@ -323,8 +323,24 @@ static int sm2_encrypt_core(const unsigned char* content, size_t content_len,
     ret = sm2_encrypt(&key, content, content_len, buf, &actual_len);
     if (ret < 0) { free(buf); return CROSSMOOL_ERR_ENCRYPT_DECRYPT; }
 
-    *ciphertext = buf;
-    *ciphertext_len = actual_len;
+    /* FIX-020: 将 GmSSL 的 DER 输出转换为 C1C3C2 格式，以支持跨语言互通 */
+    unsigned char* raw_ct = NULL;
+    size_t raw_ct_len = 0;
+    int conv_ret = sm2_der_to_raw_c1c3c2(buf, actual_len, &raw_ct, &raw_ct_len);
+    free(buf);
+    if (conv_ret != 0) {
+        /* 如果转换失败，回退到原始 DER 格式（兼容旧版本） */
+        unsigned char* fallback = (unsigned char*)malloc(actual_len);
+        if (!fallback) return CROSSMOOL_ERR_MEMORY_ALLOC;
+        /* Need to re-encrypt since we freed buf */
+        ret = sm2_encrypt(&key, content, content_len, fallback, &actual_len);
+        if (ret < 0) { free(fallback); return CROSSMOOL_ERR_ENCRYPT_DECRYPT; }
+        *ciphertext = fallback;
+        *ciphertext_len = actual_len;
+    } else {
+        *ciphertext = raw_ct;
+        *ciphertext_len = raw_ct_len;
+    }
     return CROSSMOOL_SUCCESS;
 }
 
@@ -436,6 +452,113 @@ static int sm2_raw_c1c3c2_to_der(const unsigned char* raw, size_t raw_len,
 
     *der_out = out;
     *der_len = total;
+    return 0;
+}
+
+/* ====================================================
+ * 内部辅助：将 GmSSL 的 DER SEQUENCE 格式密文转换为 RAW C1C3C2 格式
+ *
+ * GmSSL sm2_encrypt 输出格式:
+ *   SM2Cipher ::= SEQUENCE {
+ *       XCoordinate  INTEGER,
+ *       YCoordinate  INTEGER,
+ *       HASH         OCTET STRING SIZE(32),
+ *       CipherText   OCTET STRING }
+ *
+ * 目标输出格式:
+ *   04 || x[32] || y[32] || c3[32] || c2[N]
+ *
+ * FIX-020: 新增函数，解决与 Python/Go/JS/Java/C# 的跨语言兼容性
+ * ==================================================== */
+static int sm2_der_to_raw_c1c3c2(const unsigned char* der, size_t der_len,
+                                  unsigned char** raw_out, size_t* raw_len)
+{
+    /* 最小长度: SEQUENCE hdr(4) + INTEGER(2) + INTEGER(2+32) + OCT(2+32) + OCT(2+1) */
+    if (!der || der_len < 80) return -1;
+    if (der[0] != 0x30) return -1; /* 必须是 SEQUENCE */
+
+    const unsigned char* p = der;
+    const unsigned char* end = der + der_len;
+
+    /* 跳过 SEQUENCE 头部 */
+    if (*p != 0x30) return -1;
+    p++;
+    if (*p == 0x81) { p++; }
+    else if (*p == 0x82) { p += 3; }
+    else if (*p < 128) { p++; }
+    else return -1;
+
+    /* 跳过 INTEGER XCoordinate */
+    if (*p != 0x02) return -1;
+    p++;
+    int xi_len = *p++;
+    p += xi_len;
+
+    /* 跳过 INTEGER YCoordinate */
+    if (p >= end || *p != 0x02) return -1;
+    p++;
+    int yi_len = *p++;
+    p += yi_len;
+
+    /* 读取 OCTET STRING c3 (HASH, 32 bytes) */
+    if (p >= end || *p != 0x04) return -1;
+    p++;
+    int c3_len = *p++;
+    if (c3_len != 32 || p + c3_len > end) return -1;
+    const unsigned char* c3 = p;
+    p += c3_len;
+
+    /* 读取 OCTET STRING c2 (CipherText) */
+    if (p >= end || *p != 0x04) return -1;
+    p++;
+    int c2_len;
+    if (*p == 0x81) { p++; c2_len = *p++; }
+    else if (*p == 0x82) { c2_len = (*p++ << 8) | *p++; }
+    else if (*p < 128) { c2_len = *p++; }
+    else return -1;
+    if (p + c2_len > end) return -1;
+    const unsigned char* c2 = p;
+
+    /* 现在需要从 DER 的 INTEGER 字段中恢复完整的 32 字节 X 和 Y */
+    /* 重新解析以获得完整值 */
+    const unsigned char* pp = der;
+    /* 跳过 SEQUENCE hdr */
+    pp++;
+    if (*pp == 0x81) pp++; else if (*pp == 0x82) pp += 3; else pp++;
+    /* INTEGER x */
+    if (*pp++ != 0x02) return -1;
+    int xl = *pp++;
+    unsigned char x_buf[32] = {0};
+    if (xl > 32) {
+        pp += (xl - 32);
+        xl = 32;
+    }
+    memcpy(x_buf + (32 - xl), pp, xl);
+    pp += xl;
+    /* INTEGER y */
+    if (*pp++ != 0x02) return -1;
+    int yl = *pp++;
+    unsigned char y_buf[32] = {0};
+    if (yl > 32) {
+        pp += (yl - 32);
+        yl = 32;
+    }
+    memcpy(y_buf + (32 - yl), pp, yl);
+
+    /* 组装: 04 + x[32] + y[32] + c3[32] + c2 */
+    size_t total = 1 + 32 + 32 + 32 + (size_t)c2_len;
+    unsigned char* out = (unsigned char*)malloc(total);
+    if (!out) return -1;
+
+    unsigned char* op = out;
+    *op++ = 0x04;
+    memcpy(op, x_buf, 32); op += 32;
+    memcpy(op, y_buf, 32); op += 32;
+    memcpy(op, c3, 32); op += 32;
+    memcpy(op, c2, c2_len);
+
+    *raw_out = out;
+    *raw_len = total;
     return 0;
 }
 

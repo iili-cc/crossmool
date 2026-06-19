@@ -1,0 +1,3 @@
+G:/workspaces/git/corssmool/crossmool/testcase/output7/c_build/CMakeFiles/c_self_test.dir
+G:/workspaces/git/corssmool/crossmool/testcase/output7/c_build/CMakeFiles/ALL_BUILD.dir
+G:/workspaces/git/corssmool/crossmool/testcase/output7/c_build/CMakeFiles/ZERO_CHECK.dir

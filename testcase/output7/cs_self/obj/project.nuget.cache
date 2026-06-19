@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "V7O9Vpfkcd8=",
+  "success": true,
+  "projectFilePath": "G:\\workspaces\\git\\corssmool\\crossmool\\testcase\\output7\\cs_self\\cs_self.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Administrator\\.nuget\\packages\\bouncycastle.cryptography\\2.6.2\\bouncycastle.cryptography.2.6.2.nupkg.sha512"
+  ],
+  "logs": []
+}

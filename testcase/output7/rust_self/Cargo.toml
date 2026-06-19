@@ -1,0 +1,9 @@
+[package]
+name = "rust-self-test"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+crossmool = { path = "G:/workspaces/git/corssmool/crossmool/rust/crossmool" }
+hex = "0.4"
+serde_json = "1"

@@ -17,10 +17,11 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import cc.iili.tools.crossmool.util.Base64Util;
 import cc.iili.tools.crossmool.util.HexUtil;
-import lombok.extern.slf4j.Slf4j;
+// import lombok.extern.slf4j.Slf4j; -- removed, see FIX-017
 
-@Slf4j
+// @Slf4j -- removed, see FIX-017
 public class SM3Util {
+    private static final java.util.logging.Logger log = java.util.logging.Logger.getLogger(SM3Util.class.getName());
 
 	static {
 		// register Bouncy Castle Provider（avoid duplicate）

@@ -19,10 +19,11 @@ import org.bouncycastle.jce.interfaces.ECPrivateKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
 
 import cc.iili.tools.crossmool.constant.SM2Constant;
-import lombok.extern.slf4j.Slf4j;
+// import lombok.extern.slf4j.Slf4j; -- removed, see FIX-017
 
-@Slf4j
+// @Slf4j -- removed, see FIX-017
 public class SM2KeyUtil {
+    private static final java.util.logging.Logger log = java.util.logging.Logger.getLogger(SM2KeyUtil.class.getName());
     
     /**
      * for the SM2 curve, the parameters are fixed.
@@ -37,7 +38,7 @@ public class SM2KeyUtil {
         try {
             return KeyFactory.getInstance("EC", "BC");
         } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
-            log.error("获取KeyFactory失败: {}", e.getMessage(), e);
+            System.err.println("KeyFactory error: " + e.getMessage());
             throw new RuntimeException("Get KeyFactory instance failed.", e);
         }
     }
@@ -71,7 +72,7 @@ public class SM2KeyUtil {
         try {
             return keyFactory.generatePublic(keySpec);
         } catch (InvalidKeySpecException e) {
-            log.error("创建公钥失败: {}", e.getMessage(), e);
+            System.err.println("create public key error: " + e.getMessage());
             throw new RuntimeException("Convert the publicKeyBytes to java.security.PublicKey failed.", e);
         }
     }
@@ -107,7 +108,7 @@ public class SM2KeyUtil {
         try {
             return keyFactory.generatePrivate(keySpec);
         } catch (InvalidKeySpecException e) {
-            log.error("创建公钥失败：{}", e.getMessage(), e);
+            System.err.println("create public key error: " + e.getMessage());
             throw new RuntimeException("Convert the privateKeyBytes to java.security.PrivateKey failed.", e);
         }
     }

@@ -1,0 +1,8 @@
+G:\workspaces\git\corssmool\crossmool\testcase\output7\c_self_test.c;G:\workspaces\git\corssmool\crossmool\testcase\output7\c_build\c_self_test.dir\Release\c_self_test.obj
+G:\workspaces\git\corssmool\crossmool\c\crossmool\src\error.c;G:\workspaces\git\corssmool\crossmool\testcase\output7\c_build\c_self_test.dir\Release\error.obj
+G:\workspaces\git\corssmool\crossmool\c\crossmool\src\util_hex.c;G:\workspaces\git\corssmool\crossmool\testcase\output7\c_build\c_self_test.dir\Release\util_hex.obj
+G:\workspaces\git\corssmool\crossmool\c\crossmool\src\util_base64.c;G:\workspaces\git\corssmool\crossmool\testcase\output7\c_build\c_self_test.dir\Release\util_base64.obj
+G:\workspaces\git\corssmool\crossmool\c\crossmool\src\util_string.c;G:\workspaces\git\corssmool\crossmool\testcase\output7\c_build\c_self_test.dir\Release\util_string.obj
+G:\workspaces\git\corssmool\crossmool\c\crossmool\src\sm2.c;G:\workspaces\git\corssmool\crossmool\testcase\output7\c_build\c_self_test.dir\Release\sm2.obj
+G:\workspaces\git\corssmool\crossmool\c\crossmool\src\sm3.c;G:\workspaces\git\corssmool\crossmool\testcase\output7\c_build\c_self_test.dir\Release\sm3.obj
+G:\workspaces\git\corssmool\crossmool\c\crossmool\src\sm4.c;G:\workspaces\git\corssmool\crossmool\testcase\output7\c_build\c_self_test.dir\Release\sm4.obj

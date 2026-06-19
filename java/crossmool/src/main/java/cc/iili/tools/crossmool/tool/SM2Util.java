@@ -31,7 +31,7 @@ import cc.iili.tools.crossmool.constant.SM2Constant;
 import cc.iili.tools.crossmool.util.Base64Util;
 import cc.iili.tools.crossmool.util.HexUtil;
 import cc.iili.tools.crossmool.util.SM2KeyUtil;
-import lombok.extern.slf4j.Slf4j;
+// import lombok.extern.slf4j.Slf4j; -- removed, see FIX-017
 
 /**
  * Encrypt only: use encrypt(String, String) to Hex, encrypt(String, String, true) to Base64
@@ -51,8 +51,9 @@ import lombok.extern.slf4j.Slf4j;
  * sign & encrypt use different keypairs
  *
  */
-@Slf4j
+// @Slf4j -- removed, see FIX-017
 public class SM2Util {
+    private static final java.util.logging.Logger log = java.util.logging.Logger.getLogger(SM2Util.class.getName());
     
     static {
     	// register Bouncy Castle Provider（avoid duplicate）
@@ -73,7 +74,7 @@ public class SM2Util {
             generator.initialize(sm2Spec);
             return generator.generateKeyPair();
         } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidAlgorithmParameterException e) {
-            log.error("generateKeyPair error:", e);
+            System.err.println("generateKeyPair error: " + e.getMessage());
             throw new RuntimeException("generateKeyPair error:" + e.getMessage());
         }
     }
@@ -90,7 +91,7 @@ public class SM2Util {
         String publicKeyStr = Base64.getEncoder().encodeToString(publicEncoded);
         String privateKeyStr = Base64.getEncoder().encodeToString(privateEncoded);
         SerialKeyPair serialKeyPair = new SerialKeyPair(publicKeyStr, privateKeyStr);
-        log.info("\npublicKeyStr:" + publicKeyStr + "\nprivateKeyStr:" + privateKeyStr);
+        // log.info removed - FIX-017
         return serialKeyPair;
     }
     /**
@@ -105,7 +106,7 @@ public class SM2Util {
         String publicKeyStr = Hex.toHexString(publicEncoded);
         String privateKeyStr = Hex.toHexString(privateEncoded);
         SerialKeyPair serialKeyPair = new SerialKeyPair(publicKeyStr, privateKeyStr);
-        log.info("\npublicKeyStr:" + publicKeyStr + "\nprivateKeyStr:" + privateKeyStr);
+        // log.info removed - FIX-017
         return serialKeyPair;
     }
     /**
@@ -160,7 +161,7 @@ public class SM2Util {
         try {
             return sm2Engine.processBlock(content, 0, content.length);
         } catch (InvalidCipherTextException e) {
-            log.error("SM2 encrypt error:", e);
+            System.err.println("SM2 encrypt error: " + e.getMessage());
             throw new RuntimeException("SM2 encrypt error:" + e.getMessage());
         }
     }
@@ -244,7 +245,7 @@ public class SM2Util {
         try {
             return sm2Engine.processBlock(content, 0, content.length);
         } catch (InvalidCipherTextException e) {
-            log.error("SM2 decrypt error:", e);
+            System.err.println("SM2 decrypt error: " + e.getMessage());
             throw new RuntimeException("SM2 decrypt error:" + e.getMessage());
         }
     }
@@ -343,7 +344,7 @@ public class SM2Util {
         try {
             return sm2Signer.generateSignature();
         } catch (Exception e) {
-            log.error("SM2 sign error:", e);
+            System.err.println("SM2 sign error: " + e.getMessage());
             throw new RuntimeException("SM2 sign error:" + e.getMessage());
         }
     }
