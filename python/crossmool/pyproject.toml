@@ -8,7 +8,7 @@ version = "1.0.0"
 description = "Python utilities for SM2/SM3/SM4 compatible with crossmool implementations"
 authors = [{name = "crossmool"}]
 requires-python = ">=3.8"
-dependencies = ["gmssl-python 2.2.2"]
+dependencies = ["gmssl-python>=2.2.2"]
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.0"
