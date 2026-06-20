@@ -40,7 +40,12 @@ pub fn encrypt_gcm(key: &[u8], plain: &[u8], to_base64: bool) -> Result<String, 
 
 /// Encrypt using SM4-GCM with a specific IV.
 /// Returns Hex(IV + ciphertext + Tag) by default, or Base64 if to_base64=true
-pub fn encrypt_gcm_with_iv(key: &[u8], plain: &[u8], iv: &[u8], to_base64: bool) -> Result<String, String> {
+pub fn encrypt_gcm_with_iv(
+    key: &[u8],
+    plain: &[u8],
+    iv: &[u8],
+    to_base64: bool,
+) -> Result<String, String> {
     validate_key(key)?;
     if iv.len() != GCM_IV_LEN {
         return Err(format!("GCM IV must be {} bytes", GCM_IV_LEN));
@@ -181,6 +186,7 @@ fn sm4_encrypt_block(cipher: &mut Sm4, block: &[u8]) -> [u8; 16] {
     out
 }
 
+#[allow(dead_code)]
 fn sm4_decrypt_block(cipher: &mut Sm4, block: &[u8]) -> [u8; 16] {
     let mut b = generic_array::GenericArray::clone_from_slice(block);
     cipher.decrypt_block_mut(&mut b);
@@ -299,7 +305,13 @@ fn gcm_encrypt(cipher: &mut Sm4, iv: &[u8], aad: &[u8], plain: &[u8]) -> (Vec<u8
 }
 
 /// GCM decrypt: verifies tag and returns plaintext
-fn gcm_decrypt(cipher: &mut Sm4, iv: &[u8], aad: &[u8], ciphertext: &[u8], tag: &[u8]) -> Result<Vec<u8>, String> {
+fn gcm_decrypt(
+    cipher: &mut Sm4,
+    iv: &[u8],
+    aad: &[u8],
+    ciphertext: &[u8],
+    tag: &[u8],
+) -> Result<Vec<u8>, String> {
     // H = SM4_K(0^128)
     let h = sm4_encrypt_block(cipher, &[0u8; 16]);
 
@@ -412,7 +424,7 @@ mod tests {
 
         // Encrypt with specific IV
         let encrypted = encrypt_gcm_base64_with_iv(&key, plain.as_bytes(), &iv).unwrap();
-        
+
         // Decrypt and verify
         let decrypted = decrypt_gcm_base64_to_string(&key, &encrypted).unwrap();
         assert_eq!(decrypted, plain, "Decrypted text does not match original");
@@ -447,5 +459,5 @@ mod tests {
         assert_eq!(decrypted, plain);
     }
 
-// Legacy ECB round-trip test removed. SM4-GCM is the only supported mode.
+    // Legacy ECB round-trip test removed. SM4-GCM is the only supported mode.
 }
