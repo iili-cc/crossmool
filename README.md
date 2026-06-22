@@ -2,7 +2,10 @@
 
 #### 介绍
 The crossmool is the short name of cross-sm-tool. It wanna provide the common tools for cross-language-sm-encryption.
-The first plan is to support Java, Python, JavaScript, Golang, Rust, C++, C.
+The first plan is to support Java, Python, JavaScript, Golang, Rust, C++, C, C#.
+
+####Milestone
+20260622 finish the Java, Python, Rust, Golang compile.
 
 #### 软件架构
 软件架构说明
