@@ -1,9 +1,10 @@
 package main
 
 import (
-	crossmool "cc.iili.tools/crossmool"
 	"encoding/json"
 	"fmt"
+
+	crossmool "cc.iili.tools/crossmool"
 )
 
 func main() {
