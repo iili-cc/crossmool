@@ -1,8 +1,0 @@
-test_via_dll.c
-Microsoft (R) Incremental Linker Version 14.50.35729.0
-Copyright (C) Microsoft Corporation.  All rights reserved.
-
-/out:test_via_dll.exe 
-/OUT:test_via_dll.exe 
-test_via_dll.obj 
-crossmool.lib 
