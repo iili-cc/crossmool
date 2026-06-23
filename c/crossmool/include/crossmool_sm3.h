@@ -21,7 +21,7 @@ extern "C" {
  * @param digest 输出参数，存储杂凑值（至少 32 字节）
  * @return 成功返回 0，失败返回负数错误码
  */
-int crossmool_sm3_digest(
+CROSSMOOL_API int crossmool_sm3_digest(
     const unsigned char* data,
     size_t data_len,
     unsigned char* digest
@@ -35,7 +35,7 @@ int crossmool_sm3_digest(
  * @return 成功返回 0，失败返回负数错误码
  * @note 调用者需调用 free() 释放 digest_hex 内存
  */
-int crossmool_sm3_digest_to_hex(
+CROSSMOOL_API int crossmool_sm3_digest_to_hex(
     const unsigned char* data,
     size_t data_len,
     char** digest_hex
@@ -44,7 +44,7 @@ int crossmool_sm3_digest_to_hex(
 /**
  * SM3 杂凑（字节数组输入，返回 Base64 字符串）
  */
-int crossmool_sm3_digest_to_base64(
+CROSSMOOL_API int crossmool_sm3_digest_to_base64(
     const unsigned char* data,
     size_t data_len,
     char** digest_base64
@@ -58,7 +58,7 @@ int crossmool_sm3_digest_to_base64(
  * @return 成功返回 0，失败返回负数错误码
  * @note 调用者需调用 free() 释放 digest_hex 内存
  */
-int crossmool_sm3_digest_str(
+CROSSMOOL_API int crossmool_sm3_digest_str(
     const char* str,
     const char* charset,
     char** digest_hex
@@ -67,7 +67,7 @@ int crossmool_sm3_digest_str(
 /**
  * SM3 杂凑（字符串输入，返回 Base64 字符串）
  */
-int crossmool_sm3_digest_str_to_base64(
+CROSSMOOL_API int crossmool_sm3_digest_str_to_base64(
     const char* str,
     const char* charset,
     char** digest_base64
@@ -84,7 +84,7 @@ int crossmool_sm3_digest_str_to_base64(
  * @return 成功返回 0，失败返回负数错误码
  * @note 调用者需调用 free() 释放 key 内存
  */
-int crossmool_sm3_generate_hmac_key(
+CROSSMOOL_API int crossmool_sm3_generate_hmac_key(
     size_t key_length,
     unsigned char** key
 );
@@ -98,7 +98,7 @@ int crossmool_sm3_generate_hmac_key(
  * @param mac 输出参数，存储 HMAC 值（至少 32 字节）
  * @return 成功返回 0，失败返回负数错误码
  */
-int crossmool_sm3_hmac(
+CROSSMOOL_API int crossmool_sm3_hmac(
     const unsigned char* key,
     size_t key_len,
     const unsigned char* data,
@@ -109,7 +109,7 @@ int crossmool_sm3_hmac(
 /**
  * HMAC-SM3（HEX 编码密钥，字节数组数据，返回 HEX 字符串）
  */
-int crossmool_sm3_hmac_hex(
+CROSSMOOL_API int crossmool_sm3_hmac_hex(
     const char* key_hex,
     const unsigned char* data,
     size_t data_len,
@@ -126,7 +126,7 @@ int crossmool_sm3_hmac_hex(
  * @return 成功返回 0，失败返回负数错误码
  * @note 调用者需调用 free() 释放 hmac_hex 内存
  */
-int crossmool_sm3_hmac_str(
+CROSSMOOL_API int crossmool_sm3_hmac_str(
     const char* key_str,
     const char* charset,
     const char* data_str,
@@ -141,7 +141,7 @@ int crossmool_sm3_hmac_str(
  * @param mac_hex 输出参数，存储 HEX 编码的 HMAC 值
  * @return 成功返回 0，失败返回负数错误码
  */
-int crossmool_sm3_hmac_to_hex(
+CROSSMOOL_API int crossmool_sm3_hmac_to_hex(
     const char* key,
     const char* data,
     char** mac_hex
@@ -150,7 +150,7 @@ int crossmool_sm3_hmac_to_hex(
 /**
  * HMAC-SM3（字符串接口，返回 Base64）
  */
-int crossmool_sm3_hmac_to_base64(
+CROSSMOOL_API int crossmool_sm3_hmac_to_base64(
     const char* key,
     const char* data,
     char** mac_base64
@@ -165,7 +165,7 @@ int crossmool_sm3_hmac_to_base64(
  * @param received_mac 接收到的 HMAC（HEX 或 Base64）
  * @return 验证成功返回 1，失败返回 0，错误返回负数
  */
-int crossmool_sm3_hmac_verify(
+CROSSMOOL_API int crossmool_sm3_hmac_verify(
     const char* key,
     const char* charset,
     const char* data,

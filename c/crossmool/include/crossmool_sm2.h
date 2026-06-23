@@ -39,41 +39,41 @@ typedef struct {
  * @return 0 on success, negative error code on failure
  * @note Caller must call crossmool_sm2_keypair_free() to release memory
  */
-int crossmool_sm2_generate_keypair(crossmool_sm2_keypair_t** keypair);
+CROSSMOOL_API int crossmool_sm2_generate_keypair(crossmool_sm2_keypair_t** keypair);
 
 /**
  * Convert keypair to HEX format (fills private_key_hex / public_key_hex fields)
  * @param keypair Generated keypair
  * @return 0 on success, negative error code on failure
  */
-int crossmool_sm2_keypair_to_hex(crossmool_sm2_keypair_t* keypair);
+CROSSMOOL_API int crossmool_sm2_keypair_to_hex(crossmool_sm2_keypair_t* keypair);
 
 /**
  * Convert keypair to Base64 format (fills private_key_base64 / public_key_base64 fields)
  * @param keypair Generated keypair
  * @return 0 on success, negative error code on failure
  */
-int crossmool_sm2_keypair_to_base64(crossmool_sm2_keypair_t* keypair);
+CROSSMOOL_API int crossmool_sm2_keypair_to_base64(crossmool_sm2_keypair_t* keypair);
 
 /**
  * Generate SM2 keypair (Base64 encoded, direct struct)
  * @param keypair Output parameter, stores generated keypair
  * @return 0 on success, negative error code on failure
  */
-int crossmool_sm2_generate_keypair_base64(crossmool_sm2_keypair_t* keypair);
+CROSSMOOL_API int crossmool_sm2_generate_keypair_base64(crossmool_sm2_keypair_t* keypair);
 
 /**
  * Generate SM2 keypair (HEX encoded, direct struct)
  * @param keypair Output parameter, stores generated keypair
  * @return 0 on success, negative error code on failure
  */
-int crossmool_sm2_generate_keypair_hex(crossmool_sm2_keypair_t* keypair);
+CROSSMOOL_API int crossmool_sm2_generate_keypair_hex(crossmool_sm2_keypair_t* keypair);
 
 /**
  * Free keypair memory (pointer version)
  * @param keypair Keypair pointer to free
  */
-void crossmool_sm2_keypair_free(crossmool_sm2_keypair_t* keypair);
+CROSSMOOL_API void crossmool_sm2_keypair_free(crossmool_sm2_keypair_t* keypair);
 
 /* ====================================================
  * Encryption / Decryption
@@ -88,7 +88,7 @@ void crossmool_sm2_keypair_free(crossmool_sm2_keypair_t* keypair);
  * @return 0 on success, negative error code on failure
  * @note Caller must call free() to release ciphertext_hex
  */
-int crossmool_sm2_encrypt(
+CROSSMOOL_API int crossmool_sm2_encrypt(
     const char* content,
     const char* charset,
     const char* public_key,
@@ -104,7 +104,7 @@ int crossmool_sm2_encrypt(
  * @return 0 on success, negative error code on failure
  * @note Caller must call free() to release plaintext_str
  */
-int crossmool_sm2_decrypt(
+CROSSMOOL_API int crossmool_sm2_decrypt(
     const char* ciphertext,
     const char* private_key,
     const char* charset,
@@ -120,7 +120,7 @@ int crossmool_sm2_decrypt(
  * @param ciphertext_len Output ciphertext length
  * @return 0 on success, negative error code on failure
  */
-int crossmool_sm2_encrypt_bytes(
+CROSSMOOL_API int crossmool_sm2_encrypt_bytes(
     const unsigned char* content,
     size_t content_len,
     const char* public_key,
@@ -131,7 +131,7 @@ int crossmool_sm2_encrypt_bytes(
 /**
  * SM2 encryption (returns HEX string, byte array input)
  */
-int crossmool_sm2_encrypt_to_hex(
+CROSSMOOL_API int crossmool_sm2_encrypt_to_hex(
     const unsigned char* content,
     size_t content_len,
     const char* charset,
@@ -142,7 +142,7 @@ int crossmool_sm2_encrypt_to_hex(
 /**
  * SM2 encryption (returns Base64 string, byte array input)
  */
-int crossmool_sm2_encrypt_to_base64(
+CROSSMOOL_API int crossmool_sm2_encrypt_to_base64(
     const unsigned char* content,
     size_t content_len,
     const char* charset,
@@ -153,7 +153,7 @@ int crossmool_sm2_encrypt_to_base64(
 /**
  * SM2 decryption (returns byte array)
  */
-int crossmool_sm2_decrypt_bytes(
+CROSSMOOL_API int crossmool_sm2_decrypt_bytes(
     const char* ciphertext,
     const char* private_key,
     unsigned char** plaintext,
@@ -163,7 +163,7 @@ int crossmool_sm2_decrypt_bytes(
 /**
  * SM2 decryption and convert to string
  */
-int crossmool_sm2_decrypt_to_string(
+CROSSMOOL_API int crossmool_sm2_decrypt_to_string(
     const char* ciphertext,
     const char* private_key,
     const char* charset,
@@ -183,7 +183,7 @@ int crossmool_sm2_decrypt_to_string(
  * @return 0 on success, negative error code on failure
  * @note Caller must call free() to release signature_hex
  */
-int crossmool_sm2_sign(
+CROSSMOOL_API int crossmool_sm2_sign(
     const char* content,
     const char* charset,
     const char* private_key,
@@ -198,7 +198,7 @@ int crossmool_sm2_sign(
  * @param public_key Public key (HEX or Base64)
  * @return 1 on success, 0 on failure, negative on error
  */
-int crossmool_sm2_verify(
+CROSSMOOL_API int crossmool_sm2_verify(
     const char* content,
     const char* charset,
     const char* signature,
@@ -208,7 +208,7 @@ int crossmool_sm2_verify(
 /**
  * SM2 signing (byte array input, returns byte array)
  */
-int crossmool_sm2_sign_bytes(
+CROSSMOOL_API int crossmool_sm2_sign_bytes(
     const unsigned char* content,
     size_t content_len,
     const char* private_key,
@@ -219,7 +219,7 @@ int crossmool_sm2_sign_bytes(
 /**
  * SM2 signing (byte array input, returns HEX string)
  */
-int crossmool_sm2_sign_to_hex(
+CROSSMOOL_API int crossmool_sm2_sign_to_hex(
     const unsigned char* content,
     size_t content_len,
     const char* charset,
@@ -230,7 +230,7 @@ int crossmool_sm2_sign_to_hex(
 /**
  * SM2 signing (byte array input, returns Base64 string)
  */
-int crossmool_sm2_sign_to_base64(
+CROSSMOOL_API int crossmool_sm2_sign_to_base64(
     const unsigned char* content,
     size_t content_len,
     const char* charset,
@@ -241,7 +241,7 @@ int crossmool_sm2_sign_to_base64(
 /**
  * SM2 verification (byte array input)
  */
-int crossmool_sm2_verify_bytes(
+CROSSMOOL_API int crossmool_sm2_verify_bytes(
     const unsigned char* content,
     size_t content_len,
     const char* signature,
@@ -262,7 +262,7 @@ int crossmool_sm2_verify_bytes(
  * @return 0 on success, negative error code on failure
  * @note Caller must call crossmool_sm2_cipher_sig_pair_free() to release memory
  */
-int crossmool_sm2_encrypt_sign(
+CROSSMOOL_API int crossmool_sm2_encrypt_sign(
     const char* content,
     const char* charset,
     const char* enc_public_key,
@@ -280,7 +280,7 @@ int crossmool_sm2_encrypt_sign(
  * @param plaintext Output plaintext string
  * @return 0 on success, negative error code on failure
  */
-int crossmool_sm2_verify_decrypt(
+CROSSMOOL_API int crossmool_sm2_verify_decrypt(
     const char* ciphertext,
     const char* signature,
     const char* sign_public_key,
@@ -293,7 +293,7 @@ int crossmool_sm2_verify_decrypt(
  * Encrypt and sign (byte array input, supports HEX or Base64 output)
  * @param to_base64 0=HEX, 1=Base64
  */
-int crossmool_sm2_encrypt_sign_ex(
+CROSSMOOL_API int crossmool_sm2_encrypt_sign_ex(
     const unsigned char* content,
     size_t content_len,
     const char* charset,
@@ -306,7 +306,7 @@ int crossmool_sm2_encrypt_sign_ex(
 /**
  * Free ciphertext-signature pair memory (pointer version)
  */
-void crossmool_sm2_cipher_sig_pair_free(crossmool_sm2_cipher_sig_pair_t* pair);
+CROSSMOOL_API void crossmool_sm2_cipher_sig_pair_free(crossmool_sm2_cipher_sig_pair_t* pair);
 
 #ifdef __cplusplus
 }

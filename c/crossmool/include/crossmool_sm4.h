@@ -17,7 +17,7 @@ extern "C" {
  * @param key 输出参数，存储生成的密钥（至少 16 字节）
  * @return 成功返回 0，失败返回负数错误码
  */
-int crossmool_sm4_generate_key(unsigned char* key);
+CROSSMOOL_API int crossmool_sm4_generate_key(unsigned char* key);
 
 /**
  * 生成 SM4 密钥（返回 HEX 字符串）
@@ -25,7 +25,7 @@ int crossmool_sm4_generate_key(unsigned char* key);
  * @return 成功返回 0，失败返回负数错误码
  * @note 调用者需调用 free() 释放 key_hex 内存
  */
-int crossmool_sm4_generate_key_hex(char** key_hex);
+CROSSMOOL_API int crossmool_sm4_generate_key_hex(char** key_hex);
 
 /**
  * 解析 HEX 密钥字符串
@@ -33,14 +33,14 @@ int crossmool_sm4_generate_key_hex(char** key_hex);
  * @param key 输出参数，存储解析后的密钥（至少 16 字节）
  * @return 成功返回 0，失败返回负数错误码
  */
-int crossmool_sm4_parse_hex_key(const char* hex_key, unsigned char* key);
+CROSSMOOL_API int crossmool_sm4_parse_hex_key(const char* hex_key, unsigned char* key);
 
 /**
  * 生成随机 IV（12 字节）
  * @param iv 输出参数，存储生成的 IV（至少 12 字节）
  * @return 成功返回 0，失败返回负数错误码
  */
-int crossmool_sm4_generate_iv(unsigned char* iv);
+CROSSMOOL_API int crossmool_sm4_generate_iv(unsigned char* iv);
 
 /**
  * SM4 GCM 模式加密（返回 HEX 字符串）【优先使用】
@@ -52,7 +52,7 @@ int crossmool_sm4_generate_iv(unsigned char* iv);
  * @return 成功返回 0，失败返回负数错误码
  * @note 调用者需调用 free() 释放 ciphertext_hex 内存
  */
-int crossmool_sm4_encrypt_gcm_hex(
+CROSSMOOL_API int crossmool_sm4_encrypt_gcm_hex(
     const unsigned char* key,
     const unsigned char* plaintext,
     size_t plaintext_len,
@@ -69,7 +69,7 @@ int crossmool_sm4_encrypt_gcm_hex(
  * @return 成功返回 0，失败返回负数错误码
  * @note 调用者需调用 free() 释放 ciphertext_base64 内存
  */
-int crossmool_sm4_encrypt_gcm_base64(
+CROSSMOOL_API int crossmool_sm4_encrypt_gcm_base64(
     const unsigned char* key,
     const unsigned char* plaintext,
     size_t plaintext_len,
@@ -86,7 +86,7 @@ int crossmool_sm4_encrypt_gcm_base64(
  * @return 成功返回 0，失败返回负数错误码
  * @note 调用者需调用 free() 释放 plaintext 内存
  */
-int crossmool_sm4_decrypt_gcm_hex(
+CROSSMOOL_API int crossmool_sm4_decrypt_gcm_hex(
     const unsigned char* key,
     const char* ciphertext_hex,
     unsigned char** plaintext,
@@ -103,7 +103,7 @@ int crossmool_sm4_decrypt_gcm_hex(
  * @return 成功返回 0，失败返回负数错误码
  * @note 调用者需调用 free() 释放 plaintext 内存
  */
-int crossmool_sm4_decrypt_gcm_base64(
+CROSSMOOL_API int crossmool_sm4_decrypt_gcm_base64(
     const unsigned char* key,
     const char* ciphertext_base64,
     unsigned char** plaintext,
@@ -114,7 +114,7 @@ int crossmool_sm4_decrypt_gcm_base64(
  * @deprecated 请使用 crossmool_sm4_encrypt_gcm_hex 或 crossmool_sm4_encrypt_gcm_base64
  * SM4 GCM 模式加密（返回 Base64 字符串，保持向后兼容）
  */
-int crossmool_sm4_encrypt_gcm(
+CROSSMOOL_API int crossmool_sm4_encrypt_gcm(
     const unsigned char* key,
     const unsigned char* plaintext,
     size_t plaintext_len,
@@ -125,7 +125,7 @@ int crossmool_sm4_encrypt_gcm(
  * @deprecated 请使用 crossmool_sm4_decrypt_gcm_hex 或 crossmool_sm4_decrypt_gcm_base64
  * SM4 GCM 模式解密（保持向后兼容）
  */
-int crossmool_sm4_decrypt_gcm(
+CROSSMOOL_API int crossmool_sm4_decrypt_gcm(
     const unsigned char* key,
     const char* ciphertext_base64,
     unsigned char** plaintext,

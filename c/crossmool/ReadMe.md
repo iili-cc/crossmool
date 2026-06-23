@@ -245,12 +245,29 @@ c/crossmool/
 
 ## 许可证
 
-MIT License
+GPLv3 License
+
+## 标准发布包结构
+
+crossmool-1.0.0-x64/
+├── include/
+│   ├── crossmool.h
+│   ├── crossmool_error.h
+│   ├── crossmool_sm2.h
+│   ├── crossmool_sm3.h
+│   ├── crossmool_sm4.h
+│   └── crossmool_util.h
+├── lib/
+│   └── crossmool.lib
+├── bin/
+│   ├── crossmool.dll
+│   └── gmssl.dll
+└── README.txt
 
 ## 贡献
 
-欢迎提交 Issue 和 Pull Request！
+
 
 ## 联系方式
 
-- 项目地址：https://github.com/crossmool/crossmool
+- 项目地址：https://gitee.com/iilic/crossmool

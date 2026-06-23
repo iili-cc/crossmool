@@ -1,6 +1,21 @@
 #ifndef CROSSMOOL_ERROR_H
 #define CROSSMOOL_ERROR_H
 
+/* DLL 导出控制 */
+#ifdef _MSC_VER
+  #ifdef CROSSMOOL_BUILD_DLL
+    #define CROSSMOOL_API __declspec(dllexport)
+  #else
+    #ifdef CROSSMOOL_USE_DLL
+      #define CROSSMOOL_API __declspec(dllimport)
+    #else
+      #define CROSSMOOL_API
+    #endif
+  #endif
+#else
+  #define CROSSMOOL_API
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -22,13 +37,13 @@ extern "C" {
  * @param error_code 错误码
  * @return 错误描述字符串（静态字符串，无需释放）
  */
-const char* crossmool_error_string(int error_code);
+CROSSMOOL_API const char* crossmool_error_string(int error_code);
 
 /**
  * 获取库版本号
  * @return 版本号字符串（格式：major.minor.patch）
  */
-const char* crossmool_version(void);
+CROSSMOOL_API const char* crossmool_version(void);
 
 #ifdef __cplusplus
 }

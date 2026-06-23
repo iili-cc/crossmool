@@ -13,14 +13,14 @@ extern "C" {
  * @param str 输入字符串
  * @return 是 HEX 格式返回 1，否则返回 0
  */
-int crossmool_is_hex_string(const char* str);
+CROSSMOOL_API int crossmool_is_hex_string(const char* str);
 
 /**
  * 判断字符串是否为 Base64 格式
  * @param str 输入字符串
  * @return 是 Base64 格式返回 1，否则返回 0
  */
-int crossmool_is_base64_string(const char* str);
+CROSSMOOL_API int crossmool_is_base64_string(const char* str);
 
 /**
  * HEX 编码
@@ -30,7 +30,7 @@ int crossmool_is_base64_string(const char* str);
  * @return 成功返回 0，失败返回负数错误码
  * @note 调用者需调用 free() 释放 hex_str 内存
  */
-int crossmool_hex_encode(const unsigned char* data, size_t data_len, char** hex_str);
+CROSSMOOL_API int crossmool_hex_encode(const unsigned char* data, size_t data_len, char** hex_str);
 
 /**
  * HEX 解码
@@ -40,7 +40,7 @@ int crossmool_hex_encode(const unsigned char* data, size_t data_len, char** hex_
  * @return 成功返回 0，失败返回负数错误码
  * @note 调用者需调用 free() 释放 data 内存
  */
-int crossmool_hex_decode(const char* hex_str, unsigned char** data, size_t* data_len);
+CROSSMOOL_API int crossmool_hex_decode(const char* hex_str, unsigned char** data, size_t* data_len);
 
 /**
  * Base64 编码
@@ -50,7 +50,7 @@ int crossmool_hex_decode(const char* hex_str, unsigned char** data, size_t* data
  * @return 成功返回 0，失败返回负数错误码
  * @note 调用者需调用 free() 释放 base64_str 内存
  */
-int crossmool_base64_encode(const unsigned char* data, size_t data_len, char** base64_str);
+CROSSMOOL_API int crossmool_base64_encode(const unsigned char* data, size_t data_len, char** base64_str);
 
 /**
  * Base64 解码
@@ -60,7 +60,7 @@ int crossmool_base64_encode(const unsigned char* data, size_t data_len, char** b
  * @return 成功返回 0，失败返回负数错误码
  * @note 调用者需调用 free() 释放 data 内存
  */
-int crossmool_base64_decode(const char* base64_str, unsigned char** data, size_t* data_len);
+CROSSMOOL_API int crossmool_base64_decode(const char* base64_str, unsigned char** data, size_t* data_len);
 
 /**
  * 字符串转字节数组（支持字符集）
@@ -71,7 +71,7 @@ int crossmool_base64_decode(const char* base64_str, unsigned char** data, size_t
  * @return 成功返回 0，失败返回负数错误码
  * @note 调用者需调用 free() 释放 data 内存
  */
-int crossmool_string_to_bytes(
+CROSSMOOL_API int crossmool_string_to_bytes(
     const char* str,
     const char* charset,
     unsigned char** data,
@@ -87,7 +87,7 @@ int crossmool_string_to_bytes(
  * @return 成功返回 0，失败返回负数错误码
  * @note 调用者需调用 free() 释放 str 内存
  */
-int crossmool_bytes_to_string(
+CROSSMOOL_API int crossmool_bytes_to_string(
     const unsigned char* data,
     size_t data_len,
     const char* charset,
@@ -97,7 +97,7 @@ int crossmool_bytes_to_string(
 /**
  * 清理全局资源（可选调用）
  */
-void crossmool_cleanup(void);
+CROSSMOOL_API void crossmool_cleanup(void);
 
 #ifdef __cplusplus
 }
