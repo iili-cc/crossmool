@@ -78,13 +78,9 @@ else()
 endif()
 
 # Create executables for testing
-add_executable(crossmool_test tests/main.cpp)
-add_executable(interoperability_test tests/interoperability_test.cpp)
-add_executable(edge_case_tests tests/edge_case_tests.cpp)
+add_executable(crossmool_test tests/test_all.cpp)
 
 target_link_libraries(crossmool_test PRIVATE crossmool)
-target_link_libraries(interoperability_test PRIVATE crossmool)
-target_link_libraries(edge_case_tests PRIVATE crossmool)
 
 # Install targets
 install(TARGETS crossmool
@@ -98,5 +94,3 @@ install(DIRECTORY include/
 # Enable testing
 enable_testing()
 add_test(NAME crossmool_test COMMAND crossmool_test)
-add_test(NAME interoperability_test COMMAND interoperability_test)
-add_test(NAME edge_case_tests COMMAND edge_case_tests)

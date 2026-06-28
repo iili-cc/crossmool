@@ -1,10 +1,11 @@
 #ifndef SM4UTIL_H
 #define SM4UTIL_H
 
+#include "crossmool_config.h"
 #include <string>
 #include <vector>
 
-class SM4Util {
+class CROSSMOOL_API SM4Util {
 public:
     static std::vector<unsigned char> generateKey();
 

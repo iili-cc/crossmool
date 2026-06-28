@@ -1,11 +1,12 @@
 #ifndef STRINGUTIL_H
 #define STRINGUTIL_H
 
+#include "../include/crossmool_config.h"
 #include <string>
 #include <vector>
 #include <memory>
 
-class StringUtil {
+class CROSSMOOL_API StringUtil {
 public:
     /**
      * Convert string to byte vector using specified charset

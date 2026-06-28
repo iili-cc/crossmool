@@ -1,10 +1,11 @@
 #ifndef SM3UTIL_H
 #define SM3UTIL_H
 
+#include "crossmool_config.h"
 #include <string>
 #include <vector>
 
-class SM3Util {
+class CROSSMOOL_API SM3Util {
 public:
     /**
      * Generate SM3 hash for byte array

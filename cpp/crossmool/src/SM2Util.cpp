@@ -10,13 +10,13 @@
 
 // Conditional compilation based on GmSSL availability
 #ifdef USE_GMSSL
-#include <gmssl/sm2.h>
 /* 禁用 GmSSL 的 error_print()/fprintf(stderr) 宏，
  * 避免 DLL 与 EXE 使用不同 CRT 实例时 stderr 为 NULL 导致崩溃 */
 #ifdef DEBUG
 #undef DEBUG
 #endif
 #define DEBUG 0
+#include <gmssl/sm2.h>
 #include <gmssl/error.h>
 #else
 // Stub implementation placeholder
@@ -310,27 +310,13 @@ SM2Util::KeyPair SM2Util::generateKeyPairBase64() {
         throw std::runtime_error("Failed to generate SM2 key pair");
     }
 
-    // Export public key as X.509 SubjectPublicKeyInfo DER
-    uint8_t* pub_der = NULL;
-    size_t pub_der_len = 0;
-    if (sm2_public_key_info_to_der(&key, &pub_der, &pub_der_len) != 1) {
-        throw std::runtime_error("Failed to export public key to DER");
-    }
-
-    // Export private key as PKCS#8 DER
-    uint8_t* pri_der = NULL;
-    size_t pri_der_len = 0;
-    if (sm2_private_key_info_to_der(&key, &pri_der, &pri_der_len) != 1) {
-        free(pub_der);
-        throw std::runtime_error("Failed to export private key to DER");
-    }
+    // Use stack buffer (avoid CRT mismatch with GmSSL malloc)
+    unsigned char pub_bytes[65];
+    sm2_point_to_uncompressed_octets(&key.public_key, pub_bytes);
 
     KeyPair pair;
-    pair.publicKey = Base64Util::encodeBase64Str(std::vector<unsigned char>(pub_der, pub_der + pub_der_len));
-    pair.privateKey = Base64Util::encodeBase64Str(std::vector<unsigned char>(pri_der, pri_der + pri_der_len));
-
-    free(pub_der);
-    free(pri_der);
+    pair.publicKey = Base64Util::encodeBase64Str(std::vector<unsigned char>(pub_bytes, pub_bytes + 65));
+    pair.privateKey = Base64Util::encodeBase64Str(std::vector<unsigned char>(key.private_key, key.private_key + 32));
     return pair;
 #else
     // Stub implementation
@@ -351,27 +337,13 @@ SM2Util::KeyPair SM2Util::generateKeyPairHex() {
         throw std::runtime_error("Failed to generate SM2 key pair");
     }
 
-    // Export public key as X.509 SubjectPublicKeyInfo DER
-    uint8_t* pub_der = NULL;
-    size_t pub_der_len = 0;
-    if (sm2_public_key_info_to_der(&key, &pub_der, &pub_der_len) != 1) {
-        throw std::runtime_error("Failed to export public key to DER");
-    }
-
-    // Export private key as PKCS#8 DER
-    uint8_t* pri_der = NULL;
-    size_t pri_der_len = 0;
-    if (sm2_private_key_info_to_der(&key, &pri_der, &pri_der_len) != 1) {
-        free(pub_der);
-        throw std::runtime_error("Failed to export private key to DER");
-    }
+    // Use stack buffer (avoid CRT mismatch with GmSSL malloc)
+    unsigned char pub_bytes[65];
+    sm2_point_to_uncompressed_octets(&key.public_key, pub_bytes);
 
     KeyPair pair;
-    pair.publicKey = HexUtil::encodeHexStr(std::vector<unsigned char>(pub_der, pub_der + pub_der_len));
-    pair.privateKey = HexUtil::encodeHexStr(std::vector<unsigned char>(pri_der, pri_der + pri_der_len));
-
-    free(pub_der);
-    free(pri_der);
+    pair.publicKey = HexUtil::encodeHexStr(std::vector<unsigned char>(pub_bytes, pub_bytes + 65));
+    pair.privateKey = HexUtil::encodeHexStr(std::vector<unsigned char>(key.private_key, key.private_key + 32));
     return pair;
 #else
     // Stub implementation

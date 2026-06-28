@@ -1,10 +1,11 @@
 #ifndef HEXUTIL_H
 #define HEXUTIL_H
 
+#include "../include/crossmool_config.h"
 #include <string>
 #include <vector>
 
-class HexUtil {
+class CROSSMOOL_API HexUtil {
 public:
     /**
      * Encode byte array to hex string

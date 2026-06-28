@@ -1,10 +1,11 @@
 #ifndef BASE64UTIL_H
 #define BASE64UTIL_H
 
+#include "../include/crossmool_config.h"
 #include <string>
 #include <vector>
 
-class Base64Util {
+class CROSSMOOL_API Base64Util {
 public:
     /**
      * Encode byte array to base64 string

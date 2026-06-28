@@ -1,13 +1,14 @@
 #ifndef SM2UTIL_H
 #define SM2UTIL_H
 
+#include "crossmool_config.h"
 #include <string>
 #include <vector>
 
 // SM2 signature max size (DER encoded, from GmSSL)
 #define SM2_SIGNATURE_DER_MAX_SIZE 72
 
-class SM2Util {
+class CROSSMOOL_API SM2Util {
 private:
     static const std::string USER_ID;
 
