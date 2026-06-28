@@ -32,7 +32,7 @@ namespace Crossmool.Crypto.Utils
             if (bytes == null || bytes.Length == 0) return string.Empty;
             var sb = new StringBuilder(bytes.Length * 2);
             foreach (var b in bytes)
-                sb.AppendFormat("{0:x2}", b);
+                sb.Append(b.ToString("x2"));
             return sb.ToString();
         }
 

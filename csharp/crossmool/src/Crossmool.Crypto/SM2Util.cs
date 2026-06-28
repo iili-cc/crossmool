@@ -66,6 +66,10 @@ namespace Crossmool.Crypto
             if (keyBytes == null || keyBytes.Length == 0)
                 throw new ArgumentException("Private key bytes cannot be empty");
 
+            // Pad short keys to 32 bytes (BouncyCastle may return < 32 from ToByteArrayUnsigned)
+            if (keyBytes.Length < 32)
+                keyBytes = PadPrivateKeyTo32(keyBytes);
+
             if (keyBytes.Length == 32)
             {
                 var d = new BigInteger(1, keyBytes);
@@ -297,12 +301,26 @@ namespace Crossmool.Crypto
             var priv = (ECPrivateKeyParameters)pair.Private;
             var pub = (ECPublicKeyParameters)pair.Public;
 
-            var privBytes = priv.D.ToByteArrayUnsigned();
+            // Pad private key to 32 bytes (BouncyCastle's ToByteArrayUnsigned may truncate leading zeros)
+            var privBytes = PadPrivateKeyTo32(priv.D.ToByteArrayUnsigned());
             var pubBytes = pub.Q.GetEncoded(false);
 
             var privHex = EncodingUtils.ToHex(privBytes);
             var pubHex = EncodingUtils.ToHex(pubBytes);
             return $"{{\"privateKeyHex\":\"{privHex}\",\"publicKeyHex\":\"{pubHex}\"}}";
+        }
+
+        /// <summary>
+        /// Pad private key bytes to 32 bytes (256 bits).
+        /// BouncyCastle's ToByteArrayUnsigned() strips leading zeros.
+        /// </summary>
+        internal static byte[] PadPrivateKeyTo32(byte[] key)
+        {
+            if (key.Length == 32) return key;
+            if (key.Length > 32) throw new ArgumentException($"Private key too long: {key.Length} bytes");
+            var padded = new byte[32];
+            Array.Copy(key, 0, padded, 32 - key.Length, key.Length);
+            return padded;
         }
 
         #endregion

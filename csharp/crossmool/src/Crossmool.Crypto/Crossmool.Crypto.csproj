@@ -4,6 +4,13 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <PackageId>Crossmool.Crypto</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>crossmool</Authors>
+    <Description>SM2/SM3/SM4 Chinese national cryptographic algorithm library for .NET</Description>
+    <PackageTags>SM2;SM3;SM4;国密;cryptography</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
