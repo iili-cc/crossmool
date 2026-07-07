@@ -522,6 +522,61 @@ public class SM2Util {
     public static String verifyDecrypt(CiphertextSignaturePair cipherSigPair, String signPublicKey, String decPrivateKey) {
         return verifyDecrypt(cipherSigPair.getCiphertext(), cipherSigPair.getSignature(), signPublicKey, decPrivateKey);
     }
-    
+
+    // ========================
+    // PEM Export/Import
+    // ========================
+
+    /**
+     * Export public key DER bytes as PEM string (X.509 SubjectPublicKeyInfo).
+     */
+    public static String exportPublicKeyPem(byte[] publicKeyDer) {
+        return toPem("PUBLIC KEY", publicKeyDer);
+    }
+
+    /**
+     * Export private key DER bytes as PEM string (PKCS#8 PrivateKeyInfo).
+     */
+    public static String exportPrivateKeyPem(byte[] privateKeyDer) {
+        return toPem("PRIVATE KEY", privateKeyDer);
+    }
+
+    /**
+     * Import PEM-encoded public key, returning raw DER bytes.
+     */
+    public static byte[] importPublicKeyPem(String pem) {
+        return fromPem(pem, "PUBLIC KEY");
+    }
+
+    /**
+     * Import PEM-encoded private key, returning raw DER bytes.
+     */
+    public static byte[] importPrivateKeyPem(String pem) {
+        return fromPem(pem, "PRIVATE KEY");
+    }
+
+    private static String toPem(String type, byte[] der) {
+        String b64 = Base64.getEncoder().encodeToString(der);
+        StringBuilder sb = new StringBuilder();
+        sb.append("-----BEGIN ").append(type).append("-----\n");
+        for (int i = 0; i < b64.length(); i += 64) {
+            int end = Math.min(i + 64, b64.length());
+            sb.append(b64, i, end).append('\n');
+        }
+        sb.append("-----END ").append(type).append("-----\n");
+        return sb.toString();
+    }
+
+    private static byte[] fromPem(String pem, String type) {
+        String begin = "-----BEGIN " + type + "-----";
+        String end = "-----END " + type + "-----";
+        int start = pem.indexOf(begin);
+        int finish = pem.indexOf(end);
+        if (start == -1 || finish == -1) {
+            throw new IllegalArgumentException("Invalid PEM: missing " + type + " boundaries");
+        }
+        String b64 = pem.substring(start + begin.length(), finish).replaceAll("\\s", "");
+        return Base64.getDecoder().decode(b64);
+    }
 
 }

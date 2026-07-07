@@ -190,4 +190,62 @@ export class SM2Util {
   static verifyDecryptPair(pair: CiphertextSignaturePair, signPublicKey: KeyInput, decPrivateKey: KeyInput): string {
     return this.verifyDecrypt(pair.ciphertext, pair.signature, signPublicKey, decPrivateKey);
   }
+
+  /**
+   * Encode DER public key bytes to PEM format.
+   * @param pubDerHex hex string of X.509 SubjectPublicKeyInfo DER
+   */
+  static exportPublicKeyPEM(pubDerHex: string): string {
+    const der = hexToBytes(pubDerHex);
+    return derToPEM('PUBLIC KEY', der);
+  }
+
+  /**
+   * Encode DER private key bytes to PEM format.
+   * @param privDerHex hex string of PKCS#8 PrivateKeyInfo DER
+   */
+  static exportPrivateKeyPEM(privDerHex: string): string {
+    const der = hexToBytes(privDerHex);
+    return derToPEM('PRIVATE KEY', der);
+  }
+
+  /**
+   * Decode a PEM-encoded public key, returning the raw DER as hex.
+   */
+  static importPublicKeyPEM(pem: string): string {
+    const der = pemToDER(pem, 'PUBLIC KEY');
+    return bytesToHex(der);
+  }
+
+  /**
+   * Decode a PEM-encoded private key, returning the raw DER as hex.
+   */
+  static importPrivateKeyPEM(pem: string): string {
+    const der = pemToDER(pem, 'PRIVATE KEY');
+    return bytesToHex(der);
+  }
+}
+
+// ────────────────── PEM helpers ──────────────────
+
+function derToPEM(type: string, der: Uint8Array): string {
+  const b64 = bytesToBase64(der);
+  const lines: string[] = [`-----BEGIN ${type}-----`];
+  for (let i = 0; i < b64.length; i += 64) {
+    lines.push(b64.slice(i, i + 64));
+  }
+  lines.push(`-----END ${type}-----`);
+  return lines.join('\n');
+}
+
+function pemToDER(pem: string, type: string): Uint8Array {
+  const begin = `-----BEGIN ${type}-----`;
+  const end = `-----END ${type}-----`;
+  const start = pem.indexOf(begin);
+  const finish = pem.indexOf(end);
+  if (start === -1 || finish === -1) {
+    throw new Error(`Invalid PEM: missing ${type} boundaries`);
+  }
+  const b64 = pem.slice(start + begin.length, finish).replace(/\s/g, '');
+  return decodeHexOrBase64ToBytes(b64);
 }

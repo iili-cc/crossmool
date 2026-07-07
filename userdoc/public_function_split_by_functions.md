@@ -88,22 +88,65 @@
 | **Go** | `GenerateKeyPairBase64()` | `(pubB64 string, privB64 string, error)` |
 | **Rust** | `sm2::generate_keypair_base64()` | `Result<(String, String), String>` → (pub_b64, priv_b64) |
 
-#### SM2_export_private_key_pem / SM2_export_public_key_pem
+#### SM2_export_public_key_pem
 
-导出 PEM 格式密钥（仅部分语言支持）。
+将公钥（HEX 或 DER 格式）导出为 PEM 字符串 (`-----BEGIN PUBLIC KEY-----`)。
 
-| 语言 | 导出私钥 | 导出公钥 |
+| 语言 | 调用方式 |
+|------|----------|
+| **C** | `crossmool_sm2_export_public_key_pem(pub_hex, &pem)` → PEM 字符串 |
+| **C++** | `SM2Util::exportKeyPem(pub_der_hex, "PUBLIC KEY")` → PEM 字符串 |
+| **C#** | `SM2Util.exportPublicKeyPem(pubKeyBytes)` → PEM 字符串 |
+| **Java** | `SM2Util.exportPublicKeyPem(pubKeyDer)` → PEM 字符串 |
+| **Python** | `SM2Util.export_public_key_pem(pub_hex)` → PEM 字符串 |
+| **JavaScript** | `SM2Util.exportPublicKeyPEM(pub_der_hex)` → PEM 字符串 |
+| **Go** | `ExportPublicKeyPEM(pubDer)` → PEM ([]byte) |
+| **Rust** | 通过 `generate_keypair()` 直接获取 PEM → `SerialKeyPair.public_key_pem` |
+
+#### SM2_export_private_key_pem
+
+将私钥（HEX 或 DER 格式）导出为 PEM 字符串 (`-----BEGIN PRIVATE KEY-----`)。
+
+| 语言 | 调用方式 |
+|------|----------|
+| **C** | `crossmool_sm2_export_private_key_pem(priv_hex, pub_hex, &pem)` → PEM 字符串 |
+| **C++** | `SM2Util::exportKeyPem(priv_der_hex, "PRIVATE KEY")` → PEM 字符串 |
+| **C#** | `SM2Util.exportPrivateKeyPem(privKeyBytes)` → PEM 字符串 |
+| **Java** | `SM2Util.exportPrivateKeyPem(privKeyDer)` → PEM 字符串 |
+| **Python** | `SM2Util.export_private_key_pem(priv_hex, pub_hex)` → PEM 字符串 |
+| **JavaScript** | `SM2Util.exportPrivateKeyPEM(priv_der_hex)` → PEM 字符串 |
+| **Go** | `ExportPrivateKeyPEM(privDer)` → PEM ([]byte) |
+| **Rust** | 通过 `generate_keypair()` 直接获取 PEM → `SerialKeyPair.private_key_pem` |
+
+#### SM2_import_public_key_pem
+
+从 PEM 字符串导入公钥。
+
+| 语言 | 调用方式 | 返回格式 |
 |------|----------|----------|
-| **C#** | `SM2Util.exportPrivateKeyPem(byte[])` → string | `SM2Util.exportPublicKeyPem(byte[])` → string |
-| **Rust** | `sm2::generate_keypair()` → `SerialKeyPair{ private_key_pem, public_key_pem }` | 同上 |
+| **C** | `crossmool_sm2_import_public_key_pem(pem, &hex_out)` | 130 字符 HEX 公钥 |
+| **C++** | `SM2Util::importKeyPem(pem, "PUBLIC KEY")` | DER HEX 字符串 |
+| **C#** | `SM2Util.importPublicKeyPem(pem)` | 原始公钥字节数组 |
+| **Java** | `SM2Util.importPublicKeyPem(pem)` | 公钥 DER 字节数组 |
+| **Python** | `SM2Util.import_public_key_pem(pem)` | 130 字符 HEX 公钥 |
+| **JavaScript** | `SM2Util.importPublicKeyPEM(pem)` | DER HEX 字符串 |
+| **Go** | `ImportPublicKeyPEM(pemBytes)` | 公钥 DER ([]byte, error) |
+| **Rust** | PEM 为原生支持，加密/验签函数直接接受 PEM | — |
 
-#### SM2_import_private_key_pem / SM2_import_public_key_pem
+#### SM2_import_private_key_pem
 
-导入 PEM 格式密钥（仅部分语言支持）。
+从 PEM 字符串导入私钥。
 
-| 语言 | 导入私钥 | 导入公钥 |
+| 语言 | 调用方式 | 返回格式 |
 |------|----------|----------|
-| **C#** | `SM2Util.importPrivateKeyPem(string)` → byte[] | `SM2Util.importPublicKeyPem(string)` → byte[] |
+| **C** | `crossmool_sm2_import_private_key_pem(pem, &hex_out)` | 64 字符 HEX 私钥 |
+| **C++** | `SM2Util::importKeyPem(pem, "PRIVATE KEY")` | DER HEX 字符串 |
+| **C#** | `SM2Util.importPrivateKeyPem(pem)` | 原始私钥字节数组 |
+| **Java** | `SM2Util.importPrivateKeyPem(pem)` | 私钥 DER 字节数组 |
+| **Python** | `SM2Util.import_private_key_pem(pem)` | 64 字符 HEX 私钥 |
+| **JavaScript** | `SM2Util.importPrivateKeyPEM(pem)` | DER HEX 字符串 |
+| **Go** | `ImportPrivateKeyPEM(pemBytes)` | 私钥 DER ([]byte, error) |
+| **Rust** | 所有签名/解密函数直接接受 PEM | — |
 
 ---
 
@@ -715,8 +758,6 @@ const plain = SM2Util.verifyDecrypt(ctHex, sigHex, signPubKey, decPrivKey);
 // Go
 plain, _ := crossmool.VerifyDecrypt(ctHex, sigHex, signPubHex, decPrivHex)
 ```
-
----
 
 ## 8. SM3 杂凑
 

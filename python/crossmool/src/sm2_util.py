@@ -138,6 +138,74 @@ def raw_rs_to_der(r_hex: str, s_hex: str) -> bytes:
     s_enc = _der_encode_int(s)
     return _der_encode_sequence(r_enc + s_enc)
 
+# ────────────────── DER key encoding helpers ──────────────────
+
+OID_EC_PUBLIC_KEY = '1.2.840.10045.2.1'
+OID_SM2_CURVE = '1.2.156.10197.1.301'
+
+def _der_encode_oid(oid: str) -> bytes:
+    """DER encode an OID string."""
+    parts = [int(x) for x in oid.split('.')]
+    result = [parts[0] * 40 + parts[1]]
+    for v in parts[2:]:
+        stack = [v & 0x7f]
+        v >>= 7
+        while v > 0:
+            stack.insert(0, (v & 0x7f) | 0x80)
+            v >>= 7
+        result.extend(stack)
+    content = bytes(result)
+    if len(content) < 128:
+        return b'\x06' + bytes([len(content)]) + content
+    len_bytes = len(content).to_bytes((len(content).bit_length() + 7) // 8, 'big')
+    return b'\x06' + bytes([0x80 | len(len_bytes)]) + len_bytes + content
+
+def _der_encode_octet_string(data: bytes) -> bytes:
+    if len(data) < 128:
+        return b'\x04' + bytes([len(data)]) + data
+    len_bytes = len(data).to_bytes((len(data).bit_length() + 7) // 8, 'big')
+    return b'\x04' + bytes([0x80 | len(len_bytes)]) + len_bytes + data
+
+def _der_encode_bit_string(data: bytes, unused_bits: int = 0) -> bytes:
+    content = bytes([unused_bits]) + data
+    if len(content) < 128:
+        return b'\x03' + bytes([len(content)]) + content
+    len_bytes = len(content).to_bytes((len(content).bit_length() + 7) // 8, 'big')
+    return b'\x03' + bytes([0x80 | len(len_bytes)]) + len_bytes + content
+
+def _der_encode_context_specific(tag_number: int, content: bytes) -> bytes:
+    tag = 0xa0 | tag_number
+    if len(content) < 128:
+        return bytes([tag, len(content)]) + content
+    len_bytes = len(content).to_bytes((len(content).bit_length() + 7) // 8, 'big')
+    return bytes([tag, 0x80 | len(len_bytes)]) + len_bytes + content
+
+def _encode_public_key_to_der(pub_hex: str) -> bytes:
+    """Encode raw-hex public key (130 chars, 04+X+Y) to X.509 SPKI DER."""
+    pub_bytes = bytes.fromhex(pub_hex)  # 65 bytes
+    alg_seq = _der_encode_sequence(
+        _der_encode_oid(OID_EC_PUBLIC_KEY) + _der_encode_oid(OID_SM2_CURVE)
+    )
+    return _der_encode_sequence(alg_seq + _der_encode_bit_string(pub_bytes, 0))
+
+def _encode_private_key_to_der(priv_hex: str, pub_hex: str) -> bytes:
+    """Encode raw-hex keys to PKCS#8 PrivateKeyInfo DER."""
+    d = bytes.fromhex(priv_hex)  # 32 bytes
+    pub = bytes.fromhex(pub_hex)  # 65 bytes
+    # ECPrivateKey (SEC1)
+    ec_priv = _der_encode_sequence(
+        _der_encode_int(b'\x01') +
+        _der_encode_octet_string(d) +
+        _der_encode_context_specific(1, _der_encode_bit_string(pub, 0))
+    )
+    # AlgorithmIdentifier
+    alg_seq = _der_encode_sequence(
+        _der_encode_oid(OID_EC_PUBLIC_KEY) + _der_encode_oid(OID_SM2_CURVE)
+    )
+    return _der_encode_sequence(
+        _der_encode_int(b'\x00') + alg_seq + _der_encode_octet_string(ec_priv)
+    )
+
 def der_to_raw_rs(der_sig: bytes) -> (str, str):
     """将 DER 编码的签名转换为 r||s（去除 DER INTEGER 的符号填充）"""
     d = DerReader(der_sig).read_sequence()
@@ -337,3 +405,53 @@ class SM2Util:
     @staticmethod
     def verify_str(content: str, public_key, signature: str) -> bool:
         return SM2Util.verify(utf8_to_bytes(content), public_key, signature)
+
+    # ────────────────── PEM Export / Import ──────────────────
+
+    @staticmethod
+    def export_public_key_pem(pub_hex: str) -> str:
+        """Export raw-hex public key (130 chars) as PEM (X.509 SubjectPublicKeyInfo)."""
+        der = _encode_public_key_to_der(pub_hex)
+        b64 = bytes_to_base64(der)
+        lines = ['-----BEGIN PUBLIC KEY-----']
+        for i in range(0, len(b64), 64):
+            lines.append(b64[i:i + 64])
+        lines.append('-----END PUBLIC KEY-----')
+        return '\n'.join(lines)
+
+    @staticmethod
+    def export_private_key_pem(priv_hex: str, pub_hex: str) -> str:
+        """Export raw-hex keys as PEM (PKCS#8 PrivateKeyInfo)."""
+        der = _encode_private_key_to_der(priv_hex, pub_hex)
+        b64 = bytes_to_base64(der)
+        lines = ['-----BEGIN PRIVATE KEY-----']
+        for i in range(0, len(b64), 64):
+            lines.append(b64[i:i + 64])
+        lines.append('-----END PRIVATE KEY-----')
+        return '\n'.join(lines)
+
+    @staticmethod
+    def import_public_key_pem(pem: str) -> str:
+        """Import PEM (X.509 SPKI) and return raw-hex public key (130 chars)."""
+        begin = '-----BEGIN PUBLIC KEY-----'
+        end = '-----END PUBLIC KEY-----'
+        s = pem.find(begin)
+        e = pem.find(end)
+        if s == -1 or e == -1:
+            raise ValueError('Invalid PEM: missing PUBLIC KEY boundaries')
+        b64 = pem[s + len(begin):e].replace('\n', '').replace('\r', '').replace(' ', '')
+        der = base64_to_bytes(b64)
+        return sm2_public_key_to_raw_hex(der)
+
+    @staticmethod
+    def import_private_key_pem(pem: str) -> str:
+        """Import PEM (PKCS#8) and return raw-hex private key (64 chars)."""
+        begin = '-----BEGIN PRIVATE KEY-----'
+        end = '-----END PRIVATE KEY-----'
+        s = pem.find(begin)
+        e = pem.find(end)
+        if s == -1 or e == -1:
+            raise ValueError('Invalid PEM: missing PRIVATE KEY boundaries')
+        b64 = pem[s + len(begin):e].replace('\n', '').replace('\r', '').replace(' ', '')
+        der = base64_to_bytes(b64)
+        return sm2_private_key_to_raw_hex(der)

@@ -308,6 +308,43 @@ CROSSMOOL_API int crossmool_sm2_encrypt_sign_ex(
  */
 CROSSMOOL_API void crossmool_sm2_cipher_sig_pair_free(crossmool_sm2_cipher_sig_pair_t* pair);
 
+/* ============================================================
+ * PEM Export / Import
+ * ============================================================ */
+
+/**
+ * Export public key as PEM string (X.509 SubjectPublicKeyInfo).
+ * @param public_key_hex  public key in hex format (04+X+Y, 130 chars)
+ * @param pem_out         output PEM string (caller must free())
+ * @return 0 on success, negative on error
+ */
+CROSSMOOL_API int crossmool_sm2_export_public_key_pem(const char* public_key_hex, char** pem_out);
+
+/**
+ * Export private key as PEM string (PKCS#8 PrivateKeyInfo).
+ * @param private_key_hex private key in hex format (64 chars)
+ * @param public_key_hex  public key in hex format (to embed in PKCS#8)
+ * @param pem_out         output PEM string (caller must free())
+ * @return 0 on success, negative on error
+ */
+CROSSMOOL_API int crossmool_sm2_export_private_key_pem(const char* private_key_hex, const char* public_key_hex, char** pem_out);
+
+/**
+ * Import public key from PEM string, returning hex key (04+X+Y, 130 chars).
+ * @param pem        PEM string (X.509 SubjectPublicKeyInfo)
+ * @param hex_out    output hex public key (caller must free())
+ * @return 0 on success, negative on error
+ */
+CROSSMOOL_API int crossmool_sm2_import_public_key_pem(const char* pem, char** hex_out);
+
+/**
+ * Import private key from PEM string, returning hex key (64 chars).
+ * @param pem        PEM string (PKCS#8 PrivateKeyInfo)
+ * @param hex_out    output hex private key (caller must free())
+ * @return 0 on success, negative on error
+ */
+CROSSMOOL_API int crossmool_sm2_import_private_key_pem(const char* pem, char** hex_out);
+
 #ifdef __cplusplus
 }
 #endif

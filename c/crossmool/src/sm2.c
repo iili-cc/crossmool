@@ -1097,3 +1097,179 @@ void crossmool_sm2_cipher_sig_pair_free(crossmool_sm2_cipher_sig_pair_t* pair)
     if (pair->signature_base64)  { free(pair->signature_base64);  pair->signature_base64  = NULL; }
     free(pair);
 }
+
+/* ============================================================
+ * PEM Export / Import
+ * ============================================================ */
+
+static int der_to_pem(const char* type, const unsigned char* der, size_t der_len, char** pem_out)
+{
+    char* b64 = NULL;
+    int ret = crossmool_base64_encode(der, der_len, &b64);
+    if (ret != CROSSMOOL_SUCCESS) return ret;
+
+    size_t b64_len = strlen(b64);
+    size_t pem_len = strlen("-----BEGIN -----\n") + strlen(type) * 2 + b64_len + (b64_len / 64 + 1) + 4;
+    char* pem = (char*)malloc(pem_len);
+    if (!pem) { free(b64); return CROSSMOOL_ERR_MEMORY_ALLOC; }
+
+    char* p = pem;
+    p += sprintf(p, "-----BEGIN %s-----\n", type);
+    for (size_t i = 0; i < b64_len; i += 64) {
+        size_t chunk = b64_len - i;
+        if (chunk > 64) chunk = 64;
+        memcpy(p, b64 + i, chunk);
+        p += chunk;
+        *p++ = '\n';
+    }
+    p += sprintf(p, "-----END %s-----\n", type);
+
+    free(b64);
+    *pem_out = pem;
+    return CROSSMOOL_SUCCESS;
+}
+
+static int pem_to_der(const char* type, const char* pem, unsigned char** der_out, size_t* der_len)
+{
+    char begin[128], end[128];
+    snprintf(begin, sizeof(begin), "-----BEGIN %s-----", type);
+    snprintf(end, sizeof(end), "-----END %s-----", type);
+
+    const char* start = strstr(pem, begin);
+    const char* finish = strstr(pem, end);
+    if (!start || !finish || finish <= start) {
+        return CROSSMOOL_ERR_FORMAT_CONVERSION;
+    }
+    start += strlen(begin);
+
+    // Extract base64 content (remove whitespace)
+    size_t b64_len = finish - start;
+    char* b64 = (char*)malloc(b64_len + 1);
+    if (!b64) return CROSSMOOL_ERR_MEMORY_ALLOC;
+    size_t j = 0;
+    for (size_t i = 0; i < b64_len; i++) {
+        if (start[i] != ' ' && start[i] != '\n' && start[i] != '\r' && start[i] != '\t') {
+            b64[j++] = start[i];
+        }
+    }
+    b64[j] = '\0';
+
+    int ret = crossmool_base64_decode(b64, der_out, der_len);
+    free(b64);
+    return ret;
+}
+
+int crossmool_sm2_export_public_key_pem(const char* public_key_hex, char** pem_out)
+{
+    if (!public_key_hex || !pem_out) return CROSSMOOL_ERR_INVALID_PARAM;
+
+    unsigned char* pub_bytes = NULL;
+    size_t pub_len = 0;
+    int ret = crossmool_hex_decode(public_key_hex, &pub_bytes, &pub_len);
+    if (ret != CROSSMOOL_SUCCESS) return ret;
+
+    // Build SM2_KEY with only the public key set
+    SM2_KEY sm2_key;
+    memset(&sm2_key, 0, sizeof(sm2_key));
+    SM2_POINT point;
+    if (!decode_public_key_to_point(pub_bytes, pub_len, &point)) {
+        free(pub_bytes);
+        return CROSSMOOL_ERR_KEY_INVALID;
+    }
+    free(pub_bytes);
+
+    if (sm2_key_set_public_key(&sm2_key, &point) != 1) {
+        return CROSSMOOL_ERR_KEY_INVALID;
+    }
+
+    uint8_t* der = NULL;
+    size_t der_len = 0;
+    if (sm2_public_key_info_to_der(&sm2_key, &der, &der_len) != 1) {
+        return CROSSMOOL_ERR_FORMAT_CONVERSION;
+    }
+
+    ret = der_to_pem("PUBLIC KEY", der, der_len, pem_out);
+    free(der);
+    return ret;
+}
+
+int crossmool_sm2_export_private_key_pem(const char* private_key_hex, const char* public_key_hex, char** pem_out)
+{
+    if (!private_key_hex || !pem_out) return CROSSMOOL_ERR_INVALID_PARAM;
+
+    unsigned char* priv_bytes = NULL;
+    size_t priv_len = 0;
+    int ret = crossmool_hex_decode(private_key_hex, &priv_bytes, &priv_len);
+    if (ret != CROSSMOOL_SUCCESS) return ret;
+    if (priv_len != 32) { free(priv_bytes); return CROSSMOOL_ERR_KEY_INVALID; }
+
+    SM2_KEY sm2_key;
+    memset(&sm2_key, 0, sizeof(sm2_key));
+    memcpy(sm2_key.private_key, priv_bytes, 32);
+    free(priv_bytes);
+
+    // Set the public key by deriving it from the private key
+    if (sm2_key_set_private_key(&sm2_key, sm2_key.private_key) != 1) {
+        return CROSSMOOL_ERR_KEY_INVALID;
+    }
+
+    uint8_t* der = NULL;
+    size_t der_len = 0;
+    if (sm2_private_key_info_to_der(&sm2_key, &der, &der_len) != 1) {
+        return CROSSMOOL_ERR_FORMAT_CONVERSION;
+    }
+
+    ret = der_to_pem("PRIVATE KEY", der, der_len, pem_out);
+    free(der);
+    return ret;
+}
+
+int crossmool_sm2_import_public_key_pem(const char* pem, char** hex_out)
+{
+    if (!pem || !hex_out) return CROSSMOOL_ERR_INVALID_PARAM;
+
+    unsigned char* der = NULL;
+    size_t der_len = 0;
+    int ret = pem_to_der("PUBLIC KEY", pem, &der, &der_len);
+    if (ret != CROSSMOOL_SUCCESS) return ret;
+
+    SM2_KEY sm2_key;
+    memset(&sm2_key, 0, sizeof(sm2_key));
+    const uint8_t* der_ptr = der;
+    size_t remaining = der_len;
+    if (sm2_public_key_info_from_der(&sm2_key, &der_ptr, &remaining) != 1) {
+        free(der);
+        return CROSSMOOL_ERR_KEY_INVALID;
+    }
+    free(der);
+
+    unsigned char pub_bytes[65];
+    sm2_point_to_uncompressed_octets(&sm2_key.public_key, pub_bytes);
+    ret = crossmool_hex_encode(pub_bytes, 65, hex_out);
+    return ret;
+}
+
+int crossmool_sm2_import_private_key_pem(const char* pem, char** hex_out)
+{
+    if (!pem || !hex_out) return CROSSMOOL_ERR_INVALID_PARAM;
+
+    unsigned char* der = NULL;
+    size_t der_len = 0;
+    int ret = pem_to_der("PRIVATE KEY", pem, &der, &der_len);
+    if (ret != CROSSMOOL_SUCCESS) return ret;
+
+    SM2_KEY sm2_key;
+    memset(&sm2_key, 0, sizeof(sm2_key));
+    const uint8_t* der_ptr = der;
+    size_t remaining = der_len;
+    const uint8_t* attrs = NULL;
+    size_t attrs_len = 0;
+    if (sm2_private_key_info_from_der(&sm2_key, &attrs, &attrs_len, &der_ptr, &remaining) != 1) {
+        free(der);
+        return CROSSMOOL_ERR_KEY_INVALID;
+    }
+    free(der);
+
+    ret = crossmool_hex_encode(sm2_key.private_key, 32, hex_out);
+    return ret;
+}

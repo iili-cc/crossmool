@@ -791,3 +791,41 @@ std::string SM2Util::verifyDecrypt(const std::string& content, const std::string
         throw std::runtime_error("SM2 verification failed");
     }
 }
+
+/* ============================================================
+ * PEM Export / Import
+ * ============================================================ */
+
+static std::string toPem(const std::string& type, const std::vector<unsigned char>& der) {
+    std::string b64 = Base64Util::encodeBase64Str(der);
+    std::string result = "-----BEGIN " + type + "-----\n";
+    for (size_t i = 0; i < b64.size(); i += 64) {
+        result += b64.substr(i, 64) + "\n";
+    }
+    result += "-----END " + type + "-----\n";
+    return result;
+}
+
+static std::vector<unsigned char> fromPem(const std::string& pem, const std::string& type) {
+    std::string begin = "-----BEGIN " + type + "-----";
+    std::string end   = "-----END " + type + "-----";
+    size_t start = pem.find(begin);
+    size_t finish = pem.find(end);
+    if (start == std::string::npos || finish == std::string::npos) {
+        throw std::runtime_error("Invalid PEM: missing " + type + " boundaries");
+    }
+    std::string b64 = pem.substr(start + begin.size(), finish - (start + begin.size()));
+    // Remove whitespace
+    b64.erase(std::remove_if(b64.begin(), b64.end(), ::isspace), b64.end());
+    return Base64Util::decodeBase64Str(b64);
+}
+
+std::string SM2Util::exportKeyPem(const std::string& derHex, const std::string& type) {
+    auto der = HexUtil::decodeHexStr(derHex);
+    return toPem(type, der);
+}
+
+std::string SM2Util::importKeyPem(const std::string& pem, const std::string& type) {
+    auto der = fromPem(pem, type);
+    return HexUtil::encodeHexStr(der);
+}

@@ -4,6 +4,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/rand"
 	"encoding/asn1"
+	"encoding/pem"
 	"errors"
 	"math/big"
 
@@ -343,4 +344,32 @@ func VerifyDecryptPair(pair *CiphertextSignaturePair, signPublicKey string, decP
 		return "", errors.New("sm2 verifyDecryptPair error: nil pair")
 	}
 	return VerifyDecrypt(pair.Ciphertext, pair.Signature, signPublicKey, decPrivateKey)
+}
+
+// ExportPublicKeyPEM encodes DER public key bytes to PEM format (X.509 SubjectPublicKeyInfo).
+func ExportPublicKeyPEM(pubDer []byte) []byte {
+	return pem.EncodeToMemory(&pem.Block{Type: "PUBLIC KEY", Bytes: pubDer})
+}
+
+// ExportPrivateKeyPEM encodes DER private key bytes to PEM format (PKCS#8 PrivateKeyInfo).
+func ExportPrivateKeyPEM(privDer []byte) []byte {
+	return pem.EncodeToMemory(&pem.Block{Type: "PRIVATE KEY", Bytes: privDer})
+}
+
+// ImportPublicKeyPEM decodes a PEM-encoded public key and returns the raw DER bytes.
+func ImportPublicKeyPEM(pemBytes []byte) ([]byte, error) {
+	block, _ := pem.Decode(pemBytes)
+	if block == nil || block.Type != "PUBLIC KEY" {
+		return nil, errors.New("failed to decode PEM block (expected PUBLIC KEY)")
+	}
+	return block.Bytes, nil
+}
+
+// ImportPrivateKeyPEM decodes a PEM-encoded private key and returns the raw DER bytes.
+func ImportPrivateKeyPEM(pemBytes []byte) ([]byte, error) {
+	block, _ := pem.Decode(pemBytes)
+	if block == nil || block.Type != "PRIVATE KEY" {
+		return nil, errors.New("failed to decode PEM block (expected PRIVATE KEY)")
+	}
+	return block.Bytes, nil
 }

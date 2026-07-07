@@ -132,6 +132,23 @@ public:
      * Verify signature and decrypt content
      */
     static std::string verifyDecrypt(const std::string& content, const std::string& signature, const std::string& signPublicKey, const std::string& decPrivateKey);
+
+    // ── PEM Export/Import ──
+
+    /**
+     * Encode DER bytes to PEM string.
+     * @param der  DER-encoded key bytes in hex format
+     * @param type PEM label ("PUBLIC KEY" or "PRIVATE KEY")
+     */
+    static std::string exportKeyPem(const std::string& derHex, const std::string& type);
+
+    /**
+     * Decode PEM string to DER hex.
+     * @param pem  PEM-encoded key
+     * @param type expected PEM label
+     * @return DER bytes in hex format
+     */
+    static std::string importKeyPem(const std::string& pem, const std::string& type);
 };
 
 #endif // SM2UTIL_H
