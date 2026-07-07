@@ -8,7 +8,7 @@ import {
   utf8ToBytes,
   bytesToUtf8
 } from './utils/encoding';
-import { sm2PrivateKeyToRawHex, sm2PublicKeyToRawHex, type KeyInput } from './utils/sm2KeyFormats';
+import { sm2PrivateKeyToRawHex, sm2PublicKeyToRawHex, type KeyInput, encodePublicKeyToDer, encodePrivateKeyToDer } from './utils/sm2KeyFormats';
 
 export interface CiphertextSignaturePair {
   ciphertext: string;
@@ -59,6 +59,31 @@ export class SM2Util {
    */
   static generateKeyPairHex(): KeyPair {
     return sm2.generateKeyPairHex();
+  }
+
+  /**
+   * Generate SM2 key pair (Base64 format).
+   * @returns KeyPair with publicKey and privateKey encoded as Base64.
+   */
+  static generateKeyPairBase64(): KeyPair {
+    const kp = sm2.generateKeyPairHex();
+    return {
+      publicKey: bytesToBase64(hexToBytes(kp.publicKey)),
+      privateKey: bytesToBase64(hexToBytes(kp.privateKey))
+    };
+  }
+
+  /**
+   * Generate SM2 key pair as DER-encoded Hex.
+   * Public key: Hex of X.509 SubjectPublicKeyInfo DER.
+   * Private key: Hex of PKCS#8 PrivateKeyInfo DER.
+   */
+  static generateKeyPairRaw(): KeyPair {
+    const kp = sm2.generateKeyPairHex();
+    return {
+      publicKey: encodePublicKeyToDer(kp.publicKey),
+      privateKey: encodePrivateKeyToDer(kp.privateKey, kp.publicKey)
+    };
   }
 
   static encryptToBytes(content: Uint8Array, publicKey: KeyInput): Uint8Array {

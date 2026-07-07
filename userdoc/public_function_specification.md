@@ -1719,6 +1719,8 @@ export interface KeyPair {
 | 方法 | 签名 | 出参 |
 |------|------|------|
 | `generateKeyPairHex` | `static generateKeyPairHex(): KeyPair` | `KeyPair{ publicKey, privateKey }`（公钥 130 字符 hex，私钥 64 字符 hex） |
+| `generateKeyPairBase64` | `static generateKeyPairBase64(): KeyPair` | `KeyPair{ publicKey, privateKey }`（Base64 编码） |
+| `generateKeyPairRaw` | `static generateKeyPairRaw(): KeyPair` | `KeyPair{ publicKey, privateKey }`（HEX of X.509/PKCS#8 DER） |
 
 #### 10.1.2 加密 / 解密
 

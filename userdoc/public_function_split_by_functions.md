@@ -54,8 +54,9 @@
 | **Python** | `SM2Util.generate_keypair_raw()` → `(private_hex, public_hex)` 元组 |
 | **Go** | `GenerateKeyPair()` → `(pubDer []byte, privDer []byte, error)` |
 | **Rust** | `sm2::generate_keypair()` → `Result<SerialKeyPair, String>`（PEM 格式） |
+| **JavaScript** | `SM2Util.generateKeyPairRaw()` → `KeyPair{ publicKey, privateKey }`（HEX of X.509 / PKCS#8 DER） |
 
-> **说明**: C++ `generateKeyPairRaw()` 返回的公钥为 **X.509 SubjectPublicKeyInfo DER** 的 HEX 编码，私钥为 **PKCS#8 PrivateKeyInfo DER** 的 HEX 编码，与 Go 的 `GenerateKeyPair()` 输出格式一致。
+> **说明**: C++ 和 JavaScript 的 `generateKeyPairRaw()` 返回格式一致：公钥为 **X.509 SubjectPublicKeyInfo DER** 的 HEX 编码，私钥为 **PKCS#8 PrivateKeyInfo DER** 的 HEX 编码，与 Go 的 `GenerateKeyPair()` 输出格式兼容。
 
 #### SM2_generate_keypair_hex
 
@@ -78,6 +79,7 @@
 | **C** | `crossmool_sm2_generate_keypair_base64(&keypair)` | `keypair.public_key_base64` / `keypair.private_key_base64` |
 | **C++** | `SM2Util::generateKeyPairBase64()` | `KeyPair{ publicKey, privateKey }` |
 | **Java** | `SM2Util.generateKeyPairBase64()` | `SerialKeyPair` 对象 |
+| **JavaScript** | `SM2Util.generateKeyPairBase64()` | `KeyPair{ publicKey, privateKey }` |
 | **Go** | `GenerateKeyPairBase64()` | `(pubB64 string, privB64 string, error)` |
 
 #### SM2_export_private_key_pem / SM2_export_public_key_pem
