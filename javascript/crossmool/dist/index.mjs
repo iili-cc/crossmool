@@ -173,6 +173,108 @@ var DerReader = class _DerReader {
 // src/utils/sm2KeyFormats.ts
 var OID_EC_PUBLIC_KEY = "1.2.840.10045.2.1";
 var OID_SM2_CURVE = "1.2.156.10197.1.301";
+function concatArrays(...arrays) {
+  const total = arrays.reduce((s, a) => s + a.length, 0);
+  const out = new Uint8Array(total);
+  let offset = 0;
+  for (const a of arrays) {
+    out.set(a, offset);
+    offset += a.length;
+  }
+  return out;
+}
+function encodeLength(len) {
+  if (len < 128) return new Uint8Array([len]);
+  const parts = [];
+  let v = len;
+  while (v > 0) {
+    parts.unshift(v & 255);
+    v >>>= 8;
+  }
+  return new Uint8Array([128 | parts.length, ...parts]);
+}
+function encodeTaggedValue(tag, content) {
+  return concatArrays(new Uint8Array([tag]), encodeLength(content.length), content);
+}
+function encodeInteger(value) {
+  let start = 0;
+  while (start < value.length && value[start] === 0) start++;
+  if (start === value.length) return encodeTaggedValue(2, new Uint8Array([0]));
+  const trimmed = value.slice(start);
+  if (trimmed[0] >= 128) {
+    return encodeTaggedValue(2, concatArrays(new Uint8Array([0]), trimmed));
+  }
+  return encodeTaggedValue(2, trimmed);
+}
+function encodeOID(oid) {
+  const parts = oid.split(".").map(Number);
+  const result = [parts[0] * 40 + parts[1]];
+  for (let i = 2; i < parts.length; i++) {
+    let v = parts[i];
+    const stack = [v & 127];
+    v >>>= 7;
+    while (v > 0) {
+      stack.unshift(v & 127 | 128);
+      v >>>= 7;
+    }
+    result.push(...stack);
+  }
+  return encodeTaggedValue(6, new Uint8Array(result));
+}
+function encodeOctetString(data) {
+  return encodeTaggedValue(4, data);
+}
+function encodeBitString(data, unusedBits = 0) {
+  return encodeTaggedValue(3, concatArrays(new Uint8Array([unusedBits]), data));
+}
+function encodeSequence(content) {
+  return encodeTaggedValue(48, content);
+}
+function encodeContextSpecific(tagNumber, content) {
+  return encodeTaggedValue(160 | tagNumber, content);
+}
+function encodePublicKeyToDer(pubHex) {
+  const raw = ensureUncompressedPublicKeyHex(pubHex);
+  const pubPoint = hexToBytes(raw);
+  const algSeq = encodeSequence(concatArrays(
+    encodeOID(OID_EC_PUBLIC_KEY),
+    encodeOID(OID_SM2_CURVE)
+  ));
+  const spki = encodeSequence(concatArrays(
+    algSeq,
+    encodeBitString(pubPoint, 0)
+  ));
+  return bytesToHex(spki);
+}
+function encodePrivateKeyToDer(privHex, pubHex) {
+  const d = hexToBytes(ensureRawPrivateKeyHex(privHex));
+  const pubPoint = hexToBytes(ensureUncompressedPublicKeyHex(pubHex));
+  const ecPrivKey = encodeSequence(concatArrays(
+    encodeInteger(new Uint8Array([1])),
+    // version = 1
+    encodeOctetString(d),
+    // private key
+    encodeContextSpecific(1, encodeBitString(pubPoint, 0))
+    // [1] public key
+  ));
+  const algSeq = encodeSequence(concatArrays(
+    encodeOID(OID_EC_PUBLIC_KEY),
+    encodeOID(OID_SM2_CURVE)
+  ));
+  const pki = encodeSequence(concatArrays(
+    encodeInteger(new Uint8Array([0])),
+    // version
+    algSeq,
+    encodeOctetString(ecPrivKey)
+  ));
+  return bytesToHex(pki);
+}
+function ensureRawPrivateKeyHex(privHex) {
+  const s = privHex.trim().toLowerCase();
+  if (!isHexString(s)) throw new Error("Private key must be hex");
+  if (s.length === 64) return s;
+  throw new Error("Unsupported SM2 private key hex length");
+}
 function toBytes(input) {
   if (typeof input !== "string") return input;
   return decodeHexOrBase64ToBytes(input);
@@ -272,6 +374,36 @@ function normalizeSignatureToHex(signature) {
   throw new Error("Signature must be hex or base64");
 }
 var SM2Util = class {
+  /**
+   * Generate SM2 key pair (hex format).
+   * @returns KeyPair with publicKey (130 chars: 04+X+Y) and privateKey (64 chars).
+   */
+  static generateKeyPairHex() {
+    return sm2.generateKeyPairHex();
+  }
+  /**
+   * Generate SM2 key pair (Base64 format).
+   * @returns KeyPair with publicKey and privateKey encoded as Base64.
+   */
+  static generateKeyPairBase64() {
+    const kp = sm2.generateKeyPairHex();
+    return {
+      publicKey: bytesToBase64(hexToBytes(kp.publicKey)),
+      privateKey: bytesToBase64(hexToBytes(kp.privateKey))
+    };
+  }
+  /**
+   * Generate SM2 key pair as DER-encoded Hex.
+   * Public key: Hex of X.509 SubjectPublicKeyInfo DER.
+   * Private key: Hex of PKCS#8 PrivateKeyInfo DER.
+   */
+  static generateKeyPairRaw() {
+    const kp = sm2.generateKeyPairHex();
+    return {
+      publicKey: encodePublicKeyToDer(kp.publicKey),
+      privateKey: encodePrivateKeyToDer(kp.privateKey, kp.publicKey)
+    };
+  }
   static encryptToBytes(content, publicKey) {
     const pubHex = sm2PublicKeyToRawHex(publicKey);
     const cipherHex = sm2.doEncrypt(content, pubHex, CIPHER_MODE_C1C3C2);
@@ -356,7 +488,57 @@ var SM2Util = class {
   static verifyDecryptPair(pair, signPublicKey, decPrivateKey) {
     return this.verifyDecrypt(pair.ciphertext, pair.signature, signPublicKey, decPrivateKey);
   }
+  /**
+   * Encode DER public key bytes to PEM format.
+   * @param pubDerHex hex string of X.509 SubjectPublicKeyInfo DER
+   */
+  static exportPublicKeyPEM(pubDerHex) {
+    const der = hexToBytes(pubDerHex);
+    return derToPEM("PUBLIC KEY", der);
+  }
+  /**
+   * Encode DER private key bytes to PEM format.
+   * @param privDerHex hex string of PKCS#8 PrivateKeyInfo DER
+   */
+  static exportPrivateKeyPEM(privDerHex) {
+    const der = hexToBytes(privDerHex);
+    return derToPEM("PRIVATE KEY", der);
+  }
+  /**
+   * Decode a PEM-encoded public key, returning the raw DER as hex.
+   */
+  static importPublicKeyPEM(pem) {
+    const der = pemToDER(pem, "PUBLIC KEY");
+    return bytesToHex(der);
+  }
+  /**
+   * Decode a PEM-encoded private key, returning the raw DER as hex.
+   */
+  static importPrivateKeyPEM(pem) {
+    const der = pemToDER(pem, "PRIVATE KEY");
+    return bytesToHex(der);
+  }
 };
+function derToPEM(type, der) {
+  const b64 = bytesToBase64(der);
+  const lines = [`-----BEGIN ${type}-----`];
+  for (let i = 0; i < b64.length; i += 64) {
+    lines.push(b64.slice(i, i + 64));
+  }
+  lines.push(`-----END ${type}-----`);
+  return lines.join("\n");
+}
+function pemToDER(pem, type) {
+  const begin = `-----BEGIN ${type}-----`;
+  const end = `-----END ${type}-----`;
+  const start = pem.indexOf(begin);
+  const finish = pem.indexOf(end);
+  if (start === -1 || finish === -1) {
+    throw new Error(`Invalid PEM: missing ${type} boundaries`);
+  }
+  const b64 = pem.slice(start + begin.length, finish).replace(/\s/g, "");
+  return decodeHexOrBase64ToBytes(b64);
+}
 
 // src/SM3Util.ts
 import { sm3 } from "sm-crypto-v2";

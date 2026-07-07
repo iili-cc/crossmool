@@ -422,7 +422,7 @@ class SM2Util:
     def encrypt_sign(content: str, enc_public_key, sign_private_key, to_base64: bool = False) -> dict:
         """Encrypt and sign UTF-8 content. Returns {'ciphertext': ..., 'signature': ...}."""
         ct = SM2Util.encrypt(content, enc_public_key, to_base64=to_base64)
-        sig = SM2Util.sign(content, sign_private_key, to_base64=to_base64)
+        sig = SM2Util.sign(ct, sign_private_key, to_base64=to_base64)
         return {'ciphertext': ct, 'signature': sig}
 
     @staticmethod

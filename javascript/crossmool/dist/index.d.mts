@@ -6,7 +6,27 @@ interface CiphertextSignaturePair {
     ciphertext: string;
     signature: string;
 }
+interface KeyPair {
+    publicKey: string;
+    privateKey: string;
+}
 declare class SM2Util {
+    /**
+     * Generate SM2 key pair (hex format).
+     * @returns KeyPair with publicKey (130 chars: 04+X+Y) and privateKey (64 chars).
+     */
+    static generateKeyPairHex(): KeyPair;
+    /**
+     * Generate SM2 key pair (Base64 format).
+     * @returns KeyPair with publicKey and privateKey encoded as Base64.
+     */
+    static generateKeyPairBase64(): KeyPair;
+    /**
+     * Generate SM2 key pair as DER-encoded Hex.
+     * Public key: Hex of X.509 SubjectPublicKeyInfo DER.
+     * Private key: Hex of PKCS#8 PrivateKeyInfo DER.
+     */
+    static generateKeyPairRaw(): KeyPair;
     static encryptToBytes(content: Uint8Array, publicKey: KeyInput): Uint8Array;
     static encryptToHex(content: string | Uint8Array, publicKey: KeyInput): string;
     static encryptToBase64(content: string | Uint8Array, publicKey: KeyInput): string;
@@ -24,6 +44,24 @@ declare class SM2Util {
     static encryptSignWithSameFormatKeys(content: string, encPublicKey: string, signPrivateKey: string): CiphertextSignaturePair;
     static verifyDecrypt(ciphertext: string, signature: string, signPublicKey: KeyInput, decPrivateKey: KeyInput): string;
     static verifyDecryptPair(pair: CiphertextSignaturePair, signPublicKey: KeyInput, decPrivateKey: KeyInput): string;
+    /**
+     * Encode DER public key bytes to PEM format.
+     * @param pubDerHex hex string of X.509 SubjectPublicKeyInfo DER
+     */
+    static exportPublicKeyPEM(pubDerHex: string): string;
+    /**
+     * Encode DER private key bytes to PEM format.
+     * @param privDerHex hex string of PKCS#8 PrivateKeyInfo DER
+     */
+    static exportPrivateKeyPEM(privDerHex: string): string;
+    /**
+     * Decode a PEM-encoded public key, returning the raw DER as hex.
+     */
+    static importPublicKeyPEM(pem: string): string;
+    /**
+     * Decode a PEM-encoded private key, returning the raw DER as hex.
+     */
+    static importPrivateKeyPEM(pem: string): string;
 }
 
 declare class SM3Util {
@@ -94,4 +132,4 @@ declare function utf8ToBytes(text: string): Bytes;
 declare function bytesToUtf8(bytes: Bytes): string;
 declare function decodeHexOrBase64ToBytes(input: string): Bytes;
 
-export { type CiphertextSignaturePair, SM2Util, SM3Util, SM4Util, base64ToBytes, bytesToBase64, bytesToHex, bytesToUtf8, decodeHexOrBase64ToBytes, hexToBytes, isBase64String, isHexString, sm2PrivateKeyToRawHex, sm2PublicKeyToRawHex, utf8ToBytes };
+export { type CiphertextSignaturePair, type KeyPair, SM2Util, SM3Util, SM4Util, base64ToBytes, bytesToBase64, bytesToHex, bytesToUtf8, decodeHexOrBase64ToBytes, hexToBytes, isBase64String, isHexString, sm2PrivateKeyToRawHex, sm2PublicKeyToRawHex, utf8ToBytes };
