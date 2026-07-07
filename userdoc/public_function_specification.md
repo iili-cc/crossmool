@@ -727,7 +727,16 @@ struct CiphertextSignaturePair {
 | 字段 | 描述 |
 |------|------|
 | **签名** | `static KeyPair generateKeyPairHex()` |
-| **出参** | `KeyPair` — HEX 编码的公私钥对 |
+| **出参** | `KeyPair` — HEX 编码的公私钥对（公钥 130 字符 hex，私钥 64 字符 hex） |
+
+##### `generateKeyPairRaw`
+
+| 字段 | 描述 |
+|------|------|
+| **签名** | `static KeyPair generateKeyPairRaw()` |
+| **入参** | 无 |
+| **出参** | `KeyPair` — X.509/PKCS#8 DER 的 HEX 编码公私钥对 |
+| **说明** | 公钥为 X.509 SubjectPublicKeyInfo DER 的 HEX 编码，私钥为 PKCS#8 PrivateKeyInfo DER 的 HEX 编码。与 Go `GenerateKeyPair()` / Rust `generate_keypair()` 输出格式兼容。 |
 
 **调用示例**：
 
@@ -737,6 +746,9 @@ struct CiphertextSignaturePair {
 auto keypair = SM2Util::generateKeyPairHex();
 std::cout << "Public: " << keypair.publicKey << std::endl;
 std::cout << "Private: " << keypair.privateKey << std::endl;
+
+// 或生成 DER 原始格式
+auto rawKeypair = SM2Util::generateKeyPairRaw();
 ```
 
 ---

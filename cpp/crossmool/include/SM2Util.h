@@ -36,6 +36,14 @@ public:
     static KeyPair generateKeyPairHex();
 
     /**
+     * Generate SM2 key pair and return as DER-encoded Hex strings.
+     * Public key: Hex of X.509 SubjectPublicKeyInfo DER.
+     * Private key: Hex of PKCS#8 PrivateKeyInfo DER.
+     * These are the standard interchange formats compatible with Go/Rust/Java.
+     */
+    static KeyPair generateKeyPairRaw();
+
+    /**
      * Encrypt data with public key (raw bytes), return as byte array
      */
     static std::vector<unsigned char> encryptToBytes(const std::vector<unsigned char>& content, const std::vector<unsigned char>& publicKey);

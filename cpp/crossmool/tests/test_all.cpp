@@ -35,6 +35,12 @@ void test_sm2_keygen() {
     TEST("Hex priv len 64", kp_hex.privateKey.length() == 64);
     TEST("Pub starts with 04", kp_hex.publicKey.substr(0, 2) == "04");
     TEST("Hex pub is valid hex", HexUtil::isHexString(kp_hex.publicKey));
+
+    auto kp_raw = SM2Util::generateKeyPairRaw();
+    TEST("generateKeyPairRaw pub", !kp_raw.publicKey.empty());
+    TEST("generateKeyPairRaw priv", !kp_raw.privateKey.empty());
+    TEST("Raw pub is valid hex", HexUtil::isHexString(kp_raw.publicKey));
+    TEST("Raw priv is valid hex", HexUtil::isHexString(kp_raw.privateKey));
 }
 
 void test_sm2_encrypt_decrypt() {

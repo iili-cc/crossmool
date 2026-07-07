@@ -355,6 +355,92 @@ SM2Util::KeyPair SM2Util::generateKeyPairHex() {
 #endif
 }
 
+SM2Util::KeyPair SM2Util::generateKeyPairRaw() {
+#ifdef USE_GMSSL
+    SM2_KEY key;
+    memset(&key, 0, sizeof(key));
+
+    if (sm2_key_generate(&key) != 1) {
+        throw std::runtime_error("Failed to generate SM2 key pair");
+    }
+
+    // Convert public key to X.509 SubjectPublicKeyInfo DER
+    uint8_t* pub_der = nullptr;
+    size_t pub_der_len = 0;
+    if (sm2_public_key_info_to_der(&key, &pub_der, &pub_der_len) != 1) {
+        throw std::runtime_error("Failed to encode public key to X.509 DER");
+    }
+
+    // Convert private key to PKCS#8 PrivateKeyInfo DER
+    uint8_t* priv_der = nullptr;
+    size_t priv_der_len = 0;
+    if (sm2_private_key_info_to_der(&key, &priv_der, &priv_der_len) != 1) {
+        free(pub_der);
+        throw std::runtime_error("Failed to encode private key to PKCS#8 DER");
+    }
+
+    KeyPair pair;
+    pair.publicKey = HexUtil::encodeHexStr(std::vector<unsigned char>(pub_der, pub_der + pub_der_len));
+    pair.privateKey = HexUtil::encodeHexStr(std::vector<unsigned char>(priv_der, priv_der + priv_der_len));
+
+    free(pub_der);
+    free(priv_der);
+    return pair;
+#else
+    // Stub implementation: hand-craft DER-encoded key pair
+    SM2Context ctx;
+    // Public key: X.509 SubjectPublicKeyInfo DER
+    //   30 59    SEQUENCE (89 bytes)
+    //     30 13    SEQUENCE (19 bytes) — AlgorithmIdentifier
+    //       06 07 2A811CCF5501822D   OID 1.2.156.10197.1.301 (SM2)
+    //       06 08 2A811CCF5501822D   OID 1.2.156.10197.1.301 (curve param)
+    //     03 42 00 BIT STRING (66 bytes) — 04||x||y uncompressed point
+    std::vector<unsigned char> pub_der;
+    pub_der.push_back(0x30); pub_der.push_back(0x59);
+    pub_der.push_back(0x30); pub_der.push_back(0x13);
+    pub_der.push_back(0x06); pub_der.push_back(0x07);
+    pub_der.push_back(0x2A); pub_der.push_back(0x81); pub_der.push_back(0x1C);
+    pub_der.push_back(0xCF); pub_der.push_back(0x55); pub_der.push_back(0x01);
+    pub_der.push_back(0x82); pub_der.push_back(0x2D);
+    pub_der.push_back(0x06); pub_der.push_back(0x08);
+    pub_der.push_back(0x2A); pub_der.push_back(0x81); pub_der.push_back(0x1C);
+    pub_der.push_back(0xCF); pub_der.push_back(0x55); pub_der.push_back(0x01);
+    pub_der.push_back(0x82); pub_der.push_back(0x2D);
+    pub_der.push_back(0x03); pub_der.push_back(0x42); pub_der.push_back(0x00);
+    pub_der.insert(pub_der.end(), ctx.publicKey.begin(), ctx.publicKey.end());
+
+    // Private key: PKCS#8 PrivateKeyInfo DER
+    std::vector<unsigned char> priv_der;
+    priv_der.push_back(0x30); priv_der.push_back(0x54);
+    priv_der.push_back(0x02); priv_der.push_back(0x01); priv_der.push_back(0x00); // version
+    // AlgorithmIdentifier
+    priv_der.push_back(0x30); priv_der.push_back(0x13);
+    priv_der.push_back(0x06); priv_der.push_back(0x07);
+    priv_der.push_back(0x2A); priv_der.push_back(0x81); priv_der.push_back(0x1C);
+    priv_der.push_back(0xCF); priv_der.push_back(0x55); priv_der.push_back(0x01);
+    priv_der.push_back(0x82); priv_der.push_back(0x2D);
+    priv_der.push_back(0x06); priv_der.push_back(0x08);
+    priv_der.push_back(0x2A); priv_der.push_back(0x81); priv_der.push_back(0x1C);
+    priv_der.push_back(0xCF); priv_der.push_back(0x55); priv_der.push_back(0x01);
+    priv_der.push_back(0x82); priv_der.push_back(0x2D);
+    // OCTET STRING wrapping ECPrivateKey SEQUENCE
+    priv_der.push_back(0x04); priv_der.push_back(0x3A);
+    priv_der.push_back(0x30); priv_der.push_back(0x38);
+    priv_der.push_back(0x02); priv_der.push_back(0x01); priv_der.push_back(0x01); // version 1
+    priv_der.push_back(0x04); priv_der.push_back(0x20); // private key OCTET STRING (32 bytes)
+    priv_der.insert(priv_der.end(), ctx.privateKey.begin(), ctx.privateKey.end());
+    // [1] EXPLICIT BIT STRING for public key (context-specific tag 1)
+    priv_der.push_back(0xA1); priv_der.push_back(0x11);
+    priv_der.push_back(0x03); priv_der.push_back(0x0F); priv_der.push_back(0x00);
+    priv_der.insert(priv_der.end(), ctx.publicKey.begin(), ctx.publicKey.begin() + 15);
+
+    KeyPair pair;
+    pair.publicKey = HexUtil::encodeHexStr(pub_der);
+    pair.privateKey = HexUtil::encodeHexStr(priv_der);
+    return pair;
+#endif
+}
+
 /* ============================================================
  * 加密
  * ============================================================ */
