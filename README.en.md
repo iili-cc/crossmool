@@ -34,3 +34,7 @@ Software architecture description
 4.  The most valuable open source project [GVP](https://gitee.com/gvp)
 5.  The manual of Gitee [https://gitee.com/help](https://gitee.com/help)
 6.  The most popular members  [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+
+#### License
+LGPL-v3 
+(To reduce the probability of fragmentation issues, this software will use the LGPL-v3 license in its early stages. And the goal is to switch to the Apache License in the future.)

@@ -33,4 +33,5 @@ The first plan is to support Java, Python, JavaScript, Golang, Rust, C++, C, C#.
 
 
 #### License
-GPLv3
+LGPL-v3 
+(To reduce the probability of fragmentation issues, this software will use the LGPL-v3 license in its early stages. And the goal is to switch to the Apache License in the future.)
