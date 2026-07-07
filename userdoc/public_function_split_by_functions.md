@@ -66,9 +66,12 @@
 |------|----------|--------|
 | **C** | `crossmool_sm2_generate_keypair_hex(&keypair)` | `keypair.public_key_hex` / `keypair.private_key_hex` |
 | **C++** | `SM2Util::generateKeyPairHex()` | `KeyPair{ publicKey, privateKey }` |
+| **C#** | `SM2Util.generateKeyPairHex()` | `(string publicKey, string privateKey)` 元组 |
 | **Java** | `SM2Util.generateKeyPairHex()` | `SerialKeyPair` 对象（`.getPublicKey()` / `.getPrivateKey()`） |
+| **Python** | `SM2Util.generate_keypair_hex()` | `{'publicKey': ..., 'privateKey': ...}` |
 | **JavaScript** | `SM2Util.generateKeyPairHex()` | `KeyPair{ publicKey, privateKey }`（公钥 130 字符，私钥 64 字符） |
 | **Go** | `GenerateKeyPairHex()` | `(pubHex string, privHex string, error)` |
+| **Rust** | `sm2::generate_keypair_hex()` | `Result<(String, String), String>` → (pub_hex, priv_hex) |
 
 #### SM2_generate_keypair_base64
 
@@ -78,9 +81,12 @@
 |------|----------|--------|
 | **C** | `crossmool_sm2_generate_keypair_base64(&keypair)` | `keypair.public_key_base64` / `keypair.private_key_base64` |
 | **C++** | `SM2Util::generateKeyPairBase64()` | `KeyPair{ publicKey, privateKey }` |
+| **C#** | `SM2Util.generateKeyPairBase64()` | `(string publicKey, string privateKey)` 元组 |
 | **Java** | `SM2Util.generateKeyPairBase64()` | `SerialKeyPair` 对象 |
+| **Python** | `SM2Util.generate_keypair_base64()` | `{'publicKey': ..., 'privateKey': ...}` |
 | **JavaScript** | `SM2Util.generateKeyPairBase64()` | `KeyPair{ publicKey, privateKey }` |
 | **Go** | `GenerateKeyPairBase64()` | `(pubB64 string, privB64 string, error)` |
+| **Rust** | `sm2::generate_keypair_base64()` | `Result<(String, String), String>` → (pub_b64, priv_b64) |
 
 #### SM2_export_private_key_pem / SM2_export_public_key_pem
 

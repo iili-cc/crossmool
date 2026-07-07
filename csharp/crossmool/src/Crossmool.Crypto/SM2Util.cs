@@ -293,6 +293,35 @@ namespace Crossmool.Crypto
 
         public static string generateKeyPair()
         {
+            var (pubHex, privHex) = generateKeyPairRaw();
+            return $"{{\"privateKeyHex\":\"{privHex}\",\"publicKeyHex\":\"{pubHex}\"}}";
+        }
+
+        /// <summary>
+        /// Generate SM2 key pair, return as hex strings.
+        /// Public key: 130 chars (04+X+Y), Private key: 64 chars.
+        /// </summary>
+        public static (string publicKey, string privateKey) generateKeyPairHex()
+        {
+            return generateKeyPairRaw();
+        }
+
+        /// <summary>
+        /// Generate SM2 key pair, return as base64 strings.
+        /// </summary>
+        public static (string publicKey, string privateKey) generateKeyPairBase64()
+        {
+            var (pubHex, privHex) = generateKeyPairRaw();
+            return (EncodingUtils.ToBase64(EncodingUtils.FromHex(pubHex)),
+                    EncodingUtils.ToBase64(EncodingUtils.FromHex(privHex)));
+        }
+
+        /// <summary>
+        /// Generate SM2 key pair, return as (publicKeyHex, privateKeyHex) tuple.
+        /// Public key: 130 chars (04+X+Y), Private key: 64 chars.
+        /// </summary>
+        internal static (string publicKey, string privateKey) generateKeyPairRaw()
+        {
             var gen = new ECKeyPairGenerator();
             var keyGenParams = new ECKeyGenerationParameters(Sm2Domain, Rng);
             gen.Init(keyGenParams);
@@ -307,7 +336,7 @@ namespace Crossmool.Crypto
 
             var privHex = EncodingUtils.ToHex(privBytes);
             var pubHex = EncodingUtils.ToHex(pubBytes);
-            return $"{{\"privateKeyHex\":\"{privHex}\",\"publicKeyHex\":\"{pubHex}\"}}";
+            return (pubHex, privHex);
         }
 
         /// <summary>

@@ -76,6 +76,41 @@ pub fn generate_keypair() -> Result<SerialKeyPair, String> {
     })
 }
 
+/// Generate an SM2 key pair and return hex-encoded raw keys.
+/// Returns (public_key_hex, private_key_hex).
+/// Public key: 130 chars (04+X+Y), Private key: 64 chars.
+pub fn generate_keypair_hex() -> Result<(String, String), String> {
+    let mut rng = OsRng;
+    let sk = SecretKey::random(&mut rng);
+    let pk = PublicKey::from_secret_scalar(&sk.to_nonzero_scalar());
+
+    let pub_encoded = pk.to_encoded_point(false);
+    let pub_hex = crate::encoding::to_hex(pub_encoded.as_bytes());
+
+    let sk_scalar = sk.to_nonzero_scalar();
+    let priv_bytes: Vec<u8> = sk_scalar.as_ref().as_slice().to_vec();
+    let priv_hex = crate::encoding::to_hex(&priv_bytes);
+
+    Ok((pub_hex, priv_hex))
+}
+
+/// Generate an SM2 key pair and return base64-encoded raw keys.
+/// Returns (public_key_base64, private_key_base64).
+pub fn generate_keypair_base64() -> Result<(String, String), String> {
+    let mut rng = OsRng;
+    let sk = SecretKey::random(&mut rng);
+    let pk = PublicKey::from_secret_scalar(&sk.to_nonzero_scalar());
+
+    let pub_encoded = pk.to_encoded_point(false);
+    let pub_b64 = crate::encoding::to_base64(pub_encoded.as_bytes());
+
+    let sk_scalar = sk.to_nonzero_scalar();
+    let priv_bytes: Vec<u8> = sk_scalar.as_ref().as_slice().to_vec();
+    let priv_b64 = crate::encoding::to_base64(&priv_bytes);
+
+    Ok((pub_b64, priv_b64))
+}
+
 /// Sign message bytes using PKCS#8 private key DER, returning signature bytes.
 pub fn sign_bytes(msg: &[u8], private_pkcs8_der: &[u8]) -> Result<Vec<u8>, String> {
     let sk = SecretKey::from_pkcs8_der(private_pkcs8_der)

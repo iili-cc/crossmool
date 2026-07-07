@@ -169,6 +169,21 @@ class SM2Util:
         return priv.lower(), pub.lower()
 
     @staticmethod
+    def generate_keypair_hex() -> dict:
+        """生成 HEX 密钥对，返回 {'publicKey': ..., 'privateKey': ...}（公钥 130 字符，私钥 64 字符）"""
+        priv_hex, pub_hex = SM2Util.generate_keypair_raw()
+        return {'publicKey': pub_hex, 'privateKey': priv_hex}
+
+    @staticmethod
+    def generate_keypair_base64() -> dict:
+        """生成 Base64 密钥对，返回 {'publicKey': ..., 'privateKey': ...}"""
+        priv_hex, pub_hex = SM2Util.generate_keypair_raw()
+        return {
+            'publicKey': bytes_to_base64(hex_to_bytes(pub_hex)),
+            'privateKey': bytes_to_base64(hex_to_bytes(priv_hex))
+        }
+
+    @staticmethod
     def encrypt_to_hex(content: bytes, public_key) -> str:
         """
         加密 SM2 明文（C1C3C2 格式，与 Java/Go 兼容）
