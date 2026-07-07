@@ -1,4 +1,4 @@
-export { SM2Util, type CiphertextSignaturePair } from './SM2Util';
+export { SM2Util, type CiphertextSignaturePair, type KeyPair } from './SM2Util';
 export { SM3Util } from './SM3Util';
 export { SM4Util } from './SM4Util';
 

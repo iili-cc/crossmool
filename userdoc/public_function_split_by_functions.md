@@ -55,9 +55,7 @@
 | **Go** | `GenerateKeyPair()` → `(pubDer []byte, privDer []byte, error)` |
 | **Rust** | `sm2::generate_keypair()` → `Result<SerialKeyPair, String>`（PEM 格式） |
 
-> **说明**:
-> - JavaScript 不直接暴露密钥生成方法（底层库 `sm-crypto-v2` 未提供）。
-> - C++ `generateKeyPairRaw()` 返回的公钥为 **X.509 SubjectPublicKeyInfo DER** 的 HEX 编码，私钥为 **PKCS#8 PrivateKeyInfo DER** 的 HEX 编码，与 Go 的 `GenerateKeyPair()` 输出格式一致。
+> **说明**: C++ `generateKeyPairRaw()` 返回的公钥为 **X.509 SubjectPublicKeyInfo DER** 的 HEX 编码，私钥为 **PKCS#8 PrivateKeyInfo DER** 的 HEX 编码，与 Go 的 `GenerateKeyPair()` 输出格式一致。
 
 #### SM2_generate_keypair_hex
 
@@ -68,6 +66,7 @@
 | **C** | `crossmool_sm2_generate_keypair_hex(&keypair)` | `keypair.public_key_hex` / `keypair.private_key_hex` |
 | **C++** | `SM2Util::generateKeyPairHex()` | `KeyPair{ publicKey, privateKey }` |
 | **Java** | `SM2Util.generateKeyPairHex()` | `SerialKeyPair` 对象（`.getPublicKey()` / `.getPrivateKey()`） |
+| **JavaScript** | `SM2Util.generateKeyPairHex()` | `KeyPair{ publicKey, privateKey }`（公钥 130 字符，私钥 64 字符） |
 | **Go** | `GenerateKeyPairHex()` | `(pubHex string, privHex string, error)` |
 
 #### SM2_generate_keypair_base64
@@ -1384,7 +1383,7 @@ let pt = sm4::decrypt_gcm(&key, &ct_hex).unwrap();
 
 | 功能 | C | C++ | C# | Java | Python | JS | Go | Rust |
 |------|:--:|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
-| **SM2 密钥生成** | ✅ | ✅ | ✅ | ✅ | ✅ | ⬜ | ✅ | ✅ |
+| **SM2 密钥生成** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **SM2 加密 (utf8→hex)** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **SM2 加密 (utf8→base64)** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **SM2 加密 (bytes→bytes)** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |

@@ -1707,9 +1707,20 @@ export interface CiphertextSignaturePair {
   ciphertext: string;
   signature: string;
 }
+
+export interface KeyPair {
+  publicKey: string;
+  privateKey: string;
+}
 ```
 
-#### 10.1.1 加密 / 解密
+#### 10.1.1 密钥生成
+
+| 方法 | 签名 | 出参 |
+|------|------|------|
+| `generateKeyPairHex` | `static generateKeyPairHex(): KeyPair` | `KeyPair{ publicKey, privateKey }`（公钥 130 字符 hex，私钥 64 字符 hex） |
+
+#### 10.1.2 加密 / 解密
 
 | 方法 | 签名 | 出参 |
 |------|------|------|
@@ -1722,7 +1733,7 @@ export interface CiphertextSignaturePair {
 | `decryptToBytesFromString` | `static decryptToBytesFromString(cipherHexOrBase64: string, privateKey: KeyInput): Uint8Array` | 明文字节 |
 | **`decrypt` ⭐** | `static decrypt(cipherHexOrBase64: string, privateKey: KeyInput): string` | UTF-8 明文 |
 
-#### 10.1.2 签名 / 验签
+#### 10.1.3 签名 / 验签
 
 | 方法 | 签名 | 出参 |
 |------|------|------|
@@ -1732,7 +1743,7 @@ export interface CiphertextSignaturePair {
 | **`sign` ⭐** | `static sign(content: string, privateKey: KeyInput, toBase64 = false): string` | HEX/Base64 签名 |
 | **`verify` ⭐** | `static verify(content: string \| Uint8Array, publicKey: KeyInput, signatureHexOrBase64: string): boolean` | 验证结果 |
 
-#### 10.1.3 加密签名组合
+#### 10.1.4 加密签名组合
 
 | 方法 | 签名 |
 |------|------|

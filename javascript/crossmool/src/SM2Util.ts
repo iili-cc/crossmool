@@ -15,6 +15,11 @@ export interface CiphertextSignaturePair {
   signature: string;
 }
 
+export interface KeyPair {
+  publicKey: string;
+  privateKey: string;
+}
+
 const USER_ID = '1234567812345678';
 const CIPHER_MODE_C1C3C2 = 1;
 
@@ -48,6 +53,14 @@ function normalizeSignatureToHex(signature: string): string {
 }
 
 export class SM2Util {
+  /**
+   * Generate SM2 key pair (hex format).
+   * @returns KeyPair with publicKey (130 chars: 04+X+Y) and privateKey (64 chars).
+   */
+  static generateKeyPairHex(): KeyPair {
+    return sm2.generateKeyPairHex();
+  }
+
   static encryptToBytes(content: Uint8Array, publicKey: KeyInput): Uint8Array {
     const pubHex = sm2PublicKeyToRawHex(publicKey);
     const cipherHex = sm2.doEncrypt(content, pubHex, CIPHER_MODE_C1C3C2);
