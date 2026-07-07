@@ -149,6 +149,12 @@ pub fn generate_hmac_key_str_default() -> String {
     generate_hmac_key_to_str(32, false)
 }
 
+/// Verify HMAC-SM3 by computing expected value and comparing.
+pub fn hmac_verify(key: &str, data: &str, received_hmac: &str) -> Result<bool, String> {
+    let expected = hmac_str_default(key, data)?;
+    Ok(expected == received_hmac)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

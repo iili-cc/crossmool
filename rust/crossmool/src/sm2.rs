@@ -304,3 +304,21 @@ pub fn decrypt_with_private_pem(private_pem: &str, ciphertext: &[u8]) -> Result<
     }
     Ok(m)
 }
+
+/// Encrypt and sign in one pass. Uses different keys for encryption and signing.
+pub fn encrypt_sign(plaintext: &[u8], enc_public_pem: &str, sign_private_pem: &str) -> Result<(String, String), String> {
+    let ct_hex = encrypt_with_public_pem_hex(enc_public_pem, plaintext)?;
+    let sig = sign_with_private_pem(plaintext, sign_private_pem)?;
+    Ok((ct_hex, crate::encoding::to_hex(&sig)))
+}
+
+/// Verify signature and decrypt in one pass.
+pub fn verify_decrypt(ciphertext_hex: &str, signature_hex: &str, sign_public_pem: &str, dec_private_pem: &str) -> Result<String, String> {
+    let sig = crate::encoding::from_hex(signature_hex).map_err(|e| format!("hex decode: {:?}", e))?;
+    let valid = verify_with_public_pem(ciphertext_hex.as_bytes(), &sig, sign_public_pem)?;
+    if !valid {
+        return Err("SM2 signature verification failed".into());
+    }
+    let pt = decrypt_with_private_pem_hex(dec_private_pem, ciphertext_hex)?;
+    String::from_utf8(pt).map_err(|e| format!("utf8: {:?}", e))
+}

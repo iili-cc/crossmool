@@ -34,6 +34,11 @@ std::string SM4Util::generateKeyAsHex() {
     return HexUtil::encodeHexStr(key);
 }
 
+std::string SM4Util::generateKeyAsBase64() {
+    auto key = generateKey();
+    return Base64Util::encodeBase64Str(key);
+}
+
 std::vector<unsigned char> SM4Util::parseHexKey(const std::string& hexKey) {
     return HexUtil::decodeHexStr(hexKey);
 }

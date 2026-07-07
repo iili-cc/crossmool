@@ -243,6 +243,7 @@ let ct = sm2::encrypt_with_public_pem_hex(&keypair.public_key_pem, b"Hello, SM2!
 | **JavaScript** | `SM2Util.encryptToHex(content, publicKey)` → content: Uint8Array |
 | **Go** | `Encrypt(string(content), encPublicKey, false)` (需先 string 转换) |
 | **Rust** | `sm2::encrypt_with_public_pem_hex(public_pem, plaintext)` |
+| **C#** | `SM2Util.encrypt(contentBytes, publicKeyBytes)` → byte[]; 再 `EncodingUtils.ToHex()` |
 
 ---
 
@@ -259,6 +260,7 @@ let ct = sm2::encrypt_with_public_pem_hex(&keypair.public_key_pem, b"Hello, SM2!
 | **JavaScript** | `SM2Util.encryptToBase64(content, publicKey)` |
 | **Go** | `Encrypt(string(content), encPublicKey, true)` |
 | **Rust** | `sm2::encrypt_with_public_pem_base64(public_pem, plaintext)` |
+| **C#** | `SM2Util.encrypt(contentBytes, publicKeyBytes)` → byte[]; 再 `EncodingUtils.ToBase64()` |
 
 ---
 
@@ -628,8 +630,8 @@ let ok = sm2::verify_with_public_pem(b"Hello", &sig_bytes, &keypair.public_key_p
 | **Java** | `SM2Util.encryptSign(content, encPublicKey, signPrivateKey)` | `CiphertextSignaturePair`（`.getCiphertext()` / `.getSignature()`） |
 | **JavaScript** | `SM2Util.encryptSign(content, encPublicKey, signPrivateKey)` | `CiphertextSignaturePair{ ciphertext, signature }`（默认 HEX） |
 | **Go** | `EncryptSignDefault(content, encPublicKey, signPrivateKey)` | `*CiphertextSignaturePair` |
-| **Python** | 不直接提供（可手动调用加密+签名组合） | — |
-| **Rust** | 不直接提供（可手动调用加密+签名组合） | — |
+| **Python** | `SM2Util.encrypt_sign(content, enc_pub, sign_priv)` | `{'ciphertext': ..., 'signature': ...}` |
+| **Rust** | `sm2::encrypt_sign(plaintext, enc_pub_pem, sign_priv_pem)` | `Result<(String, String), String>` → (ct_hex, sig_hex) |
 
 ---
 
@@ -645,6 +647,8 @@ let ok = sm2::verify_with_public_pem(b"Hello", &sig_bytes, &keypair.public_key_p
 | **Java** | `SM2Util.encryptSign(content, encPublicKey, signPrivateKey, true)` |
 | **JavaScript** | `SM2Util.encryptSign(content, encPublicKey, signPrivateKey, true)` |
 | **Go** | `EncryptSign(content, encPublicKey, signPrivateKey, true)` |
+| **Python** | `SM2Util.encrypt_sign(content, enc_pub, sign_priv, to_base64=True)` |
+| **Rust** | (可手动 base64 encode) |
 
 ---
 
@@ -713,8 +717,8 @@ pair, _ := crossmool.EncryptSignDefault("Hello", encPubHex, signPrivHex)
 | **Java** | `SM2Util.verifyDecrypt(ciphertext, signature, signPublicKey, decPrivateKey)` | String |
 | **JavaScript** | `SM2Util.verifyDecrypt(ciphertext, signature, signPublicKey, decPrivateKey)` | string |
 | **Go** | `VerifyDecrypt(ciphertext, signature, signPublicKey, decPrivateKey)` | (string, error) |
-| **Python** | 不直接提供 | — |
-| **Rust** | 不直接提供 | — |
+| **Python** | `SM2Util.verify_decrypt(ciphertext, signature, sign_pub, dec_priv)` | str（验签失败抛 ValueError） |
+| **Rust** | `sm2::verify_decrypt(ct_hex, sig_hex, sign_pub_pem, dec_priv_pem)` | `Result<String, String>` |
 
 ---
 
@@ -729,6 +733,8 @@ pair, _ := crossmool.EncryptSignDefault("Hello", encPubHex, signPrivHex)
 | **Java** | `SM2Util.verifyDecrypt(ciphertext, signature, signPublicKey, decPrivateKey)` (自动检测) |
 | **JavaScript** | `SM2Util.verifyDecrypt(ciphertext, signature, signPublicKey, decPrivateKey)` (自动检测) |
 | **Go** | `VerifyDecrypt(ciphertext, signature, signPublicKey, decPrivateKey)` (自动检测) |
+| **Python** | `SM2Util.verify_decrypt(ciphertext, signature, sign_pub, dec_priv)` (自动检测) |
+| **Rust** | `sm2::verify_decrypt(ct_hex, sig_hex, sign_pub_pem, dec_priv_pem)` |
 
 ---
 
@@ -1068,8 +1074,10 @@ let mac = sm3::hmac_str_default("my-hmac-key", "Hello, HMAC-SM3!").unwrap();
 | **C++** | `SM3Util::hmacVerify(key, data, receivedHmac)` | bool |
 | **JavaScript** | `SM3Util.hmacVerify(key, data, receivedHmac)` | boolean |
 | **Java** | `SM3Util.hmacVerify(key, data, receivedHmac)` | boolean |
-
-> 注意：C#、Python、Go、Rust 可直接计算 HMAC 后字符串比较，未单独提供 verify 方法。
+| **C#** | `SM3Util.hmacVerify(key, data, receivedHmac)` | bool |
+| **Python** | `SM3Util.hmac_verify(key_str, data_str, received_hmac)` | bool |
+| **Go** | `HMACVerify(key, data, receivedHmac)` | (bool, error) |
+| **Rust** | `sm3::hmac_verify(key, data, received_hmac)` | `Result<bool, String>` |
 
 ---
 
@@ -1132,7 +1140,11 @@ const hexKey = SM4Util.generateKeyHex();
 
 | 语言 | 调用方式 |
 |------|----------|
+| **C** | `crossmool_sm4_generate_key_base64(&key_base64)` |
+| **C++** | `SM4Util::generateKeyAsBase64()` |
+| **C#** | `SM4Util.GenerateKeyAsBase64()` |
 | **Java** | `SM4Util.generateKeyAsBase64()` |
+| **Python** | `SM4Util.generate_key_base64()` |
 | **JavaScript** | `SM4Util.generateKeyBase64()` |
 | **Go** | `GenerateKey()` + `EncodeBase64(key)` |
 | **Rust** | `sm4::generate_key()` + `encoding::to_base64(&key)` |
@@ -1251,6 +1263,7 @@ let ct = sm4::encrypt_gcm(&key, b"Hello", false).unwrap();
 
 | 语言 | 调用方式 |
 |------|----------|
+| **C** | `crossmool_sm4_encrypt_gcm_str_hex(key, plaintext_str, &ct_hex)` |
 | **C++** | `SM4Util::encryptGcmString(key, plainText)` → Base64 输出 (需手动调用 HEX 版) |
 | **C#** | `SM4Util.EncryptGcmString(key, plainText, false)` |
 | **Java** | `SM4Util.encrypt(key, plaintext, false)` (重载 String, String) |
@@ -1267,6 +1280,7 @@ let ct = sm4::encrypt_gcm(&key, b"Hello", false).unwrap();
 
 | 语言 | 调用方式 |
 |------|----------|
+| **C** | `crossmool_sm4_encrypt_gcm_str_base64(key, plaintext_str, &ct_base64)` |
 | **C++** | `SM4Util::encryptGcmString(key, plainText)` |
 | **C#** | `SM4Util.EncryptGcmString(key, plainText, true)` |
 | **Java** | `SM4Util.encrypt(key, plaintext, true)` (重载 String, String) |
@@ -1366,6 +1380,7 @@ let pt = sm4::decrypt_gcm(&key, &ct_hex).unwrap();
 
 | 语言 | 调用方式 |
 |------|----------|
+| **C** | `crossmool_sm4_decrypt_gcm_hex_str(key, ciphertext_hex, &plaintext_str)` |
 | **C++** | `SM4Util::decryptGcmToString(key, ciphertextHex)` |
 | **C#** | `SM4Util.DecryptGcmToString(key, ciphertextHex)` |
 | **Java** | `SM4Util.decrypt(key, ciphertextHex)` (重载 byte[], String) |
@@ -1382,6 +1397,7 @@ let pt = sm4::decrypt_gcm(&key, &ct_hex).unwrap();
 
 | 语言 | 调用方式 |
 |------|----------|
+| **C** | `crossmool_sm4_decrypt_gcm_base64_str(key, ciphertext_base64, &plaintext_str)` |
 | **C++** | `SM4Util::decryptGcmToString(key, ciphertextBase64)` (自动检测) |
 | **C#** | `SM4Util.DecryptGcmToString(key, ciphertextEncoded)` (自动检测) |
 | **Java** | `SM4Util.decrypt(key, ciphertextBase64)` (自动检测) |
@@ -1441,22 +1457,22 @@ let pt = sm4::decrypt_gcm(&key, &ct_hex).unwrap();
 | **SM2 签名 (utf8→hex)** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **SM2 签名 (utf8→base64)** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **SM2 验签** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **SM2 加密并签名** | ✅ | ✅ | ✅ | ✅ | ⬜ | ✅ | ✅ | ⬜ |
-| **SM2 验签并解密** | ✅ | ✅ | ✅ | ✅ | ⬜ | ✅ | ✅ | ⬜ |
+| **SM2 加密并签名** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **SM2 验签并解密** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **SM3 杂凑 (utf8→hex)** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **SM3 杂凑 (utf8→base64)** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **SM3 HMAC 密钥生成** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **SM3 HMAC 计算** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **SM3 HMAC 验证** | ✅ | ✅ | ⬜ | ✅ | ⬜ | ✅ | ⬜ | ⬜ |
+| **SM3 HMAC 验证** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **SM4 密钥生成** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **SM4 GCM 加密 (bytes→hex)** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **SM4 GCM 加密 (bytes→base64)** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **SM4 GCM 解密 (hex→bytes)** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **SM4 GCM 解密 (base64→bytes)** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **SM4 GCM 加密 (utf8→hex)** | ⬜ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **SM4 GCM 加密 (utf8→base64)** | ⬜ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **SM4 GCM 解密 (hex→utf8)** | ⬜ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| **SM4 GCM 解密 (base64→utf8)** | ⬜ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **SM4 GCM 加密 (utf8→hex)** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **SM4 GCM 加密 (utf8→base64)** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **SM4 GCM 解密 (hex→utf8)** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **SM4 GCM 解密 (base64→utf8)** | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
 ---
 

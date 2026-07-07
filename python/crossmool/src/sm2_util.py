@@ -269,6 +269,16 @@ class SM2Util:
         return enc_bytes.hex()
 
     @staticmethod
+    def encrypt_to_bytes(content: bytes, public_key) -> bytes:
+        """加密 SM2 明文，返回 C1C3C2 密文字节数组。"""
+        return bytes.fromhex(SM2Util.encrypt_to_hex(content, public_key))
+
+    @staticmethod
+    def decrypt_from_bytes(cipher_bytes: bytes, private_key) -> bytes:
+        """解密 C1C3C2 密文字节数组，返回明文字节数组。"""
+        return SM2Util.decrypt_from_hex(cipher_bytes.hex(), private_key)
+
+    @staticmethod
     def encrypt_to_base64(content: bytes, public_key) -> str:
         hex_out = SM2Util.encrypt_to_hex(content, public_key)
         return bytes_to_base64(bytes.fromhex(hex_out))
@@ -405,6 +415,22 @@ class SM2Util:
     @staticmethod
     def verify_str(content: str, public_key, signature: str) -> bool:
         return SM2Util.verify(utf8_to_bytes(content), public_key, signature)
+
+    # ────────────────── Encrypt+Sign / Verify+Decrypt ──────────────────
+
+    @staticmethod
+    def encrypt_sign(content: str, enc_public_key, sign_private_key, to_base64: bool = False) -> dict:
+        """Encrypt and sign UTF-8 content. Returns {'ciphertext': ..., 'signature': ...}."""
+        ct = SM2Util.encrypt(content, enc_public_key, to_base64=to_base64)
+        sig = SM2Util.sign(content, sign_private_key, to_base64=to_base64)
+        return {'ciphertext': ct, 'signature': sig}
+
+    @staticmethod
+    def verify_decrypt(ciphertext: str, signature: str, sign_public_key, dec_private_key) -> str:
+        """Verify signature then decrypt. Returns UTF-8 plaintext."""
+        if not SM2Util.verify_str(ciphertext, sign_public_key, signature):
+            raise ValueError('SM2 signature verification failed')
+        return SM2Util.decrypt(ciphertext, dec_private_key)
 
     # ────────────────── PEM Export / Import ──────────────────
 

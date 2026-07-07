@@ -50,6 +50,15 @@ int crossmool_sm4_generate_key_hex(char** key_hex) {
     return ret;
 }
 
+int crossmool_sm4_generate_key_base64(char** key_base64) {
+    unsigned char key[CROSSMOOL_SM4_KEY_SIZE];
+    int ret;
+    if (key_base64 == NULL) return CROSSMOOL_ERR_INVALID_PARAM;
+    ret = crossmool_sm4_generate_key(key);
+    if (ret != CROSSMOOL_SUCCESS) return ret;
+    return crossmool_base64_encode(key, CROSSMOOL_SM4_KEY_SIZE, key_base64);
+}
+
 /**
  * 解析 HEX 密钥字符串
  * @param hex_key HEX 编码的密钥字符串
@@ -386,4 +395,44 @@ int crossmool_sm4_decrypt_gcm(
     size_t* plaintext_len
 ) {
     return crossmool_sm4_decrypt_gcm_base64(key, ciphertext_base64, plaintext, plaintext_len);
+}
+
+/* UTF-8 string convenience wrappers */
+
+int crossmool_sm4_encrypt_gcm_str_hex(const unsigned char* key, const char* plaintext_str, char** ciphertext_hex) {
+    if (!key || !plaintext_str || !ciphertext_hex) return CROSSMOOL_ERR_INVALID_PARAM;
+    return crossmool_sm4_encrypt_gcm_hex(key, (const unsigned char*)plaintext_str, strlen(plaintext_str), ciphertext_hex);
+}
+
+int crossmool_sm4_encrypt_gcm_str_base64(const unsigned char* key, const char* plaintext_str, char** ciphertext_base64) {
+    if (!key || !plaintext_str || !ciphertext_base64) return CROSSMOOL_ERR_INVALID_PARAM;
+    return crossmool_sm4_encrypt_gcm_base64(key, (const unsigned char*)plaintext_str, strlen(plaintext_str), ciphertext_base64);
+}
+
+int crossmool_sm4_decrypt_gcm_hex_str(const unsigned char* key, const char* ciphertext_hex, char** plaintext_str) {
+    if (!key || !ciphertext_hex || !plaintext_str) return CROSSMOOL_ERR_INVALID_PARAM;
+    unsigned char* pt = NULL;
+    size_t pt_len = 0;
+    int ret = crossmool_sm4_decrypt_gcm_hex(key, ciphertext_hex, &pt, &pt_len);
+    if (ret != CROSSMOOL_SUCCESS) return ret;
+    *plaintext_str = (char*)malloc(pt_len + 1);
+    if (!*plaintext_str) { free(pt); return CROSSMOOL_ERR_MEMORY_ALLOC; }
+    memcpy(*plaintext_str, pt, pt_len);
+    (*plaintext_str)[pt_len] = '\0';
+    free(pt);
+    return CROSSMOOL_SUCCESS;
+}
+
+int crossmool_sm4_decrypt_gcm_base64_str(const unsigned char* key, const char* ciphertext_base64, char** plaintext_str) {
+    if (!key || !ciphertext_base64 || !plaintext_str) return CROSSMOOL_ERR_INVALID_PARAM;
+    unsigned char* pt = NULL;
+    size_t pt_len = 0;
+    int ret = crossmool_sm4_decrypt_gcm_base64(key, ciphertext_base64, &pt, &pt_len);
+    if (ret != CROSSMOOL_SUCCESS) return ret;
+    *plaintext_str = (char*)malloc(pt_len + 1);
+    if (!*plaintext_str) { free(pt); return CROSSMOOL_ERR_MEMORY_ALLOC; }
+    memcpy(*plaintext_str, pt, pt_len);
+    (*plaintext_str)[pt_len] = '\0';
+    free(pt);
+    return CROSSMOOL_SUCCESS;
 }

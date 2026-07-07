@@ -119,6 +119,11 @@ namespace Crossmool.Crypto
             return generateHmacKeyToStr(32, toBase64);
         }
 
+        public static bool hmacVerify(string key, string data, string receivedHmac)
+        {
+            return hmacToStr(key, data) == receivedHmac;
+        }
+
         #endregion
     }
 }

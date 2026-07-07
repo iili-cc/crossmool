@@ -27,6 +27,11 @@ namespace Crossmool.Crypto
             return EncodingUtils.ToHex(GenerateKey());
         }
 
+        public static string GenerateKeyAsBase64()
+        {
+            return EncodingUtils.ToBase64(GenerateKey());
+        }
+
         public static byte[] ParseHexKey(string hexKey)
         {
             return EncodingUtils.FromHex(hexKey);

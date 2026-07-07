@@ -88,6 +88,10 @@ class SM4Util:
         return bytes_to_hex(SM4Util.generate_key())
 
     @staticmethod
+    def generate_key_base64() -> str:
+        return bytes_to_base64(SM4Util.generate_key())
+
+    @staticmethod
     def parse_hex_key(hex_key: str) -> bytes:
         return hex_to_bytes(hex_key)
 

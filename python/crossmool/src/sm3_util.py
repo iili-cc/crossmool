@@ -110,3 +110,9 @@ class SM3Util:
         if to_base64:
             return bytes_to_base64(key_bytes)
         return bytes_to_hex(key_bytes)
+
+    @staticmethod
+    def hmac_verify(key_str: str, data_str: str, received_hmac: str) -> bool:
+        """Verify HMAC by computing expected value and comparing."""
+        return SM3Util.hmac_str(key_str, data_str) == received_hmac
+        return bytes_to_hex(key_bytes)

@@ -11,6 +11,8 @@ public:
 
     static std::string generateKeyAsHex();
 
+    static std::string generateKeyAsBase64();
+
     static std::vector<unsigned char> parseHexKey(const std::string& hexKey);
 
     /**

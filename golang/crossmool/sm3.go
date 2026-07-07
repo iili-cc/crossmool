@@ -101,3 +101,12 @@ func GenerateHmacKeyToStr(length int, toBase64 bool) string {
 	}
 	return EncodeHex(keyBytes)
 }
+
+// HMACVerify computes HMAC-SM3 and compares it with the received value.
+func HMACVerify(key string, data string, receivedHmac string) (bool, error) {
+	expected, err := HMACToStr(key, data, false)
+	if err != nil {
+		return false, err
+	}
+	return expected == receivedHmac, nil
+}

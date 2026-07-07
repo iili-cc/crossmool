@@ -28,6 +28,14 @@ CROSSMOOL_API int crossmool_sm4_generate_key(unsigned char* key);
 CROSSMOOL_API int crossmool_sm4_generate_key_hex(char** key_hex);
 
 /**
+ * 生成 SM4 密钥（返回 Base64 字符串）
+ * @param key_base64 输出参数，存储 Base64 编码的密钥
+ * @return 成功返回 0，失败返回负数错误码
+ * @note 调用者需调用 free() 释放 key_base64 内存
+ */
+CROSSMOOL_API int crossmool_sm4_generate_key_base64(char** key_base64);
+
+/**
  * 解析 HEX 密钥字符串
  * @param hex_key HEX 编码的密钥字符串
  * @param key 输出参数，存储解析后的密钥（至少 16 字节）
@@ -130,6 +138,50 @@ CROSSMOOL_API int crossmool_sm4_decrypt_gcm(
     const char* ciphertext_base64,
     unsigned char** plaintext,
     size_t* plaintext_len
+);
+
+/**
+ * SM4 GCM 加密（UTF-8 字符串输入，返回 HEX 密文）
+ * @param key 密钥（16 字节）
+ * @param plaintext_str 明文字符串（UTF-8）
+ * @param ciphertext_hex 输出 HEX 密文
+ * @return 成功返回 0
+ */
+CROSSMOOL_API int crossmool_sm4_encrypt_gcm_str_hex(
+    const unsigned char* key,
+    const char* plaintext_str,
+    char** ciphertext_hex
+);
+
+/**
+ * SM4 GCM 加密（UTF-8 字符串输入，返回 Base64 密文）
+ */
+CROSSMOOL_API int crossmool_sm4_encrypt_gcm_str_base64(
+    const unsigned char* key,
+    const char* plaintext_str,
+    char** ciphertext_base64
+);
+
+/**
+ * SM4 GCM 解密（从 HEX 密文，返回 UTF-8 明文字符串）
+ * @param key 密钥（16 字节）
+ * @param ciphertext_hex HEX 密文
+ * @param plaintext_str 输出 UTF-8 明文
+ * @return 成功返回 0
+ */
+CROSSMOOL_API int crossmool_sm4_decrypt_gcm_hex_str(
+    const unsigned char* key,
+    const char* ciphertext_hex,
+    char** plaintext_str
+);
+
+/**
+ * SM4 GCM 解密（从 Base64 密文，返回 UTF-8 明文字符串）
+ */
+CROSSMOOL_API int crossmool_sm4_decrypt_gcm_base64_str(
+    const unsigned char* key,
+    const char* ciphertext_base64,
+    char** plaintext_str
 );
 
 #ifdef __cplusplus
