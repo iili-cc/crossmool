@@ -87,11 +87,41 @@ pub fn generate_keypair_hex() -> Result<(String, String), String> {
     let pub_encoded = pk.to_encoded_point(false);
     let pub_hex = crate::encoding::to_hex(pub_encoded.as_bytes());
 
-    let sk_scalar = sk.to_nonzero_scalar();
-    let priv_bytes: Vec<u8> = sk_scalar.as_ref().as_slice().to_vec();
-    let priv_hex = crate::encoding::to_hex(&priv_bytes);
+    // Extract private key bytes from PKCS8 DER
+    let pkcs8_der = sk.to_pkcs8_der().map_err(|e| format!("pkcs8 der error: {:?}", e))?;
+    // PKCS8 DER for SM2: the private key is a 32-byte OCTET STRING
+    // We need to parse: SEQUENCE { INTEGER v, SEQUENCE alg, OCTET STRING wrapping ECPrivateKey }
+    let priv_hex = crate::encoding::to_hex(&extract_private_key_from_pkcs8_der(pkcs8_der.as_bytes())?);
 
     Ok((pub_hex, priv_hex))
+}
+
+/// Extract the raw 32-byte private key from a PKCS#8 DER encoding.
+fn extract_private_key_from_pkcs8_der(der: &[u8]) -> Result<Vec<u8>, String> {
+    // Skip SEQUENCE header: first byte 0x30, then length
+    let mut pos = 2;
+    if pos >= der.len() { return Err("der too short".into()); }
+    if der[1] & 0x80 != 0 { pos += (der[1] & 0x7f) as usize; }
+    // Skip version INTEGER (3 bytes: 02 01 00)
+    pos += 3;
+    // Skip AlgorithmIdentifier SEQUENCE
+    if pos + 1 >= der.len() || der[pos] != 0x30 { return Err("expected alg seq".into()); }
+    pos += 1;
+    let alg_len = der[pos] as usize; pos += 1;
+    pos += alg_len;
+    // Read OCTET STRING
+    if pos + 1 >= der.len() || der[pos] != 0x04 { return Err("expected octet string".into()); }
+    pos += 1;
+    let octet_len = der[pos] as usize; pos += 1;
+    let ec_der = &der[pos..pos + octet_len];
+    // ECPrivateKey: SEQUENCE { INTEGER v=1, OCTET STRING d }
+    let mut ep = 2; // skip 0x30 len
+    if ec_der[0] != 0x30 || ec_der[1] & 0x80 != 0 { ep = if ec_der[1] & 0x80 != 0 { 2 + (ec_der[1] & 0x7f) as usize } else { 2 }; }
+    ep += 3; // skip version INTEGER (02 01 01)
+    if ep + 1 >= ec_der.len() || ec_der[ep] != 0x04 { return Err("expected ec priv octet".into()); }
+    ep += 1;
+    let d_len = ec_der[ep] as usize; ep += 1;
+    Ok(ec_der[ep..ep + d_len].to_vec())
 }
 
 /// Generate an SM2 key pair and return base64-encoded raw keys.
@@ -104,9 +134,8 @@ pub fn generate_keypair_base64() -> Result<(String, String), String> {
     let pub_encoded = pk.to_encoded_point(false);
     let pub_b64 = crate::encoding::to_base64(pub_encoded.as_bytes());
 
-    let sk_scalar = sk.to_nonzero_scalar();
-    let priv_bytes: Vec<u8> = sk_scalar.as_ref().as_slice().to_vec();
-    let priv_b64 = crate::encoding::to_base64(&priv_bytes);
+    let pkcs8_der = sk.to_pkcs8_der().map_err(|e| format!("pkcs8 der error: {:?}", e))?;
+    let priv_b64 = crate::encoding::to_base64(&extract_private_key_from_pkcs8_der(pkcs8_der.as_bytes())?);
 
     Ok((pub_b64, priv_b64))
 }

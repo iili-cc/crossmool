@@ -1163,20 +1163,13 @@ int crossmool_sm2_export_public_key_pem(const char* public_key_hex, char** pem_o
 {
     if (!public_key_hex || !pem_out) return CROSSMOOL_ERR_INVALID_PARAM;
 
-    unsigned char* pub_bytes = NULL;
-    size_t pub_len = 0;
-    int ret = crossmool_hex_decode(public_key_hex, &pub_bytes, &pub_len);
-    if (ret != CROSSMOOL_SUCCESS) return ret;
-
     // Build SM2_KEY with only the public key set
     SM2_KEY sm2_key;
     memset(&sm2_key, 0, sizeof(sm2_key));
     SM2_POINT point;
-    if (!decode_public_key_to_point(pub_bytes, pub_len, &point)) {
-        free(pub_bytes);
+    if (!decode_public_key_to_point(public_key_hex, &point)) {
         return CROSSMOOL_ERR_KEY_INVALID;
     }
-    free(pub_bytes);
 
     if (sm2_key_set_public_key(&sm2_key, &point) != 1) {
         return CROSSMOOL_ERR_KEY_INVALID;
@@ -1188,7 +1181,7 @@ int crossmool_sm2_export_public_key_pem(const char* public_key_hex, char** pem_o
         return CROSSMOOL_ERR_FORMAT_CONVERSION;
     }
 
-    ret = der_to_pem("PUBLIC KEY", der, der_len, pem_out);
+    int ret = der_to_pem("PUBLIC KEY", der, der_len, pem_out);
     free(der);
     return ret;
 }
