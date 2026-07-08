@@ -3,10 +3,10 @@ name = "crossmool"
 version = "1.0.0"
 edition = "2021"
 authors = ["crossmool <dev@crossmool>"]
-description = "Rust utilities for SM2/SM3/SM4 compatible with crossmool Java implementation."
-license = "MIT OR Apache-2.0"
-repository = "https://gitee.com/iili/crossmool"
-documentation = "https://gitee.com/iili/crossmool/readme.md"
+description = "Rust utilities for SM2/SM3/SM4 compatible with 8-languages-implementation."
+license = "LGPLv3"
+repository = "https://gitee.com/iilic/crossmool"
+documentation = "https://gitee.com/iilic/crossmool/readme.md"
 
 [lib]
 name = "crossmool"
