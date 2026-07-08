@@ -1,7 +1,11 @@
 # crossmool
 
 #### 介绍
-The crossmool is the short name of cross-[platform]-sm-tool-kit. It wanna provide the common tools for cross-language-sm-encryption.
+crossmool是一个SM2/SM3/SM4的工具集，命名取自 cross sm tool，即cross [s]m [t]ool，它的作用有2个：
+1.方便用户（即应用软件开发人员）直接使用，省去了用户基于基础函数库自己进行封装的时间；
+2.支持跨编程语言互通，即用A语言加密的，可以使用B语言进行解密，这在实际生产活动中是一个非常劳累的活动，需要耗费大量精力和时间（因为，各种加密算法有各种模式mode、编码方式encode、默认传参、格式等，只要有一点配置不一致，就无法互通）。
+总之就是：拿来主义，用户拿来就傻瓜式使用，不用自己去做各种封装和选择。
+The crossmool is the short name of cross-[platform]-sm-tool-[kit]. It wanna provide the common tools for cross-languages-sm-encryption.
 The first plan is to support Java, Python, JavaScript, Golang, Rust, C++, C, C#.
 
 ####Milestone
