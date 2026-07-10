@@ -1,5 +1,7 @@
 # crossmool
 
+![crossmool](crossmool-logo.png)
+
 #### 介绍
 crossmool是一个SM2/SM3/SM4的工具集，命名取自 cross sm tool，即cross [s]m [t]ool，它的作用有2个：
 1.方便用户（即应用软件开发人员）直接使用，省去了用户基于基础函数库自己进行封装的时间；
