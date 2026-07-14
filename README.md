@@ -26,8 +26,23 @@ The first plan is to support Java, Python, JavaScript, Golang, Rust, C++, C, C#.
 7.  Rust supports 1.95.0 or upper.
 
 #### 使用说明
-
 Please read the /userdoc/public_function_split_by_functions.md
+
+非对称算法SM2：
+1.统一采用X.509公钥(PublicKey)数据结构，PKCS#8私钥(PrivateKey)数据结构;
+2.编码规则（序列化方法）为DER；
+3.密文拼接顺序（默认）只支持C1C3C2，具体格式C1(65字节: 04 + X坐标32字节 + Y坐标32字节) + C3(32字节: SM3哈希) + C2(与明文等长)；
+4.原文本内容（默认）只支持UTF8；
+5.SM2的USER_ID默认值为1234567812345678；
+5.输出密文支持HEX和Base64，默认HEX，建议使用HEX，除非【期望获得的密文的长度较短】即网速或存储敏感性程序，如果密文需要在URL后缀中传播建议HEX。
+
+杂凑算法SM3：
+HMAC-SM3输出原始32字节
+
+对称算法SM4:
+1.根据官方建议，分组密码的工作模式只支持GCM(Galois/Counter Mode)；
+2.GCM-IV为12字节；
+3.
 
 #### 参与贡献
 just accepts issues & suggestions. (It means does not accept CODE right now, because It will change the LICENSE in the future.)
