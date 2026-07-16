@@ -19,10 +19,10 @@ public class SM2MavenSample {
 	 * 
 	 */
 	public static void main(String[] args) {
-		
+		/**************the original content  ***********/
 		String originalContent = "今天天气真好，气温大约 28°C，我决定出門走走（出門走走）。路过咖啡店时買了一杯美式，順便（顺便）看了下手机，今日步數（步数）已经 12,345 步了，距離目標還差 3,000 步左右。朋友发来一条消息说：\"Don't forget to bring your umbrella, just in case!\" 我回了个笑脸，心想應該不會下雨吧。生活嘛，簡單點就好，快樂其實很簡單。";
 		System.out.println("OriginalContent:::"+originalContent);
-		
+		/**************generate 2 key pairs, the 1st is for crypto, the 2nd is for signature ***********/
 		SerialKeyPair keyPairHex = SM2Util.generateKeyPairHex();
 		String privateKeyHex = keyPairHex.getPrivateKey();
 		String publicKeyHex = keyPairHex.getPublicKey();
@@ -35,6 +35,7 @@ public class SM2MavenSample {
 		System.out.println("privateKeyHex-2:::" + privateKeyHex2);
 		System.out.println("publicKeyHex-2:::" + publicKeyHex2);
 		
+		/**************test the-encrypt-then-sign & the-verify-then-decrypt  ***********/
 		CiphertextSignaturePair encryptSign = SM2Util.encryptSign(originalContent, publicKeyHex, privateKeyHex2);
 		String ciphertext = encryptSign.getCiphertext();
 		String signature = encryptSign.getSignature();
@@ -59,6 +60,30 @@ public class SM2MavenSample {
 		VerifyDecrypt:::今天天气真好，气温大约 28°C，我决定出門走走（出門走走）。路过咖啡店时買了一杯美式，順便（顺便）看了下手机，今日步數（步数）已经 12,345 步了，距離目標還差 3,000 步左右。朋友发来一条消息说："Don't forget to bring your umbrella, just in case!" 我回了个笑脸，心想應該不會下雨吧。生活嘛，簡單點就好，快樂其實很簡單。
 		WhetherVerifyDecryptEqualsOriginalContent:::true
 		 */
+		/**************test the encrypt & decrypt **************/
+		String encryptedContent = SM2Util.encrypt(originalContent, publicKeyHex);
+		System.out.println("EncryptedContent:::"+encryptedContent);
+		String decryptedContent = SM2Util.decrypt(encryptedContent, privateKeyHex);
+		System.out.println("DecryptedContent:::"+decryptedContent);
+		boolean equals2 = originalContent.equals(decryptedContent);
+		System.out.println("WhetherDecryptEqualsOriginalContent:::"+equals2);
+
+		/**
+		 *  EncryptedContent:::04a4d61d06958d355ffaeea2629d106ffaacb519e7fdef0d6a1a53a752b1d407a09394860a7ee3745ec50c2f18d75b05d090d72becf60dc70a8400ce1ee74c86ffb90fb3eec89272caebfdfe285b61890837953bfeb482724625e2f179a58d6f38c58459e10bdb242c78e788a7dab6203a54e32dd189c619c1851ba43155e03c59f3254bfd4c91c1017682188634307cd83c0268d13552e62b5f5e6ab06cc19ed033bc62b6b3cf709989ddf8ba63f40f4b46d9f44075c1c107e2e0b2c6f85a4d79e67c888d3d88e61c70c8598b67c061d1bf5bc57938913308c7d1ee737f23c46c9403f88b3437e9802616c879aa8b062a13ce4a5b7477b440945be0c1c92cb392dd0116a9513621ebdc484042d5c76f8368ae799ffa6d2d3b606c849f5be057dc775746c8847e6d298076526f52d8be6852a4890104608d16c7338c916ee06aaa88fbfddce975da0c73e5a84567dce2c5bab264c22f56bd05454a8e4cbdbb725e7a76eff3a1dce49a364c8d815302b49b12e3cd5f1f94527f5e27ba516f5e7a891723b9b8e852031211b42bd17b5bfaa4eedeb1e858a739e0f7e0055a34c9eb2b401d9b1c6dc7b39728aed47081499691fd24a4f65141a16dffa05691c5afa4a2184d26e8d5ae5c5a597bc4d00da68a5613913b328e26574a732dc06b665ad0c298833e45afafffdd5be40c9a346a4acf80b8d7f8ddca083903823388806b6c7f189400fdeb1fc0a01f6f634d5c431c
+			DecryptedContent:::今天天气真好，气温大约 28°C，我决定出門走走（出門走走）。路过咖啡店时買了一杯美式，順便（顺便）看了下手机，今日步數（步数）已经 12,345 步了，距離目標還差 3,000 步左右。朋友发来一条消息说："Don't forget to bring your umbrella, just in case!" 我回了个笑脸，心想應該不會下雨吧。生活嘛，簡單點就好，快樂其實很簡單。
+			WhetherDecryptEqualsOriginalContent:::true
+		 */
+
+		/**************test the sign & verify **************/
+		String contentSignature = SM2Util.sign(originalContent, privateKeyHex2);
+		System.out.println("ContentSignature:::"+contentSignature);
+		boolean verify = SM2Util.verify(originalContent, publicKeyHex2, contentSignature);
+		System.out.println("WhetherVerifyEqualsOriginalContent:::"+verify);
+		/**
+		 *  ContentSignature:::304402205779009f7375c4957c92177700bbd12935a6f6973529cbe3e1db830dd0b1bcfd02202e6ca0e3dbc24a48b691c9b8d3ad628650a615a4ea55e844f67abb4cc5f1a868
+			WhetherVerifyEqualsOriginalContent:::true
+		 */
+
 	}
 	
 
