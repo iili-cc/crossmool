@@ -4,7 +4,7 @@ import cc.iili.tools.crossmool.bean.CiphertextSignaturePair;
 import cc.iili.tools.crossmool.bean.SerialKeyPair;
 import cc.iili.tools.crossmool.tool.SM2Util;
 
-public class SM2MavenSample {
+public class SM2Sample {
 	
 	/**
 	 * 

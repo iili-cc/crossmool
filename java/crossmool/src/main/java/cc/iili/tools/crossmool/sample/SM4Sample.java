@@ -2,7 +2,7 @@ package cc.iili.tools.crossmool.sample;
 
 import cc.iili.tools.crossmool.tool.SM4Util;
 
-public class SM4MavenSample {
+public class SM4Sample {
 
 	/**
 	 * 

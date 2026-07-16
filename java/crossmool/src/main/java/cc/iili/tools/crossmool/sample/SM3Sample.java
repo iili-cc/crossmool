@@ -2,7 +2,7 @@ package cc.iili.tools.crossmool.sample;
 
 import cc.iili.tools.crossmool.tool.SM3Util;
 
-public class SM3MavenSample {
+public class SM3Sample {
     public static void main(String[] args) {
         String input = "在这个全球化时代，無論身處何地，learning and growth are always the keys to a fulfilling life.";
         String hash = SM3Util.digestToStr(input);
