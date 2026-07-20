@@ -18,6 +18,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 
 # Option to use system GmSSL or build with bundled implementation
 option(USE_SYSTEM_GMSSL "Use system-installed GmSSL library" ON)
+option(BUILD_SAMPLES "Build sample programs" ON)
 
 # Sibling GmSSL install path (relative to this project - used when GmSSL is not in system path)
 set(GMSSL_SIBLING_DIR "${PROJECT_SOURCE_DIR}/../../c/crossmool/gmssl_install")
@@ -81,6 +82,11 @@ endif()
 add_executable(crossmool_test tests/test_all.cpp)
 
 target_link_libraries(crossmool_test PRIVATE crossmool)
+
+# 用户快速上手示例程序
+if(BUILD_SAMPLES)
+    add_subdirectory(samples)
+endif()
 
 # Install targets
 install(TARGETS crossmool
