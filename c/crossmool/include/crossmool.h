@@ -10,9 +10,9 @@
 
 // 版本信息
 #define CROSSMOOL_VERSION_MAJOR 1
-#define CROSSMOOL_VERSION_MINOR 0
+#define CROSSMOOL_VERSION_MINOR 2
 #define CROSSMOOL_VERSION_PATCH 0
-#define CROSSMOOL_VERSION_STRING "1.0.0"
+#define CROSSMOOL_VERSION_STRING "1.2.0"
 
 // 包含所有子头文件
 #include "crossmool_error.h"
