@@ -21,7 +21,7 @@ endif()
 # 配置选项
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 option(BUILD_TESTS "Build test executables" ON)
-option(BUILD_EXAMPLES "Build example programs" ON)
+option(BUILD_SAMPLES "Build sample programs" ON)
 # 查找 GmSSL 包 - 手动配置
 # 由于 GmSSL 没有提供 CMake 配置文件，我们手动指定路径
 # 默认使用项目目录下的 gmssl_install 文件夹
@@ -152,12 +152,12 @@ if(BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
 endif()
-# 示例程序
-if(BUILD_EXAMPLES)
-    add_subdirectory(examples)
+# 用户快速上手示例程序
+if(BUILD_SAMPLES)
+    add_subdirectory(samples)
 endif()
 message(STATUS "crossmool-c ${PROJECT_VERSION} configured successfully")
 message(STATUS "  Build type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "  Shared libs: ${BUILD_SHARED_LIBS}")
 message(STATUS "  Tests: ${BUILD_TESTS}")
-message(STATUS "  Examples: ${BUILD_EXAMPLES}")
+message(STATUS "  Samples: ${BUILD_SAMPLES}")

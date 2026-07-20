@@ -148,11 +148,17 @@ ctest -C Release --output-on-failure
 ```bash
 # Windows
 cd build\bin\Release
-example_interop.exe
+sm2_sample.exe
+sm3_sample.exe
+sm4_sample.exe
+interop_sample.exe
 
 # Linux/macOS
 cd build
-./examples/example_interop
+./samples/sm2_sample
+./samples/sm3_sample
+./samples/sm4_sample
+./samples/interop_sample
 ```
 
 ## 常见问题

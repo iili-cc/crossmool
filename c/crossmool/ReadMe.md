@@ -150,15 +150,14 @@ crossmool_sm4_generate_key_hex(&key_hex);
 unsigned char key[16];
 crossmool_sm4_parse_hex_key(key_hex, key);
 
-// 加密
+// 加密 (GCM 模式，返回 Hex: IV[12] + Ciphertext + Tag[16])
 const char* plaintext = "Hello, SM4!";
 char* ciphertext_hex = NULL;
-crossmool_sm4_encrypt_ecb(key, (const unsigned char*)plaintext, strlen(plaintext), &ciphertext_hex);
+crossmool_sm4_encrypt_gcm_str_hex(key, plaintext, &ciphertext_hex);
 
 // 解密
-unsigned char* decrypted = NULL;
-size_t decrypted_len = 0;
-crossmool_sm4_decrypt_ecb(key, ciphertext_hex, &decrypted, &decrypted_len);
+char* decrypted = NULL;
+crossmool_sm4_decrypt_gcm_hex_str(key, ciphertext_hex, &decrypted);
 
 printf("Decrypted: %.*s\n", (int)decrypted_len, decrypted);
 
@@ -187,9 +186,11 @@ free(decrypted);
 
 ### SM4 API
 
-- `crossmool_sm4_generate_key()`: 生成密钥
-- `crossmool_sm4_encrypt_ecb()`: ECB 模式加密
-- `crossmool_sm4_decrypt_ecb()`: ECB 模式解密
+- `crossmool_sm4_generate_key()` / `crossmool_sm4_generate_key_hex()` / `crossmool_sm4_generate_key_base64()`: 生成密钥
+- `crossmool_sm4_encrypt_gcm_hex()` / `crossmool_sm4_encrypt_gcm_str_hex()`: GCM 模式加密（Hex）
+- `crossmool_sm4_encrypt_gcm_base64()` / `crossmool_sm4_encrypt_gcm_str_base64()`: GCM 模式加密（Base64）
+- `crossmool_sm4_decrypt_gcm_hex()` / `crossmool_sm4_decrypt_gcm_hex_str()`: GCM 模式解密（Hex）
+- `crossmool_sm4_decrypt_gcm_base64()` / `crossmool_sm4_decrypt_gcm_base64_str()`: GCM 模式解密（Base64）
 
 ### 工具 API
 
@@ -218,7 +219,7 @@ c/crossmool/
 │   ├── sm3.c
 │   └── sm4.c
 ├── tests/            # 测试代码
-├── examples/         # 示例代码
+├── samples/          # 用户快速上手示例
 ├── cmake/            # CMake 配置文件
 ├── CMakeLists.txt    # CMake 构建脚本
 ├── vcpkg.json        # vcpkg 依赖配置
