@@ -1,9 +1,0 @@
-README.md
-pyproject.toml
-src/crossmool/__init__.py
-src/crossmool.egg-info/PKG-INFO
-src/crossmool.egg-info/SOURCES.txt
-src/crossmool.egg-info/dependency_links.txt
-src/crossmool.egg-info/requires.txt
-src/crossmool.egg-info/top_level.txt
-tests/test_sm2_interop.py

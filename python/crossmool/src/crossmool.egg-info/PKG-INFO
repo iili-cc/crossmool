@@ -1,7 +1,0 @@
-Metadata-Version: 2.4
-Name: crossmool
-Version: 1.0.0
-Summary: Python utilities for SM2/SM3/SM4 compatible with crossmool implementations
-Author: crossmool
-Requires-Python: >=3.8
-Requires-Dist: gmssl-python>=2.2.2
