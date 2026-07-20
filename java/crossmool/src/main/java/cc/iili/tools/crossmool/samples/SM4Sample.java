@@ -1,4 +1,4 @@
-package cc.iili.tools.crossmool.sample;
+package cc.iili.tools.crossmool.samples;
 
 import cc.iili.tools.crossmool.tool.SM4Util;
 
