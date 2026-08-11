@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(crossmool-c VERSION v1.2.0 LANGUAGES C)
+project(crossmool-c VERSION v1.3.0 LANGUAGES C)
 # 设置 C 语言标准为 C17
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)

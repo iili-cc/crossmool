@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <PackageId>Crossmool.Crypto</PackageId>
-    <Version>1.2.0</Version>
+    <Version>1.3.0</Version>
     <Authors>crossmool</Authors>
     <Description>SM2/SM3/SM4 Chinese national cryptographic algorithm library for .NET</Description>
     <PackageTags>SM2;SM3;SM4;国密;cryptography</PackageTags>
