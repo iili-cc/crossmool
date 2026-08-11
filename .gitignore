@@ -35,3 +35,7 @@ hs_err_pid*
 /cpp/crossmool/build
 /.workbuddy
 /build
+/c/crossmool/build_msvc
+/cpp/crossmool/build_msvc
+/userdoc/build_all.py
+/userdoc/build_python_wheel.py
