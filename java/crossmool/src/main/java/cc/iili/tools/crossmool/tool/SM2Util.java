@@ -390,21 +390,21 @@ public class SM2Util {
     
     /**************************************************************************************************
      * Basic verify method
-     * @param data
-     * @param publicKey
-     * @param sign
+     * @param content
+     * @param publicKeyBytes
+     * @param signature
      * @return
      * **********************************************************************************************
      */
-    public static boolean verify(byte[] content, byte[] signature, byte[] publicKeyBytes) {
+    public static boolean verify(byte[] content, byte[] publicKeyBytes, byte[] signature) {
         if(content == null) {
             throw new RuntimeException("SM2 verify error: the content is null.");
         }
-        if(signature == null) {
-            throw new RuntimeException("SM2 verify error: the signature is null.");
-        }
         if(publicKeyBytes == null) {
             throw new RuntimeException("SM2 verify error: the publicKeyBytes is null.");
+        }
+        if(signature == null) {
+            throw new RuntimeException("SM2 verify error: the signature is null.");
         }
         SM2Signer sm2Signer = getSM2Signer(false, publicKeyBytes);
         sm2Signer.update(content, 0, content.length);
@@ -420,7 +420,7 @@ public class SM2Util {
         }
         byte[] contentBytes = content.getBytes(charset);
         
-        return verify(contentBytes, signatureBytes, publicKeyBytes);
+        return verify(contentBytes, publicKeyBytes, signatureBytes);
     }
     
     public static boolean verify(String content, String publicKey, String signature) {

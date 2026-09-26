@@ -9,7 +9,7 @@ public class InteropTest {
         String pythonEncrypted = "5Dz0GG14i4i5Z6CUpgM4DYLMjRcuxbVq2AdIXRbummh4eU8+6CK07NL2bKtEqdvh+Ku8WCdPasakJ5Uf2/s=";
         
         try {
-            String decrypted = SM4Util.decryptGcmNativeToString(key, pythonEncrypted);
+            String decrypted = SM4Util.decryptGcmNativeToString(pythonEncrypted, key);
             System.out.println("Decrypted: " + decrypted);
             if (decrypted.equals("Hello, 這是国密SM4測試數據")) {
                 System.out.println("[PASS] Python GCM -> Java Native decrypt");
@@ -21,7 +21,7 @@ public class InteropTest {
         }
         
         try {
-            String decrypted2 = SM4Util.decryptGcmJca(key, pythonEncrypted);
+            String decrypted2 = SM4Util.decryptGcmJca(pythonEncrypted, key);
             System.out.println("JCA Decrypted: " + decrypted2);
             if (decrypted2.equals("Hello, 這是国密SM4測試數據")) {
                 System.out.println("[PASS] Python GCM -> Java JCA decrypt");

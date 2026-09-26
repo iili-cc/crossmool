@@ -49,8 +49,8 @@ public class InteropDataGen {
         result.put("sm3", sm3);
         
         // SM3-HMAC
-        String hmacHex = SM3Util.hmacToStr(HMAC_KEY_HEX, MSG);
-        String hmacB64 = SM3Util.hmacToStr(HMAC_KEY_HEX, MSG, true);
+        String hmacHex = SM3Util.hmacToStr(MSG, HMAC_KEY_HEX);
+        String hmacB64 = SM3Util.hmacToStr(MSG, HMAC_KEY_HEX, true);
         Map<String, String> sm3hmac = new LinkedHashMap<>();
         sm3hmac.put("hmac_hex", hmacHex);
         sm3hmac.put("hmac_b64", hmacB64);
@@ -59,8 +59,8 @@ public class InteropDataGen {
         // SM4 GCM
         byte[] sm4Key = HexUtil.decodeHexStr(SM4_KEY_HEX);
         byte[] plainBytes = MSG.getBytes(StandardCharsets.UTF_8);
-        String sm4Hex = SM4Util.encrypt(sm4Key, plainBytes, false);
-        String sm4B64 = SM4Util.encrypt(sm4Key, plainBytes, true);
+        String sm4Hex = SM4Util.encrypt(plainBytes, sm4Key, false);
+        String sm4B64 = SM4Util.encrypt(plainBytes, sm4Key, true);
         Map<String, Object> sm4 = new LinkedHashMap<>();
         sm4.put("cipher_hex", sm4Hex);
         sm4.put("cipher_b64", sm4B64);

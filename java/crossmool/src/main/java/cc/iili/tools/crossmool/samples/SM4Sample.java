@@ -30,20 +30,20 @@ public class SM4Sample {
 		System.out.println("SM4 Base64 Key:::" + base64Key);
 
 		/**************test encrypt & decrypt with Hex key (default Hex output)  ***********/
-		String encryptedHex = SM4Util.encrypt(hexKey, originalContent);
+		String encryptedHex = SM4Util.encrypt(originalContent, hexKey);
 		System.out.println("Encrypted (Hex):::" + encryptedHex);
 
-		String decryptedHex = SM4Util.decrypt(hexKey, encryptedHex);
+		String decryptedHex = SM4Util.decrypt(encryptedHex, hexKey);
 		System.out.println("Decrypted (Hex):::" + decryptedHex);
 
 		boolean equalsHex = originalContent.equals(decryptedHex);
 		System.out.println("WhetherDecryptEqualsOriginalContent (Hex):::" + equalsHex);
 
 		/**************test encrypt & decrypt with Base64 key (Base64 output)  ***********/
-		String encryptedBase64 = SM4Util.encrypt(base64Key, originalContent, true);
+		String encryptedBase64 = SM4Util.encrypt(originalContent, base64Key, true);
 		System.out.println("Encrypted (Base64):::" + encryptedBase64);
 
-		String decryptedBase64 = SM4Util.decrypt(base64Key, encryptedBase64);
+		String decryptedBase64 = SM4Util.decrypt(encryptedBase64, base64Key);
 		System.out.println("Decrypted (Base64):::" + decryptedBase64);
 
 		boolean equalsBase64 = originalContent.equals(decryptedBase64);
@@ -52,7 +52,7 @@ public class SM4Sample {
 		/**************test GCM anti-tampering  ***********/
 		String tampered = encryptedHex.substring(0, encryptedHex.length() - 2) + "XX";
 		try {
-			String hacked = SM4Util.decrypt(hexKey, tampered);
+			String hacked = SM4Util.decrypt(tampered, hexKey);
 			System.out.println("Tampered decrypted:::" + hacked);
 		} catch (Exception e) {
 			System.out.println("GCM detected tampering, decryption failed:::" + e.getMessage());

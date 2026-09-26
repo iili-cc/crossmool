@@ -118,8 +118,8 @@ public class InteropTest {
         // SM4 GCM 测试
         System.out.println("测试SM4 GCM...");
         String sm4Key = SM4Util.generateKeyAsHex();
-        String sm4Encrypted = SM4Util.encryptGcmNative(SM4Util.parseHexKey(sm4Key), message.getBytes(StandardCharsets.UTF_8));
-        String sm4Decrypted = SM4Util.decryptGcmNativeToString(SM4Util.parseHexKey(sm4Key), sm4Encrypted);
+        String sm4Encrypted = SM4Util.encryptGcmNative(message.getBytes(StandardCharsets.UTF_8), SM4Util.parseHexKey(sm4Key));
+        String sm4Decrypted = SM4Util.decryptGcmNativeToString(sm4Encrypted, SM4Util.parseHexKey(sm4Key));
 
         if (message.equals(sm4Decrypted)) {
             System.out.println("✓ SM4 GCM 加解密成功");

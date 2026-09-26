@@ -20,9 +20,9 @@ public class SM4GcmTestVector {
         String plainText = "Hello, 這是国密SM4測試數據";
 
         // Encrypt with Native API
-        String encryptedNative = SM4Util.encryptGcmNative(key, plainText.getBytes(StandardCharsets.UTF_8), iv);
+        String encryptedNative = SM4Util.encryptGcmNative(plainText.getBytes(StandardCharsets.UTF_8), key, iv);
         // Encrypt with JCA API
-        String encryptedJca = SM4Util.encryptGcmJca(key, plainText, iv);
+        String encryptedJca = SM4Util.encryptGcmJca(plainText, key, iv);
 
         System.out.println("=== SM4-GCM Test Vector ===");
         System.out.println("Key (Hex):     " + HexUtil.encodeHexStr(key));
@@ -33,7 +33,7 @@ public class SM4GcmTestVector {
         System.out.println("Native == JCA: " + encryptedNative.equals(encryptedJca));
 
         // Verify decryption
-        String decrypted = SM4Util.decryptGcmNativeToString(key, encryptedNative);
+        String decrypted = SM4Util.decryptGcmNativeToString(encryptedNative, key);
         System.out.println("Decrypted:     " + decrypted);
         System.out.println("Match:         " + plainText.equals(decrypted));
     }

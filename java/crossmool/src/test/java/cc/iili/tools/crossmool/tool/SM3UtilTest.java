@@ -24,10 +24,10 @@ class SM3UtilTest {
 		String digestToStr = SM3Util.digestToStr(sm3TestString);
 		System.out.println("digestToStr:::" + digestToStr);
 
-		String hmacToStr = SM3Util.hmacToStr(hmacKeyBase64, sm3TestString);
+		String hmacToStr = SM3Util.hmacToStr(sm3TestString, hmacKeyBase64);
 		System.out.println("hmacToStr:::" + hmacToStr);
 
-		boolean hmacVerify = SM3Util.hmacVerify(hmacKeyBase64, sm3TestString, hmacToStr);
+		boolean hmacVerify = SM3Util.hmacVerify(sm3TestString, hmacKeyBase64, hmacToStr);
 		System.out.println("hmacVerify:::" + hmacVerify);
 
 	}

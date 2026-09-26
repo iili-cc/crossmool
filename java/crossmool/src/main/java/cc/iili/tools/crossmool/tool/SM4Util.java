@@ -24,8 +24,10 @@ import cc.iili.tools.crossmool.util.HexUtil;
  * 
  * 支持 Hex 和 Base64 双编码格式，默认是 Hex，Hex 优先
  * 
- * Encrypt: use encrypt(String, String) to Hex, encrypt(String, String, true) to Base64
- * Decrypt: use decrypt(String, String) from Hex, decrypt(String, String, true) from Base64
+ * 参数顺序约定：第 1 个参数为原文（加密）/密文（解密），第 2 个参数为密钥（密码），其余参数分列 3,4,5...
+ * 
+ * Encrypt: use encrypt(String plaintext, String key) to Hex, encrypt(String plaintext, String key, true) to Base64
+ * Decrypt: use decrypt(String ciphertext, String key) auto-detect Hex/Base64
  */
 public class SM4Util {
 
@@ -127,23 +129,23 @@ public class SM4Util {
 	/**
 	 * GCM 加密（原生 API）- 返回格式：Base64(IV + 密文 (含认证标签))
 	 *
-	 * @param key   the 16-byte secret key
 	 * @param input plaintext byte array
+	 * @param key   the 16-byte secret key
 	 * @return Base64 编码的 IV+ 密文
 	 */
-	public static String encryptGcmNative(byte[] key, byte[] input) {
-		return encryptGcmNative(key, input, null);
+	public static String encryptGcmNative(byte[] input, byte[] key) {
+		return encryptGcmNative(input, key, null);
 	}
 
 	/**
 	 * GCM 加密（原生 API）
 	 *
-	 * @param key   16 字节密钥
 	 * @param input 明文
+	 * @param key   16 字节密钥
 	 * @param iv    可选，若为 null 则自动生成随机 IV
 	 * @return Base64 编码的 IV+ 密文
 	 */
-	public static String encryptGcmNative(byte[] key, byte[] input, byte[] iv) {
+	public static String encryptGcmNative(byte[] input, byte[] key, byte[] iv) {
 		validateKey(key);
 		try {
 			if (iv == null) {
@@ -181,11 +183,11 @@ public class SM4Util {
 	/**
 	 * GCM 解密（原生 API）
 	 *
-	 * @param key         16 字节密钥
 	 * @param encodedData Base64 编码的（IV + 密文）
+	 * @param key         16 字节密钥
 	 * @return 解密后的明文字节数组
 	 */
-	public static byte[] decryptGcmNative(byte[] key, String encodedData) {
+	public static byte[] decryptGcmNative(String encodedData, byte[] key) {
 		validateKey(key);
 		try {
 			byte[] data = Base64.getDecoder().decode(encodedData);
@@ -221,8 +223,8 @@ public class SM4Util {
 	/**
 	 * GCM 解密返回字符串（原生 API）
 	 */
-	public static String decryptGcmNativeToString(byte[] key, String encodedData) {
-		byte[] decrypted = decryptGcmNative(key, encodedData);
+	public static String decryptGcmNativeToString(String encodedData, byte[] key) {
+		byte[] decrypted = decryptGcmNative(encodedData, key);
 		return new String(decrypted, StandardCharsets.UTF_8);
 	}
 
@@ -233,19 +235,19 @@ public class SM4Util {
 	/**
 	 * GCM 加密（JCA API）- 返回 Base64(IV + 密文)
 	 */
-	public static String encryptGcmJca(byte[] key, String plainText) {
-		return encryptGcmJca(key, plainText, null);
+	public static String encryptGcmJca(String plainText, byte[] key) {
+		return encryptGcmJca(plainText, key, null);
 	}
 
 	/**
 	 * GCM 加密（JCA API）
 	 *
-	 * @param key       16 字节密钥
 	 * @param plainText 明文字符串
+	 * @param key       16 字节密钥
 	 * @param iv        可选，若为 null 则自动生成随机 IV
 	 * @return Base64 编码的 IV+ 密文
 	 */
-	public static String encryptGcmJca(byte[] key, String plainText, byte[] iv) {
+	public static String encryptGcmJca(String plainText, byte[] key, byte[] iv) {
 		validateKey(key);
 		try {
 			if (iv == null) {
@@ -275,11 +277,11 @@ public class SM4Util {
 	/**
 	 * GCM 解密（JCA API）
 	 *
-	 * @param key         16 字节密钥
 	 * @param encodedData Base64 编码的（IV + 密文）
+	 * @param key         16 字节密钥
 	 * @return 解密后的明文字符串
 	 */
-	public static String decryptGcmJca(byte[] key, String encodedData) {
+	public static String decryptGcmJca(String encodedData, byte[] key) {
 		validateKey(key);
 		try {
 			byte[] data = Base64.getDecoder().decode(encodedData);
@@ -311,26 +313,26 @@ public class SM4Util {
 	/**
 	 * GCM 加密，返回 Hex 格式 (IV + 密文 + Tag)
 	 */
-	public static String encryptToHex(byte[] key, byte[] plaintext) {
-		return encrypt(key, plaintext, false);
+	public static String encryptToHex(byte[] plaintext, byte[] key) {
+		return encrypt(plaintext, key, false);
 	}
 
 	/**
 	 * GCM 加密，返回 Base64 格式 (IV + 密文 + Tag)
 	 */
-	public static String encryptToBase64(byte[] key, byte[] plaintext) {
-		return encrypt(key, plaintext, true);
+	public static String encryptToBase64(byte[] plaintext, byte[] key) {
+		return encrypt(plaintext, key, true);
 	}
 
 	/**
 	 * GCM 加密，支持 Hex 和 Base64 双编码输出
 	 * 
-	 * @param key       密钥字节数组
 	 * @param plaintext 明文字节数组
+	 * @param key       密钥字节数组
 	 * @param toBase64  true 返回 Base64 格式，false 返回 Hex 格式
 	 * @return 加密结果 (Hex 或 Base64 格式)
 	 */
-	public static String encrypt(byte[] key, byte[] plaintext, boolean toBase64) {
+	public static String encrypt(byte[] plaintext, byte[] key, boolean toBase64) {
 		validateKey(key);
 		try {
 			byte[] iv = generateGcmIv();
@@ -369,47 +371,47 @@ public class SM4Util {
 	/**
 	 * GCM 加密，支持 Hex 和 Base64 双编码输出 (默认 Hex)
 	 * 
-	 * @param key       密钥字节数组
 	 * @param plaintext 明文字节数组
+	 * @param key       密钥字节数组
 	 * @return 加密结果 (Hex 格式)
 	 */
-	public static String encrypt(byte[] key, byte[] plaintext) {
-		return encrypt(key, plaintext, false);
+	public static String encrypt(byte[] plaintext, byte[] key) {
+		return encrypt(plaintext, key, false);
 	}
 
 	/**
 	 * GCM 加密，支持 Hex 和 Base64 双编码输出
 	 * 
-	 * @param key       密钥字符串 (Hex 或 Base64 格式)
 	 * @param plaintext 明文字符串 (UTF-8 编码)
+	 * @param key       密钥字符串 (Hex 或 Base64 格式)
 	 * @param toBase64  true 返回 Base64 格式，false 返回 Hex 格式
 	 * @return 加密结果 (Hex 或 Base64 格式)
 	 */
-	public static String encrypt(String key, String plaintext, boolean toBase64) {
+	public static String encrypt(String plaintext, String key, boolean toBase64) {
 		byte[] keyBytes = parseKey(key);
 		byte[] plaintextBytes = plaintext.getBytes(StandardCharsets.UTF_8);
-		return encrypt(keyBytes, plaintextBytes, toBase64);
+		return encrypt(plaintextBytes, keyBytes, toBase64);
 	}
 
 	/**
 	 * GCM 加密，支持 Hex 和 Base64 双编码输出 (默认 Hex)
 	 * 
-	 * @param key       密钥字符串 (Hex 或 Base64 格式)
 	 * @param plaintext 明文字符串 (UTF-8 编码)
+	 * @param key       密钥字符串 (Hex 或 Base64 格式)
 	 * @return 加密结果 (Hex 格式)
 	 */
-	public static String encrypt(String key, String plaintext) {
-		return encrypt(key, plaintext, false);
+	public static String encrypt(String plaintext, String key) {
+		return encrypt(plaintext, key, false);
 	}
 
 	/**
 	 * GCM 解密，支持 Hex 和 Base64 双编码输入
 	 * 
-	 * @param key         密钥字节数组
-	 * @param ciphertext  密文字符串 (Hex 或 Base64 格式，自动检测)
+	 * @param ciphertext 密文字符串 (Hex 或 Base64 格式，自动检测)
+	 * @param key        密钥字节数组
 	 * @return 解密后的明文字节数组
 	 */
-	public static byte[] decryptToBytes(byte[] key, String ciphertext) {
+	public static byte[] decryptToBytes(String ciphertext, byte[] key) {
 		validateKey(key);
 		byte[] data;
 		// 自动检测 Hex 或 Base64 格式 (Hex 优先)
@@ -454,25 +456,25 @@ public class SM4Util {
 	/**
 	 * GCM 解密，支持 Hex 和 Base64 双编码输入
 	 * 
-	 * @param key         密钥字节数组
-	 * @param ciphertext  密文字符串 (Hex 或 Base64 格式，自动检测)
+	 * @param ciphertext 密文字符串 (Hex 或 Base64 格式，自动检测)
+	 * @param key        密钥字节数组
 	 * @return 解密后的明文字符串 (UTF-8 编码)
 	 */
-	public static String decrypt(byte[] key, String ciphertext) {
-		byte[] decrypted = decryptToBytes(key, ciphertext);
+	public static String decrypt(String ciphertext, byte[] key) {
+		byte[] decrypted = decryptToBytes(ciphertext, key);
 		return new String(decrypted, StandardCharsets.UTF_8);
 	}
 
 	/**
 	 * GCM 解密，支持 Hex 和 Base64 双编码输入
 	 * 
-	 * @param key         密钥字符串 (Hex 或 Base64 格式)
-	 * @param ciphertext  密文字符串 (Hex 或 Base64 格式，自动检测)
+	 * @param ciphertext 密文字符串 (Hex 或 Base64 格式，自动检测)
+	 * @param key        密钥字符串 (Hex 或 Base64 格式)
 	 * @return 解密后的明文字符串 (UTF-8 编码)
 	 */
-	public static String decrypt(String key, String ciphertext) {
+	public static String decrypt(String ciphertext, String key) {
 		byte[] keyBytes = parseKey(key);
-		return decrypt(keyBytes, ciphertext);
+		return decrypt(ciphertext, keyBytes);
 	}
 
 	// ========================
@@ -503,15 +505,15 @@ public class SM4Util {
 
 		// 原生 API
 		byte[] plainBytes = plainText.getBytes(StandardCharsets.UTF_8);
-		String encGcmNative = encryptGcmNative(key, plainBytes);
-		String decGcmNative = decryptGcmNativeToString(key, encGcmNative);
+		String encGcmNative = encryptGcmNative(plainBytes, key);
+		String decGcmNative = decryptGcmNativeToString(encGcmNative, key);
 		System.out.println("[Native API GCM]");
 		System.out.println("  加密结果 (Base64): " + encGcmNative);
 		System.out.println("  解密结果：" + decGcmNative);
 
 		// JCA API
-		String encGcmJca = encryptGcmJca(key, plainText);
-		String decGcmJca = decryptGcmJca(key, encGcmJca);
+		String encGcmJca = encryptGcmJca(plainText, key);
+		String decGcmJca = decryptGcmJca(encGcmJca, key);
 		System.out.println("[JCA API GCM]");
 		System.out.println("  加密结果 (Base64): " + encGcmJca);
 		System.out.println("  解密结果：" + decGcmJca);
@@ -523,32 +525,32 @@ public class SM4Util {
 		System.out.println("\n========== Hex 和 Base64 双编码测试 ==========");
 
 		// Hex 加密
-		String encHex = encrypt(key, plainBytes, false);
+		String encHex = encrypt(plainBytes, key, false);
 		System.out.println("[Hex 加密]");
 		System.out.println("  加密结果 (Hex): " + encHex);
-		String decFromHex = decrypt(key, encHex);
+		String decFromHex = decrypt(encHex, key);
 		System.out.println("  解密结果：" + decFromHex);
 		assert plainText.equals(decFromHex);
 
 		// Base64 加密
-		String encBase64 = encrypt(key, plainBytes, true);
+		String encBase64 = encrypt(plainBytes, key, true);
 		System.out.println("[Base64 加密]");
 		System.out.println("  加密结果 (Base64): " + encBase64);
-		String decFromBase64 = decrypt(key, encBase64);
+		String decFromBase64 = decrypt(encBase64, key);
 		System.out.println("  解密结果：" + decFromBase64);
 		assert plainText.equals(decFromBase64);
 
 		// 字符串密钥测试
 		System.out.println("\n[字符串密钥测试]");
-		String encHexStr = encrypt(hexKey, plainText, false);
+		String encHexStr = encrypt(plainText, hexKey, false);
 		System.out.println("  Hex 密钥加密 (Hex 输出): " + encHexStr);
-		String decHexStr = decrypt(hexKey, encHexStr);
+		String decHexStr = decrypt(encHexStr, hexKey);
 		System.out.println("  解密结果：" + decHexStr);
 		assert plainText.equals(decHexStr);
 
-		String encBase64Str = encrypt(base64Key, plainText, true);
+		String encBase64Str = encrypt(plainText, base64Key, true);
 		System.out.println("  Base64 密钥加密 (Base64 输出): " + encBase64Str);
-		String decBase64Str = decrypt(base64Key, encBase64Str);
+		String decBase64Str = decrypt(encBase64Str, base64Key);
 		System.out.println("  解密结果：" + decBase64Str);
 		assert plainText.equals(decBase64Str);
 
@@ -556,7 +558,7 @@ public class SM4Util {
 		System.out.println("\n========== GCM 防篡改测试 ==========");
 		String tampered = encGcmJca.substring(0, encGcmJca.length() - 2) + "XX";
 		try {
-			String hacked = decryptGcmJca(key, tampered);
+			String hacked = decryptGcmJca(tampered, key);
 			System.out.println("❌ 篡改后仍能解密：" + hacked);
 		} catch (Exception e) {
 			System.out.println("✅ 篡改后解密失败（认证失败，GCM 自动检测到篡改）: " + e.getMessage());

@@ -21,10 +21,10 @@ public class SM3Sample {
          */
         String hmacKey = SM3Util.generateHmacKeyToStr();
         System.out.println("HMAC Key: " + hmacKey);
-        String hmacValue = SM3Util.hmacToStr(hmacKey, input);
+        String hmacValue = SM3Util.hmacToStr(input, hmacKey);
         System.out.println("HMAC Value: " + hmacValue);
 
-        String hmacValue2 = SM3Util.hmacToStr(hmacKey, input);
+        String hmacValue2 = SM3Util.hmacToStr(input, hmacKey);
         System.out.println("HMAC Value 2: " + hmacValue2);
 
         boolean hmacEquals = hmacValue.equals(hmacValue2);

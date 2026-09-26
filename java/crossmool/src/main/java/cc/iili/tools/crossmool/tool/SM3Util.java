@@ -196,8 +196,10 @@ public class SM3Util {
 
 	/**
 	 * HMAC-SM3 实现
+	 * 
+	 * 参数顺序约定：第 1 个参数为数据（原文），第 2 个参数为密钥（密码），其余参数分列 3,4,5...
 	 */
-	public static byte[] hmac(byte[] key, byte[] data) {
+	public static byte[] hmac(byte[] data, byte[] key) {
 		//generate key parameter
 		KeyParameter keyParameter = new KeyParameter(key);
 		//generate SM3 digest
@@ -213,11 +215,11 @@ public class SM3Util {
 	}
 	/**
 	 * 
-	 * @param key, must be Hex string or Base64 string
 	 * @param data, could be Hex string, Base64 string or utf-8 string
+	 * @param key, must be Hex string or Base64 string
 	 * @return
 	 */
-	public static byte[] hmac(String key, String data) {
+	public static byte[] hmac(String data, String key) {
 		if(key == null || key.isBlank() || data == null || data.isBlank()) {
 			throw new IllegalArgumentException("Key or data for HMAC-SM3 cannot be null");
 		}
@@ -238,15 +240,15 @@ public class SM3Util {
 			dataBytes = data.getBytes(StandardCharsets.UTF_8);
 		}
 		// generate HMAC-SM3
-		byte[] hmac = hmac(keyBytes, dataBytes);
+		byte[] hmac = hmac(dataBytes, keyBytes);
 		return hmac;
 	}
 	
 	/**
 	 * HMAC-SM3, output as Hex string(default) or Base64 string
 	 */
-	public static String hmacToStr(byte[] key, byte[] data, boolean toBase64) {
-		byte[] hmac = hmac(key, data);
+	public static String hmacToStr(byte[] data, byte[] key, boolean toBase64) {
+		byte[] hmac = hmac(data, key);
 		if (toBase64) {
 			return Base64.getEncoder().encodeToString(hmac);
 		}
@@ -255,19 +257,19 @@ public class SM3Util {
 	/**
 	 * HMAC-SM3, output as Hex string
 	 */
-	public static String hmacToStr(byte[] key, byte[] data) {
-		byte[] hmac = hmac(key, data);
+	public static String hmacToStr(byte[] data, byte[] key) {
+		byte[] hmac = hmac(data, key);
 		return HexUtil.encodeHexStr(hmac);
 	}
 	/**
 	 * 
-	 * @param key, should be Hex string or Base64 string
 	 * @param data, should be Hex string or Base64 string
+	 * @param key, should be Hex string or Base64 string
 	 * @param toBase64, output as Base64 string if true, otherwise as Hex string
 	 * @return, HMAC-SM3 as Hex string or Base64 string
 	 */
-	public static String hmacToStr(String key, String data, boolean toBase64) {
-		byte[] hmac = hmac(key, data);
+	public static String hmacToStr(String data, String key, boolean toBase64) {
+		byte[] hmac = hmac(data, key);
 		if (toBase64) {
 			return Base64.getEncoder().encodeToString(hmac);
 		}
@@ -275,21 +277,21 @@ public class SM3Util {
 	}
 	/**
 	 * 
-	 * @param key, should be Hex string or Base64 string
 	 * @param data, should be Hex string or Base64 string
+	 * @param key, should be Hex string or Base64 string
 	 * @return, HMAC-SM3 as Hex string
 	 */
-	public static String hmacToStr(String key, String data) {
-		return hmacToStr(key, data, false);
+	public static String hmacToStr(String data, String key) {
+		return hmacToStr(data, key, false);
 	}
 	/**
 	 * key and data must be both Hex string or both Base64 string
-	 * @param key
-	 * @param data 
+	 * @param data
+	 * @param key 
 	 * @param toBase64, output as Base64 string if true, otherwise as Hex string
 	 * @return
 	 */
-	public static String hmacToStrWithSameFormatParams(String key, String data, boolean toBase64) {
+	public static String hmacToStrWithSameFormatParams(String data, String key, boolean toBase64) {
 		if(key == null || key.isBlank() || data == null || data.isBlank()) {
 			throw new IllegalArgumentException("Key or data for HMAC-SM3 cannot be null");
 		}
@@ -304,7 +306,7 @@ public class SM3Util {
 		}else {
 			throw new IllegalArgumentException("Key and data for HMAC-SM3 must be both Hex string or both Base64 string");
 		}
-		byte[] hmac = hmac(keyBytes, dataBytes);
+		byte[] hmac = hmac(dataBytes, keyBytes);
 		if (toBase64) {
 			return Base64.getEncoder().encodeToString(hmac);
 		}
@@ -312,16 +314,16 @@ public class SM3Util {
 	}
 	/**
 	 * 
-	 * @param key, key and data must be both Hex string or both Base64 string
 	 * @param data, key and data must be both Hex string or both Base64 string
+	 * @param key, key and data must be both Hex string or both Base64 string
 	 * @return, HMAC-SM3 as Hex string
 	 */
-	public static String hmacToStrWithSameFormatParams(String key, String data) {
-		return hmacToStrWithSameFormatParams(key, data, false);
+	public static String hmacToStrWithSameFormatParams(String data, String key) {
+		return hmacToStrWithSameFormatParams(data, key, false);
 	}
 	
-	public static boolean hmacVerify(String key, String data, String receivedHmac) {
-		byte[] hmacBytes = hmac(key, data);
+	public static boolean hmacVerify(String data, String key, String receivedHmac) {
+		byte[] hmacBytes = hmac(data, key);
 		byte[] receivedHmacBytes = null;
 		if(HexUtil.isHexString(receivedHmac)) {
 			receivedHmacBytes = HexUtil.decodeHexStr(receivedHmac);
