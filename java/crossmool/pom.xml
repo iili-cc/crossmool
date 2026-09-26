@@ -73,7 +73,7 @@
 				</configuration>
 			</plugin>
 
-			<!-- 附加 sources.jar（Central 强制） -->
+			<!-- Attach sources.jar (required by Central) -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
@@ -88,7 +88,7 @@
 				</executions>
 			</plugin>
 
-			<!-- 附加 javadoc.jar（Central 强制） -->
+			<!-- Attach javadoc.jar (required by Central) -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
@@ -108,7 +108,7 @@
 				</configuration>
 			</plugin>
 
-			<!-- GPG 签名（Central 强制，verify 阶段对所有产物签名） -->
+			<!-- GPG signing (required by Central, signs all artifacts at verify phase) -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-gpg-plugin</artifactId>
@@ -132,7 +132,7 @@
 				</configuration>
 			</plugin>
 
-			<!-- Sonatype Central Portal 发布插件（新流程，替代旧 OSSRH） -->
+			<!-- Sonatype Central Portal publishing plugin (new flow, replaces legacy OSSRH) -->
 			<plugin>
 				<groupId>org.sonatype.central</groupId>
 				<artifactId>central-publishing-maven-plugin</artifactId>
