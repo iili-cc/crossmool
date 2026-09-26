@@ -19,11 +19,8 @@ import org.bouncycastle.jce.interfaces.ECPrivateKey;
 import org.bouncycastle.jce.interfaces.ECPublicKey;
 
 import cc.iili.tools.crossmool.constant.SM2Constant;
-// import lombok.extern.slf4j.Slf4j; -- removed, see FIX-017
 
-// @Slf4j -- removed, see FIX-017
 public class SM2KeyUtil {
-    private static final java.util.logging.Logger log = java.util.logging.Logger.getLogger(SM2KeyUtil.class.getName());
     
     /**
      * for the SM2 curve, the parameters are fixed.
@@ -66,7 +63,7 @@ public class SM2KeyUtil {
      * @return
      */
     public static PublicKey convertX509BytesToPublicKey(byte[] publicKeyBytes) {
-        // 使用X.509格式创建公钥
+        // Create the public key from X.509 format
         X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicKeyBytes);
         KeyFactory keyFactory = getKeyFactory();
         try {
@@ -102,7 +99,7 @@ public class SM2KeyUtil {
      * @return
      */
     public static PrivateKey convertPKCS8BytesToPrivateKey(byte[] privateKeyBytes) {
-        // 使用 X.509 格式创建公钥
+        // Create the private key from PKCS#8 format
         PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
         KeyFactory keyFactory = getKeyFactory();
         try {

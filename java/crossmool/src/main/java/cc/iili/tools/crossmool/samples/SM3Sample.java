@@ -14,11 +14,6 @@ public class SM3Sample {
         boolean equals = hash.equals(hashHex);
         System.out.println("Whether Hash Equals Hex: " + equals);
 
-        /**
-         *  SM3 Hash: 54e020abea7ebe39b25e768541f00f750b7784f0ce29b7dd71fdd2b8761f9773
-            SM3 Hash (Hex): 54e020abea7ebe39b25e768541f00f750b7784f0ce29b7dd71fdd2b8761f9773
-            Whether Hash Equals Hex: true
-         */
         String hmacKey = SM3Util.generateHmacKeyToStr();
         System.out.println("HMAC Key: " + hmacKey);
         String hmacValue = SM3Util.hmacToStr(input, hmacKey);
@@ -29,12 +24,5 @@ public class SM3Sample {
 
         boolean hmacEquals = hmacValue.equals(hmacValue2);
         System.out.println("Whether HMAC Values Equal: " + hmacEquals);
-
-        /**
-         *  HMAC Key: b06321a31c05c63c19f0b701ab0c21d2956149119c3d8f7f18ac86d6a1b21656
-            HMAC Value: 7c3abc43d27795450a1624458ee0c844a4d51a057a36d5dc1dc9710b19f82aab
-            HMAC Value 2: 7c3abc43d27795450a1624458ee0c844a4d51a057a36d5dc1dc9710b19f82aab
-            Whether HMAC Values Equal: true
-         */
     }
 }

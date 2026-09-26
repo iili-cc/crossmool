@@ -17,11 +17,8 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import cc.iili.tools.crossmool.util.Base64Util;
 import cc.iili.tools.crossmool.util.HexUtil;
-// import lombok.extern.slf4j.Slf4j; -- removed, see FIX-017
 
-// @Slf4j -- removed, see FIX-017
 public class SM3Util {
-    private static final java.util.logging.Logger log = java.util.logging.Logger.getLogger(SM3Util.class.getName());
 
 	static {
 		// register Bouncy Castle Provider（avoid duplicate）
@@ -60,6 +57,9 @@ public class SM3Util {
 	public static String digestToStr(String input, Charset charset, boolean toBase64) {
 		if(input == null || input.isBlank()) {
 			throw new RuntimeException("input cannot be empty");
+		}
+		if(charset == null) {
+			charset = StandardCharsets.UTF_8;
 		}
 		byte[] inputBytes = input.getBytes(charset);
 		byte[] digestBytes = digest(inputBytes);
@@ -118,6 +118,9 @@ public class SM3Util {
 	public static String messageDigestToStr(String input, Charset charset, boolean toBase64) {
 		if(input == null || input.isBlank()) {
 			throw new RuntimeException("input cannot be empty");
+		}
+		if(charset == null) {
+			charset = StandardCharsets.UTF_8;
 		}
 		byte[] inputBytes = input.getBytes(charset);
 		byte[] digestBytes = messageDigest(inputBytes);
@@ -195,11 +198,18 @@ public class SM3Util {
 	
 
 	/**
-	 * HMAC-SM3 实现
+	 * HMAC-SM3 implementation.
 	 * 
-	 * 参数顺序约定：第 1 个参数为数据（原文），第 2 个参数为密钥（密码），其余参数分列 3,4,5...
+	 * Parameter order convention: the 1st parameter is the data (plaintext),
+	 * the 2nd parameter is the key (password), remaining parameters follow at 3, 4, 5...
 	 */
 	public static byte[] hmac(byte[] data, byte[] key) {
+		if(data == null) {
+			throw new IllegalArgumentException("data for HMAC-SM3 cannot be null");
+		}
+		if(key == null) {
+			throw new IllegalArgumentException("key for HMAC-SM3 cannot be null");
+		}
 		//generate key parameter
 		KeyParameter keyParameter = new KeyParameter(key);
 		//generate SM3 digest

@@ -31,7 +31,6 @@ import cc.iili.tools.crossmool.constant.SM2Constant;
 import cc.iili.tools.crossmool.util.Base64Util;
 import cc.iili.tools.crossmool.util.HexUtil;
 import cc.iili.tools.crossmool.util.SM2KeyUtil;
-// import lombok.extern.slf4j.Slf4j; -- removed, see FIX-017
 
 /**
  * Encrypt only: use encrypt(String, String) to Hex, encrypt(String, String, true) to Base64
@@ -51,9 +50,7 @@ import cc.iili.tools.crossmool.util.SM2KeyUtil;
  * sign & encrypt use different keypairs
  *
  */
-// @Slf4j -- removed, see FIX-017
 public class SM2Util {
-    private static final java.util.logging.Logger log = java.util.logging.Logger.getLogger(SM2Util.class.getName());
     
     static {
     	// register Bouncy Castle Provider（avoid duplicate）
@@ -114,6 +111,7 @@ public class SM2Util {
      * @deprecated suggest using generateKeyPair(), java.security.KeyPairGenerator is better
      * @return
      */
+    @Deprecated
     public static AsymmetricCipherKeyPair generateKeyPairBC() {
         ECDomainParameters domainParameters = SM2KeyUtil.getECDomainParameters();
         ECKeyPairGenerator generator = new ECKeyPairGenerator();
@@ -127,7 +125,7 @@ public class SM2Util {
      * @param cryptoKey, if forEncryption is true, it is publicKey; else it is privateKey
      * @return
      */
-    public static SM2Engine getSM2Engine(boolean forEncryption, byte[] cryptoKey) {
+    private static SM2Engine getSM2Engine(boolean forEncryption, byte[] cryptoKey) {
         SM2Engine sm2Engine = new SM2Engine(SM2Engine.Mode.C1C3C2);
         if(forEncryption) {
             ECPublicKeyParameters publicKeyParameters = SM2KeyUtil.convertX509BytesToECPublicKeyParameters(cryptoKey);
@@ -137,11 +135,6 @@ public class SM2Util {
         ECPrivateKeyParameters privateKeyParameters = SM2KeyUtil.convertPKCS8BytesToECPrivateKeyParameters(cryptoKey);
         sm2Engine.init(false, privateKeyParameters);
         return sm2Engine;
-    }
-    
-    public static SM2Engine getSM2Engine(boolean forEncryption, String cryptoKey) {
-        byte[] cryptoKeyBytes = SM2KeyUtil.convertStringToBytes(cryptoKey);
-        return getSM2Engine(forEncryption, cryptoKeyBytes);
     }
     /************************************************************************************************
      * Basic encrypt method
@@ -236,10 +229,10 @@ public class SM2Util {
      */
     public static byte[] decryptToBytes(byte[] content, byte[] privateKey) {
         if(content == null) {
-            throw new RuntimeException("SM2 encrypt error: the content is null.");
+            throw new RuntimeException("SM2 decrypt error: the content is null.");
         }
         if(privateKey == null) {
-            throw new RuntimeException("SM2 encrypt error: the privateKey is null.");
+            throw new RuntimeException("SM2 decrypt error: the privateKey is null.");
         }
         SM2Engine sm2Engine = getSM2Engine(false, privateKey);
         try {
@@ -258,10 +251,10 @@ public class SM2Util {
      */
     public static byte[] decryptToBytes(String content, String privateKey) {
         if(content == null || content.isEmpty() || content.trim().isEmpty()) {
-            throw new RuntimeException("SM2 encrypt error: the content is null.");
+            throw new RuntimeException("SM2 decrypt error: the content is null.");
         }
         if(privateKey == null || privateKey.isEmpty() || privateKey.trim().isEmpty()) {
-            throw new RuntimeException("SM2 encrypt error: the publicKey is null.");
+            throw new RuntimeException("SM2 decrypt error: the privateKey is null.");
         }
         boolean isHex = HexUtil.isHexString(content);
         byte[] contentBytes = isHex ? HexUtil.decodeHexStr(content) : Base64.getDecoder().decode(content);
@@ -303,58 +296,90 @@ public class SM2Util {
      * @return
      * **********************************************************************************************
      */
-    private static final String USER_ID = "1234567812345678";
-    private static final byte[] USER_ID_BYTES = USER_ID.getBytes(StandardCharsets.UTF_8);
+    private static final String DEFAULT_USER_ID = "1234567812345678";
+    private static final byte[] DEFAULT_USER_ID_BYTES = DEFAULT_USER_ID.getBytes(StandardCharsets.UTF_8);
     /**
      * 
      * @param forSign
-     * @param signKey, if forSign is true, it is privateKey; else it is publicKey
+     * @param signKeyBytes, if forSign is true, it is privateKey; else it is publicKey
      * @return
      */
-    public static SM2Signer getSM2Signer(boolean forSign, byte[] signKeyBytes) {
+    private static SM2Signer getSM2Signer(boolean forSign, byte[] signKeyBytes) {
+        return getSM2Signer(forSign, signKeyBytes, DEFAULT_USER_ID_BYTES);
+    }
+
+    /**
+     * 
+     * @param forSign
+     * @param signKeyBytes, if forSign is true, it is privateKey; else it is publicKey
+     * @param userIdBytes, custom SM2 user ID; if null or empty, fall back to the default value
+     * @return
+     */
+    private static SM2Signer getSM2Signer(boolean forSign, byte[] signKeyBytes, byte[] userIdBytes) {
+        byte[] userId = (userIdBytes == null || userIdBytes.length == 0) ? DEFAULT_USER_ID_BYTES : userIdBytes;
         SM2Signer sm2Signer = new SM2Signer();
         if (forSign) {
             ECPrivateKeyParameters privateKeyParameters = SM2KeyUtil.convertPKCS8BytesToECPrivateKeyParameters(signKeyBytes);
-            ParametersWithID privateParam = new ParametersWithID(privateKeyParameters, USER_ID_BYTES);
-//            sm2Signer.init(true, new ParametersWithRandom(privateParam, new SecureRandom()));
+            ParametersWithID privateParam = new ParametersWithID(privateKeyParameters, userId);
             sm2Signer.init(true, privateParam);
             return sm2Signer;
         }
         ECPublicKeyParameters publicKeyParameters = SM2KeyUtil.convertX509BytesToECPublicKeyParameters(signKeyBytes);
-        ParametersWithID publicParam = new ParametersWithID(publicKeyParameters, USER_ID_BYTES);
-//        sm2Signer.init(false, new ParametersWithRandom(publicParam, new SecureRandom()));
+        ParametersWithID publicParam = new ParametersWithID(publicKeyParameters, userId);
         sm2Signer.init(false, publicParam);
         return sm2Signer;
     }
     
-    public static SM2Signer getSM2Signer(boolean forSign, String signKey) {
-        byte[] signKeyBytes = SM2KeyUtil.convertStringToBytes(signKey);
-        return getSM2Signer(forSign, signKeyBytes);
-    }
-    
     public static byte[] sign(byte[] content, byte[] privateKey) {
+        return sign(content, privateKey, DEFAULT_USER_ID_BYTES);
+    }
+
+    /**
+     * Sign with a custom SM2 user ID (e.g. ID card number, phone number, email).
+     * @param content
+     * @param privateKey
+     * @param userId custom SM2 user ID bytes; if null or empty, fall back to the default value
+     * @return
+     */
+    public static byte[] sign(byte[] content, byte[] privateKey, byte[] userId) {
         if(content == null) {
             throw new RuntimeException("SM2 sign error: the content is null.");
         }
         if(privateKey == null) {
             throw new RuntimeException("SM2 sign error: the privateKey is null.");
         }
-        SM2Signer sm2Signer = getSM2Signer(true, privateKey);
+        SM2Signer sm2Signer = getSM2Signer(true, privateKey, userId);
         sm2Signer.update(content, 0, content.length);
         try {
             return sm2Signer.generateSignature();
         } catch (Exception e) {
-            System.err.println("SM2 sign error: " + e.getMessage());
-            throw new RuntimeException("SM2 sign error:" + e.getMessage());
+            throw new RuntimeException("SM2 sign error:" + e.getMessage(), e);
         }
     }
+
     public static byte[] sign(String content, String privateKey, Charset charset) {
+        return sign(content, privateKey, null, charset);
+    }
+
+    /**
+     * Sign with a custom SM2 user ID (e.g. ID card number, phone number, email).
+     * @param content
+     * @param privateKey
+     * @param userId custom SM2 user ID (UTF-8 encoded); if null or empty, fall back to the default value
+     * @param charset content charset; if null, defaults to UTF-8
+     * @return
+     */
+    public static byte[] sign(String content, String privateKey, String userId, Charset charset) {
+        if(content == null || content.isEmpty()) {
+            throw new RuntimeException("SM2 sign error: the content is null.");
+        }
         byte[] privateKeyBytes = SM2KeyUtil.convertStringToBytes(privateKey);
+        byte[] userIdBytes = (userId == null || userId.isEmpty()) ? DEFAULT_USER_ID_BYTES : userId.getBytes(StandardCharsets.UTF_8);
         if(charset == null) {
             charset = StandardCharsets.UTF_8;
         }
         byte[] contentBytes = content.getBytes(charset);
-        return sign(contentBytes, privateKeyBytes);
+        return sign(contentBytes, privateKeyBytes, userIdBytes);
     }
     
     public static String signToHex(String content, String privateKey) {
@@ -397,6 +422,18 @@ public class SM2Util {
      * **********************************************************************************************
      */
     public static boolean verify(byte[] content, byte[] publicKeyBytes, byte[] signature) {
+        return verify(content, publicKeyBytes, signature, DEFAULT_USER_ID_BYTES);
+    }
+
+    /**
+     * Verify with a custom SM2 user ID (must match the one used at signing time).
+     * @param content
+     * @param publicKeyBytes
+     * @param signature
+     * @param userId custom SM2 user ID bytes; if null or empty, fall back to the default value
+     * @return
+     */
+    public static boolean verify(byte[] content, byte[] publicKeyBytes, byte[] signature, byte[] userId) {
         if(content == null) {
             throw new RuntimeException("SM2 verify error: the content is null.");
         }
@@ -406,13 +443,22 @@ public class SM2Util {
         if(signature == null) {
             throw new RuntimeException("SM2 verify error: the signature is null.");
         }
-        SM2Signer sm2Signer = getSM2Signer(false, publicKeyBytes);
+        SM2Signer sm2Signer = getSM2Signer(false, publicKeyBytes, userId);
         sm2Signer.update(content, 0, content.length);
         
         return sm2Signer.verifySignature(signature);
     }
     
     public static boolean verify(String content, String publicKey, String signature, Charset charset) {
+        if(content == null || content.isEmpty()) {
+            throw new RuntimeException("SM2 verify error: the content is null.");
+        }
+        if(publicKey == null || publicKey.isEmpty()) {
+            throw new RuntimeException("SM2 verify error: the publicKey is null.");
+        }
+        if(signature == null || signature.isEmpty()) {
+            throw new RuntimeException("SM2 verify error: the signature is null.");
+        }
         byte[] publicKeyBytes = SM2KeyUtil.convertStringToBytes(publicKey);
         byte[] signatureBytes = SM2KeyUtil.convertStringToBytes(signature);
         if(charset == null) {
@@ -425,6 +471,30 @@ public class SM2Util {
     
     public static boolean verify(String content, String publicKey, String signature) {
         return verify(content, publicKey, signature, StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Verify with a custom SM2 user ID (must match the one used at signing time).
+     * @param content
+     * @param publicKey
+     * @param signature
+     * @param userId custom SM2 user ID (UTF-8 encoded); if null or empty, fall back to the default value
+     * @return
+     */
+    public static boolean verify(String content, String publicKey, String signature, String userId) {
+        if(content == null || content.isEmpty()) {
+            throw new RuntimeException("SM2 verify error: the content is null.");
+        }
+        if(publicKey == null || publicKey.isEmpty()) {
+            throw new RuntimeException("SM2 verify error: the publicKey is null.");
+        }
+        if(signature == null || signature.isEmpty()) {
+            throw new RuntimeException("SM2 verify error: the signature is null.");
+        }
+        byte[] publicKeyBytes = SM2KeyUtil.convertStringToBytes(publicKey);
+        byte[] signatureBytes = SM2KeyUtil.convertStringToBytes(signature);
+        byte[] userIdBytes = (userId == null || userId.isEmpty()) ? DEFAULT_USER_ID_BYTES : userId.getBytes(StandardCharsets.UTF_8);
+        return verify(content.getBytes(StandardCharsets.UTF_8), publicKeyBytes, signatureBytes, userIdBytes);
     }
     
     /**

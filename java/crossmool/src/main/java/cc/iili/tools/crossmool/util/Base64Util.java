@@ -4,11 +4,17 @@ import java.util.Base64;
 
 public class Base64Util {
 	
+	/**
+	 * Check whether the string is a valid Base64 representation.
+	 * Note: under Hex/Base64 auto-detection (Hex first), a Base64 string that consists
+	 * entirely of hexadecimal characters will be judged as Hex first.
+	 * This is an inherent ambiguity of auto-detection; callers should be aware of it.
+	 */
 	public static final boolean isBase64String(String str) {
 		if (str == null || str.length() == 0) {
 			return false;
 		}
-		// 长度必须是4的倍数（Base64规范）
+		// Length must be a multiple of 4 (Base64 specification)
         if (str.length() % 4 != 0) {
             return false;
         }

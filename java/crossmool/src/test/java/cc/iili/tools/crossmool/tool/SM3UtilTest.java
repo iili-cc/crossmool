@@ -1,35 +1,45 @@
 package cc.iili.tools.crossmool.tool;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.Test;
 
 import cc.iili.tools.crossmool.constant.SM3Constant;
 
+@SuppressWarnings("deprecation")
 class SM3UtilTest {
 
 	@Test
 	void testGenerateHmacKeyToStr() {
-		String hmacKeyToStr = SM3Util.generateHmacKeyToStr();
-		System.out.println("hmacKeyToStr is :::" + hmacKeyToStr);
-		String hmacKeyToStr2 = SM3Util.generateHmacKeyToStr(32, true);
-		System.out.println("hmacKeyToStr2 is :::" + hmacKeyToStr2);
-
+		String hmacKeyHex = SM3Util.generateHmacKeyToStr();
+		String hmacKeyBase64 = SM3Util.generateHmacKeyToStr(32, true);
+		assertNotNull(hmacKeyHex);
+		assertNotNull(hmacKeyBase64);
+		// 32-byte key -> 64 Hex characters
+		assertEquals(64, hmacKeyHex.length());
 	}
 
-	@SuppressWarnings("deprecation")
 	@Test
 	void testDigest() {
 		String sm3TestString = SM3Constant.SM3_TEST_STRING;
 		String hmacKeyBase64 = SM3Constant.HMAC_KEY_BASE64;
 
 		String digestToStr = SM3Util.digestToStr(sm3TestString);
-		System.out.println("digestToStr:::" + digestToStr);
+		// SM3 digest is fixed 32 bytes -> 64 Hex characters
+		assertEquals(64, digestToStr.length());
 
 		String hmacToStr = SM3Util.hmacToStr(sm3TestString, hmacKeyBase64);
-		System.out.println("hmacToStr:::" + hmacToStr);
+		assertEquals(64, hmacToStr.length());
 
 		boolean hmacVerify = SM3Util.hmacVerify(sm3TestString, hmacKeyBase64, hmacToStr);
-		System.out.println("hmacVerify:::" + hmacVerify);
+		assertTrue(hmacVerify);
 
+		// Verification should fail after tampering
+		String tampered = hmacToStr.substring(0, 62) + "ff";
+		assertFalse(SM3Util.hmacVerify(sm3TestString, hmacKeyBase64, tampered));
 	}
 
 }
