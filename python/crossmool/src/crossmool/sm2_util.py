@@ -1,5 +1,5 @@
 from gmssl import sm2, func
-from encoding import (
+from crossmool.encoding import (
     is_hex_string,
     is_base64_string,
     hex_to_bytes,
@@ -8,13 +8,13 @@ from encoding import (
     bytes_to_base64,
     utf8_to_bytes,
 )
-from der import DerReader
+from crossmool.der import DerReader
 
-# SM2 签名/验签使用的用户 ID（与 Java BouncyCastle 保持一致）
+# SM2 signature/verification user ID (kept identical to Java BouncyCastle)
 USER_ID = b"1234567812345678"
 
 def _ensure_uncompressed_pubhex(hexstr: str) -> str:
-    """确保公钥为 uncompressed 格式 (04 + X + Y, 共 66 字节/130 HEX 字符)"""
+    """Ensure the public key is in uncompressed form (04 + X + Y, 66 bytes / 130 hex chars)."""
     s = hexstr.strip().lower()
     if len(s) == 128:
         return '04' + s
@@ -24,8 +24,8 @@ def _ensure_uncompressed_pubhex(hexstr: str) -> str:
 
 def sm2_public_key_to_raw_hex(key_input) -> str:
     """
-    将公钥转换为原始 uncompressed 格式 (04 + X + Y, 共 66 字节/130 HEX 字符)
-    支持：X.509 SPKI DER (HEX/Base64/bytes), 原始 64/128 字符 HEX
+    Convert a public key to raw uncompressed form (04 + X + Y, 66 bytes / 130 hex chars).
+    Supports X.509 SPKI DER (HEX/Base64/bytes) and raw 64/128-char HEX.
     """
     if isinstance(key_input, bytes):
         b = key_input
@@ -38,7 +38,7 @@ def sm2_public_key_to_raw_hex(key_input) -> str:
         else:
             return _ensure_uncompressed_pubhex(s)
 
-    # X.509 SPKI DER 格式 (以 0x30 开头)
+    # X.509 SPKI DER format (starts with 0x30)
     if len(b) > 2 and b[0] == 0x30:
         try:
             spki = DerReader(b).read_sequence()
@@ -66,8 +66,8 @@ def sm2_public_key_to_raw_hex(key_input) -> str:
 
 def sm2_private_key_to_raw_hex(key_input) -> str:
     """
-    将私钥转换为原始 32 字节 HEX 格式
-    支持：PKCS#8 DER (HEX/Base64/bytes), 原始 64 字符 HEX
+    Convert a private key to raw 32-byte HEX form.
+    Supports PKCS#8 DER (HEX/Base64/bytes) and raw 64-char HEX.
     """
     if isinstance(key_input, bytes):
         b = key_input
@@ -110,7 +110,7 @@ def sm2_private_key_to_raw_hex(key_input) -> str:
     return hex_result
 
 def _der_encode_int(i_bytes: bytes) -> bytes:
-    """DER 编码 INTEGER"""
+    """DER-encode an INTEGER."""
     bi = i_bytes.lstrip(b'\x00')
     if not bi:
         bi = b'\x00'
@@ -123,7 +123,7 @@ def _der_encode_int(i_bytes: bytes) -> bytes:
     return b'\x02' + bytes([0x80 | len(len_bytes)]) + len_bytes + bi
 
 def _der_encode_sequence(elements: bytes) -> bytes:
-    """DER 编码 SEQUENCE"""
+    """DER-encode a SEQUENCE."""
     length = len(elements)
     if length < 128:
         return b'\x30' + bytes([length]) + elements
@@ -131,7 +131,7 @@ def _der_encode_sequence(elements: bytes) -> bytes:
     return b'\x30' + bytes([0x80 | len(len_bytes)]) + len_bytes + elements
 
 def raw_rs_to_der(r_hex: str, s_hex: str) -> bytes:
-    """将 r||s 转换为 DER 编码的签名"""
+    """Convert raw r||s into a DER-encoded signature."""
     r = bytes.fromhex(r_hex)
     s = bytes.fromhex(s_hex)
     r_enc = _der_encode_int(r)
@@ -207,28 +207,42 @@ def _encode_private_key_to_der(priv_hex: str, pub_hex: str) -> bytes:
     )
 
 def der_to_raw_rs(der_sig: bytes) -> (str, str):
-    """将 DER 编码的签名转换为 r||s（去除 DER INTEGER 的符号填充）"""
+    """Convert a DER-encoded signature back to r||s (strip DER INTEGER sign padding)."""
     d = DerReader(der_sig).read_sequence()
     r = d.read_integer_bytes()
     s = d.read_integer_bytes()
-    # 去除 DER INTEGER 可能添加的前导 0x00（用于表示正数）
+    # strip the leading 0x00 that DER INTEGER may add to represent a positive number
     r = r.lstrip(b'\x00') or b'\x00'
     s = s.lstrip(b'\x00') or b'\x00'
     r_hex = bytes_to_hex(r).rjust(64, '0')
     s_hex = bytes_to_hex(s).rjust(64, '0')
     return r_hex, s_hex
 
+def _new_crypt(private_key='', public_key_hex=None, mode=0):
+    """
+    Construct a gmssl CryptSM2 instance while bypassing its __init__ lstrip("04")
+    bug (which strips every leading '0'/'4' char instead of only the "04" prefix).
+    gmssl internally expects the public key as 128 hex chars (X+Y, no 04 prefix).
+    """
+    crypt = sm2.CryptSM2(private_key=private_key, public_key='', mode=mode)
+    if public_key_hex is not None:
+        pub = public_key_hex.strip()
+        if pub.startswith('04') and len(pub) == 130:
+            pub = pub[2:]
+        crypt.public_key = pub
+    return crypt
+
 class SM2Util:
     """
-    SM2 加密解密签名验签工具类
-    与 Java BouncyCastle SM2Engine(C1C3C2) 和 SM2Signer 兼容
-    
-    完全基于 gmssl 库的底层实现，确保与 Java BouncyCastle 的互通性
+    SM2 encryption/decryption/signature utility class.
+    Compatible with Java BouncyCastle SM2Engine (C1C3C2) and SM2Signer.
+
+    Fully based on the low-level gmssl library to guarantee interop with Java BouncyCastle.
     """
-    
+
     @staticmethod
     def generate_keypair_raw() -> (str, str):
-        """生成原始密钥对 (private_hex, public_hex)"""
+        """Generate a raw keypair (private_hex, public_hex)."""
         priv = func.random_hex(64)
         temp_crypt = sm2.CryptSM2(private_key=priv, public_key='04' + '00' * 64)
         pub = temp_crypt._kg(int(priv, 16), temp_crypt.ecc_table['g'])
@@ -238,13 +252,13 @@ class SM2Util:
 
     @staticmethod
     def generate_keypair_hex() -> dict:
-        """生成 HEX 密钥对，返回 {'publicKey': ..., 'privateKey': ...}（公钥 130 字符，私钥 64 字符）"""
+        """Generate a HEX keypair, returning {'publicKey': ..., 'privateKey': ...} (public key 130 chars, private key 64 chars)."""
         priv_hex, pub_hex = SM2Util.generate_keypair_raw()
         return {'publicKey': pub_hex, 'privateKey': priv_hex}
 
     @staticmethod
     def generate_keypair_base64() -> dict:
-        """生成 Base64 密钥对，返回 {'publicKey': ..., 'privateKey': ...}"""
+        """Generate a Base64 keypair, returning {'publicKey': ..., 'privateKey': ...}."""
         priv_hex, pub_hex = SM2Util.generate_keypair_raw()
         return {
             'publicKey': bytes_to_base64(hex_to_bytes(pub_hex)),
@@ -254,28 +268,28 @@ class SM2Util:
     @staticmethod
     def encrypt_to_hex(content: bytes, public_key) -> str:
         """
-        加密 SM2 明文（C1C3C2 格式，与 Java/Go 兼容）
-        
-        标准 C1C3C2 格式: 04||X(32)||Y(32)||C3(32)||C2(msg_len)
-        gmssl 内置 encrypt 返回 64 字节 C1（无 04 前缀），
-        这里补上 04 前缀以兼容 Go/Java 的标准 C1C3C2 格式
+        Encrypt SM2 plaintext (C1C3C2 format, compatible with Java/Go).
+
+        Standard C1C3C2 layout: 04||X(32)||Y(32)||C3(32)||C2(msg_len).
+        gmssl's built-in encrypt returns a 64-byte C1 (no 04 prefix);
+        we prepend the 04 prefix here to match the standard Go/Java C1C3C2 format.
         """
         pub_hex = sm2_public_key_to_raw_hex(public_key)
-        crypt = sm2.CryptSM2(public_key=pub_hex, private_key='', mode=1)
+        crypt = _new_crypt(private_key='', public_key_hex=pub_hex, mode=1)
         enc_bytes = crypt.encrypt(content)
         # gmssl: C1(64 bytes) + C3(32) + C2(msg_len)
-        # -> 标准: C1(65 bytes with 04) + C3(32) + C2(msg_len)
+        # -> standard: C1(65 bytes with 04) + C3(32) + C2(msg_len)
         enc_bytes = b'\x04' + enc_bytes[:64] + enc_bytes[64:]
         return enc_bytes.hex()
 
     @staticmethod
     def encrypt_to_bytes(content: bytes, public_key) -> bytes:
-        """加密 SM2 明文，返回 C1C3C2 密文字节数组。"""
+        """Encrypt SM2 plaintext and return the C1C3C2 ciphertext bytes."""
         return bytes.fromhex(SM2Util.encrypt_to_hex(content, public_key))
 
     @staticmethod
     def decrypt_from_bytes(cipher_bytes: bytes, private_key) -> bytes:
-        """解密 C1C3C2 密文字节数组，返回明文字节数组。"""
+        """Decrypt C1C3C2 ciphertext bytes and return the plaintext bytes."""
         return SM2Util.decrypt_from_hex(cipher_bytes.hex(), private_key)
 
     @staticmethod
@@ -286,16 +300,16 @@ class SM2Util:
     @staticmethod
     def decrypt_from_hex(cipher_hex: str, private_key, public_key=None) -> bytes:
         """
-        解密 SM2 密文（C1C3C2 格式，兼容 Java/Go/Python）
-        
-        支持两种 C1C3C2 格式:
-        - 标准格式 (Java/Go): C1(65 bytes, 04+X+Y) + C3(32) + C2(msg_len)
-        - gmssl 格式: C1(64 bytes, X+Y) + C3(32) + C2(msg_len)
-        自动检测并处理
+        Decrypt SM2 ciphertext (C1C3C2 format, compatible with Java/Go/Python).
+
+        Supports two C1C3C2 layouts:
+        - standard (Java/Go): C1(65 bytes, 04+X+Y) + C3(32) + C2(msg_len)
+        - gmssl format: C1(64 bytes, X+Y) + C3(32) + C2(msg_len)
+        Auto-detects and handles both.
         """
         priv_hex = sm2_private_key_to_raw_hex(private_key)
-        
-        # 获取或推导公钥
+
+        # get or derive the public key
         if public_key is not None:
             pub_hex = sm2_public_key_to_raw_hex(public_key)
         else:
@@ -303,17 +317,17 @@ class SM2Util:
             pub_hex = temp_crypt._kg(int(priv_hex, 16), temp_crypt.ecc_table['g'])
             if not pub_hex.startswith('04'):
                 pub_hex = '04' + pub_hex
-        
+
         cipher_bytes = bytes.fromhex(cipher_hex)
-        
-        # gmssl 内置 decrypt 期望 C1 无 04 前缀 (64 bytes)
-        # 如果输入是标准格式 (C1 以 04 开头，共 65 bytes)，去掉 04 前缀
+
+        # gmssl's built-in decrypt expects C1 without the 04 prefix (64 bytes)
+        # if the input is the standard format (C1 starts with 04, 65 bytes), strip the 04 prefix
         if len(cipher_bytes) > 0 and cipher_bytes[0] == 0x04:
-            # 标准: 04||X(32)||Y(32)||C3(32)||C2(msg_len) = 1+32+32+32+msg_len
+            # standard: 04||X(32)||Y(32)||C3(32)||C2(msg_len) = 1+32+32+32+msg_len
             # -> gmssl: X(32)||Y(32)||C3(32)||C2(msg_len) = 32+32+32+msg_len
             cipher_bytes = cipher_bytes[1:65] + cipher_bytes[65:97] + cipher_bytes[97:]
-        
-        crypt = sm2.CryptSM2(private_key=priv_hex, public_key=pub_hex, mode=1)
+
+        crypt = _new_crypt(private_key=priv_hex, public_key_hex=pub_hex, mode=1)
         result = crypt.decrypt(cipher_bytes)
         if isinstance(result, str):
             result = result.encode('latin-1')
@@ -327,22 +341,22 @@ class SM2Util:
     @staticmethod
     def sign_to_der(content: bytes, private_key) -> bytes:
         """
-        签名 SM2 明文，返回 DER 编码的签名
-        Java: SM2Signer 使用 USER_ID="1234567812345678"
-        gmssl 的 sign_with_sm3 方法默认使用 USER_ID = b"1234567812345678"
+        Sign SM2 plaintext and return a DER-encoded signature.
+        Java: SM2Signer uses USER_ID="1234567812345678".
+        gmssl's sign_with_sm3 uses USER_ID = b"1234567812345678" by default.
         """
         priv_hex = sm2_private_key_to_raw_hex(private_key)
-        
-        # gmssl sign 需要 public_key，先从私钥推导公钥
+
+        # gmssl sign requires public_key; derive it from the private key first
         temp_crypt = sm2.CryptSM2(private_key=priv_hex, public_key='04' + '00' * 64)
         pub_hex = temp_crypt._kg(int(priv_hex, 16), temp_crypt.ecc_table['g'])
         if not pub_hex.startswith('04'):
             pub_hex = '04' + pub_hex
-        
-        crypt = sm2.CryptSM2(private_key=priv_hex, public_key=pub_hex)
+
+        crypt = _new_crypt(private_key=priv_hex, public_key_hex=pub_hex)
         # sign_with_sm3 uses SM3 hash and auto-generates random K
         sig_raw = crypt.sign_with_sm3(content)  # returns hex r||s
-        
+
         if len(sig_raw) % 2 != 0:
             raise ValueError('Invalid signature length')
         half = len(sig_raw) // 2
@@ -361,12 +375,12 @@ class SM2Util:
     @staticmethod
     def verify(content: bytes, public_key, signature) -> bool:
         """
-        验签 SM2 签名
-        Java: SM2Signer 使用 USER_ID="1234567812345678"
-        gmssl 的 verify 方法默认使用 USER_ID = b"1234567812345678"
+        Verify an SM2 signature.
+        Java: SM2Signer uses USER_ID="1234567812345678".
+        gmssl's verify uses USER_ID = b"1234567812345678" by default.
         """
         pub_hex = sm2_public_key_to_raw_hex(public_key)
-        
+
         # signature may be hex/base64/bytes; convert to raw r||s hex
         sig_bytes = None
         if isinstance(signature, bytes):
@@ -387,7 +401,7 @@ class SM2Util:
         else:
             sig_raw = sig_bytes.hex()
 
-        crypt = sm2.CryptSM2(public_key=pub_hex, private_key=None)
+        crypt = _new_crypt(private_key=None, public_key_hex=pub_hex)
         return crypt.verify_with_sm3(sig_raw, content)
 
     # convenience wrappers similar to Java API

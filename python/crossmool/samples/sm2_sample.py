@@ -1,24 +1,24 @@
 """
-SM2 国密非对称加密算法示例
+SM2 asymmetric encryption sample.
 
-快速上手：
+Quick start:
   1. cd python/crossmool
   2. pip install -e .
   3. python samples/sm2_sample.py
 
-核心能力：
-  - 生成 SM2 密钥对（Hex / Base64）
-  - 公钥加密 → 私钥解密
-  - 私钥签名 → 公钥验签
-  - 先加密再签名 → 先验签再解密（防篡改 + 防抵赖）
-  - PEM 格式导入导出
+Capabilities:
+  - Generate SM2 keypairs (Hex / Base64)
+  - Public-key encrypt -> private-key decrypt
+  - Private-key sign -> public-key verify
+  - Encrypt-then-sign -> verify-then-decrypt (anti-tamper + non-repudiation)
+  - PEM import/export
 """
 
 import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from sm2_util import SM2Util
+from crossmool import SM2Util
 
 
 def main():

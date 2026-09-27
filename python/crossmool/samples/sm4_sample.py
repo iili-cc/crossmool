@@ -1,7 +1,7 @@
 """
-SM4 国密对称加密算法示例（GCM 模式）
+SM4 symmetric encryption sample (GCM mode).
 
-快速上手：
+Quick start:
   1. cd python/crossmool
   2. pip install -e .
   3. python samples/sm4_sample.py
@@ -11,7 +11,7 @@ import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from sm4_util import SM4Util
+from crossmool import SM4Util
 
 
 def main():

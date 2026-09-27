@@ -1,7 +1,7 @@
 """
-SM3 国密哈希算法示例
+SM3 hash algorithm sample.
 
-快速上手：
+Quick start:
   1. cd python/crossmool
   2. pip install -e .
   3. python samples/sm3_sample.py
@@ -11,7 +11,7 @@ import sys
 import os
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-from sm3_util import SM3Util
+from crossmool import SM3Util
 
 
 def main():

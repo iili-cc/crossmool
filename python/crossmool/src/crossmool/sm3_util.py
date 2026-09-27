@@ -1,6 +1,6 @@
 from gmssl import sm3
 from os import urandom
-from encoding import (
+from crossmool.encoding import (
     bytes_to_hex, bytes_to_base64, hex_to_bytes, base64_to_bytes,
     is_hex_string, is_base64_string
 )
@@ -115,4 +115,3 @@ class SM3Util:
     def hmac_verify(key_str: str, data_str: str, received_hmac: str) -> bool:
         """Verify HMAC by computing expected value and comparing."""
         return SM3Util.hmac_str(key_str, data_str) == received_hmac
-        return bytes_to_hex(key_bytes)

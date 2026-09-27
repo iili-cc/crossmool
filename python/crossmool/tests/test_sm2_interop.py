@@ -1,55 +1,72 @@
 import os
 import sys
+
 # ensure src is on path for local test runs
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
 from crossmool import SM2Util
 
 
-def test_key_generation_and_roundtrip(tmp_path):
-    # raw pair
+def test_key_generation_lengths():
     priv_raw, pub_raw = SM2Util.generate_keypair_raw()
+    assert len(priv_raw) == 64
+    assert pub_raw.startswith('04') and len(pub_raw) == 130
 
-    # generate ASN.1 bytes and parse back
-    pub_asn1, priv_asn1 = SM2Util.generate_keypair_asn1_bytes()
+    kp_hex = SM2Util.generate_keypair_hex()
+    assert len(kp_hex['privateKey']) == 64
+    assert len(kp_hex['publicKey']) == 130
 
-    # write samples for manual Java testing into repository tests/testdata
-    repo_td = os.path.join(os.path.dirname(__file__), 'testdata')
-    os.makedirs(repo_td, exist_ok=True)
-    open(os.path.join(repo_td, 'public.spki.der'), 'wb').write(pub_asn1)
-    open(os.path.join(repo_td, 'private.pkcs8.der'), 'wb').write(priv_asn1)
-    open(os.path.join(repo_td, 'public.spki.der.b64'), 'w').write(SM2Util.generate_keypair_base64()[0])
-    open(os.path.join(repo_td, 'private.pkcs8.der.b64'), 'w').write(SM2Util.generate_keypair_base64()[1])
-
-    # parse back using the library parser
-    parsed_pub_raw = SM2Util.sm2_public_key_to_raw_hex(pub_asn1)
-    parsed_priv_raw = SM2Util.sm2_private_key_to_raw_hex(priv_asn1)
-
-    # original raw from generate_keypair_raw may differ from generate_keypair_asn1_bytes (they are independent calls)
-    # But parsing ASN.1 should yield a valid raw hex of expected length
-    assert len(parsed_priv_raw) == 64
-    assert parsed_pub_raw.startswith('04') and len(parsed_pub_raw) == 130
+    kp_b64 = SM2Util.generate_keypair_base64()
+    assert 'publicKey' in kp_b64 and 'privateKey' in kp_b64
 
 
-def test_encrypt_decrypt_and_sign_verify():
+def test_encrypt_decrypt_roundtrip():
     priv_raw, pub_raw = SM2Util.generate_keypair_raw()
-    plaintext = "hello crossmool"
+    plaintext = "hello crossmool 简体中文 繁體中文 English"
 
-    # encrypt/decrypt hex
     cipher_hex = SM2Util.encrypt(plaintext, pub_raw, to_base64=False)
-    decrypted = SM2Util.decrypt(cipher_hex, priv_raw)
-    assert decrypted == plaintext
+    assert SM2Util.decrypt(cipher_hex, priv_raw) == plaintext
 
-    # encrypt/decrypt base64
     cipher_b64 = SM2Util.encrypt(plaintext, pub_raw, to_base64=True)
-    decrypted2 = SM2Util.decrypt(cipher_b64, priv_raw)
-    assert decrypted2 == plaintext
+    assert SM2Util.decrypt(cipher_b64, priv_raw) == plaintext
 
-    # sign (DER hex) and verify
-    sig_der_hex = SM2Util.sign(cipher_hex, priv_raw, to_base64=False)
-    ok = SM2Util.verify_str(cipher_hex, pub_raw, sig_der_hex)
-    assert ok
 
-    # sign base64 and verify
-    sig_b64 = SM2Util.sign(cipher_hex, priv_raw, to_base64=True)
-    ok2 = SM2Util.verify_str(cipher_hex, pub_raw, sig_b64)
-    assert ok2
+def test_sign_verify_roundtrip():
+    priv_raw, pub_raw = SM2Util.generate_keypair_raw()
+    content = "sign me 123"
+
+    sig_hex = SM2Util.sign(content, priv_raw, to_base64=False)
+    assert SM2Util.verify_str(content, pub_raw, sig_hex)
+
+    sig_b64 = SM2Util.sign(content, priv_raw, to_base64=True)
+    assert SM2Util.verify_str(content, pub_raw, sig_b64)
+
+
+def test_encrypt_sign_verify_decrypt():
+    kp1 = SM2Util.generate_keypair_hex()
+    kp2 = SM2Util.generate_keypair_hex()
+    content = "combined flow 简体中文"
+
+    pair = SM2Util.encrypt_sign(content, kp1['publicKey'], kp2['privateKey'])
+    recovered = SM2Util.verify_decrypt(
+        pair['ciphertext'], pair['signature'], kp2['publicKey'], kp1['privateKey']
+    )
+    assert recovered == content
+
+
+def test_pem_roundtrip():
+    priv_raw, pub_raw = SM2Util.generate_keypair_raw()
+
+    pub_pem = SM2Util.export_public_key_pem(pub_raw)
+    assert SM2Util.import_public_key_pem(pub_pem) == pub_raw
+
+    pri_pem = SM2Util.export_private_key_pem(priv_raw, pub_raw)
+    assert SM2Util.import_private_key_pem(pri_pem) == priv_raw
+
+
+def test_der_signature_roundtrip():
+    priv_raw, pub_raw = SM2Util.generate_keypair_raw()
+    content = b"raw bytes signature"
+
+    der_sig = SM2Util.sign_to_der(content, priv_raw)
+    assert der_sig[0] == 0x30  # DER SEQUENCE
+    assert SM2Util.verify(content, pub_raw, der_sig)

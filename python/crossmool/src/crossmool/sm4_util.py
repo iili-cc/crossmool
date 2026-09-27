@@ -1,5 +1,5 @@
 from os import urandom
-from encoding import (
+from crossmool.encoding import (
     bytes_to_hex, hex_to_bytes, bytes_to_base64, base64_to_bytes,
     is_hex_string, is_base64_string
 )
@@ -98,7 +98,7 @@ class SM4Util:
     @staticmethod
     def encrypt_gcm(key: bytes, plaintext: bytes, aad: bytes = b'', to_base64: bool = False) -> str:
         """
-        SM4 GCM 加密，返回 Hex(IV[12] + 密文 + Tag[16]) 或 Base64
+        SM4 GCM encrypt; returns Hex(IV[12] + ciphertext + Tag[16]) or Base64.
         """
         if len(key) != 16:
             raise ValueError('SM4 key must be 16 bytes')
@@ -119,7 +119,7 @@ class SM4Util:
     @staticmethod
     def decrypt_gcm(key: bytes, ciphertext_str: str, aad: bytes = b'') -> bytes:
         """
-        SM4 GCM 解密，输入自动检测 Hex/Base64 编码
+        SM4 GCM decrypt; auto-detects Hex/Base64 input encoding.
         """
         if len(key) != 16:
             raise ValueError('SM4 key must be 16 bytes')
