@@ -23,23 +23,25 @@ option(BUILD_SAMPLES "Build sample programs" ON)
 # Sibling GmSSL install path (relative to this project - used when GmSSL is not in system path)
 set(GMSSL_SIBLING_DIR "${PROJECT_SOURCE_DIR}/../../c/crossmool/gmssl_install")
 
-# Resolve GmSSL paths (command-line override takes priority)
+# GmSSL root resolution priority:
+#   1. -DGMSSL_ROOT=<prefix> (vcpkg / CI / custom install, contains include/ and lib/)
+#   2. default CMake search paths (CMAKE_PREFIX_PATH, e.g. vcpkg installed tree)
+#   3. sibling gmssl_install directory (local development)
+set(GMSSL_ROOT "" CACHE PATH "GmSSL installation prefix (contains include/ and lib/)")
+
+# Resolve GmSSL paths (command-line variable takes priority)
 if(NOT GMSSL_LIBRARIES)
     find_library(GMSSL_LIBRARIES NAMES gmssl
-        PATHS
+        HINTS
+            "${GMSSL_ROOT}/lib"
             "${GMSSL_SIBLING_DIR}/lib"
-            "C:/Program Files/GmSSL/lib"
-            "C:/Program Files (x86)/GmSSL/lib"
-        NO_DEFAULT_PATH
     )
 endif()
 if(NOT GMSSL_INCLUDE_DIRS)
     find_path(GMSSL_INCLUDE_DIRS NAMES gmssl/sm2.h
-        PATHS
+        HINTS
+            "${GMSSL_ROOT}/include"
             "${GMSSL_SIBLING_DIR}/include"
-            "C:/Program Files/GmSSL/include"
-            "C:/Program Files (x86)/GmSSL/include"
-        NO_DEFAULT_PATH
     )
 endif()
 
@@ -79,24 +81,55 @@ else()
 endif()
 
 # Create executables for testing
-add_executable(crossmool_test tests/test_all.cpp)
+option(BUILD_TESTS "Build test executables" ON)
+if(BUILD_TESTS)
+    add_executable(crossmool_test tests/test_all.cpp)
+    target_link_libraries(crossmool_test PRIVATE crossmool)
+endif()
 
-target_link_libraries(crossmool_test PRIVATE crossmool)
-
-# 用户快速上手示例程序
+# User quick-start sample programs
 if(BUILD_SAMPLES)
     add_subdirectory(samples)
 endif()
 
-# Install targets
+# Install targets (standard GNU layout + CMake package export)
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
 install(TARGETS crossmool
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-    RUNTIME DESTINATION bin)
+    EXPORT crossmool-cpp-targets
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
 
 install(DIRECTORY include/
-    DESTINATION include/crossmool)
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+configure_package_config_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/crossmool-cpp-config.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/crossmool-cpp-config.cmake
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/crossmool-cpp
+)
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/crossmool-cpp-config-version.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/crossmool-cpp-config.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/crossmool-cpp-config-version.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/crossmool-cpp
+)
+install(EXPORT crossmool-cpp-targets
+    FILE crossmool-cpp-targets.cmake
+    NAMESPACE crossmoolcpp::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/crossmool-cpp
+)
 
 # Enable testing
-enable_testing()
-add_test(NAME crossmool_test COMMAND crossmool_test)
+if(BUILD_TESTS)
+    enable_testing()
+    add_test(NAME crossmool_test COMMAND crossmool_test)
+endif()

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(crossmool-c VERSION v1.3.1 LANGUAGES C)
+project(crossmool-c VERSION 1.3.1 LANGUAGES C)
 # 设置 C 语言标准为 C17
 set(CMAKE_C_STANDARD 17)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -22,22 +22,29 @@ endif()
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 option(BUILD_TESTS "Build test executables" ON)
 option(BUILD_SAMPLES "Build sample programs" ON)
-# 查找 GmSSL 包 - 手动配置
-# 由于 GmSSL 没有提供 CMake 配置文件，我们手动指定路径
-# 默认使用项目目录下的 gmssl_install 文件夹
-set(GMSSL_INSTALL_DIR "${CMAKE_SOURCE_DIR}/gmssl_install")
-set(GMSSL_INCLUDE_DIR "${GMSSL_INSTALL_DIR}/include")
-# 根据编译器类型选择导入库文件格式
-if(MSVC)
-    # MSVC: 使用 .lib + .dll
-    set(GMSSL_LIBRARY "${GMSSL_INSTALL_DIR}/lib/gmssl.lib")
-    set(GMSSL_DLL     "${GMSSL_INSTALL_DIR}/bin/gmssl.dll")
-else()
-    # MinGW/GCC: 使用 .dll.a + .dll
-    set(GMSSL_LIBRARY "${GMSSL_INSTALL_DIR}/lib/libgmssl.dll.a")
-    set(GMSSL_DLL     "${GMSSL_INSTALL_DIR}/bin/libgmssl.dll")
+# GmSSL root resolution priority:
+#   1. -DGMSSL_ROOT=<prefix> (vcpkg / CI / custom install, contains include/ and lib/)
+#   2. ${CMAKE_SOURCE_DIR}/gmssl_install (local development default)
+set(GMSSL_ROOT "" CACHE PATH "GmSSL installation prefix (contains include/ and lib/)")
+if(NOT GMSSL_ROOT)
+    set(GMSSL_ROOT "${CMAKE_SOURCE_DIR}/gmssl_install")
 endif()
-message(STATUS "GMSSL_INSTALL_DIR: ${GMSSL_INSTALL_DIR}")
+set(GMSSL_INCLUDE_DIR "${GMSSL_ROOT}/include")
+# Select import library format by compiler family
+if(MSVC)
+    # MSVC: .lib + .dll
+    set(GMSSL_LIBRARY "${GMSSL_ROOT}/lib/gmssl.lib")
+    set(GMSSL_DLL     "${GMSSL_ROOT}/bin/gmssl.dll")
+elseif(MINGW)
+    # MinGW/GCC: .dll.a + .dll
+    set(GMSSL_LIBRARY "${GMSSL_ROOT}/lib/libgmssl.dll.a")
+    set(GMSSL_DLL     "${GMSSL_ROOT}/bin/libgmssl.dll")
+else()
+    # Unix/GCC/Clang: shared object
+    set(GMSSL_LIBRARY "${GMSSL_ROOT}/lib/libgmssl.so")
+    set(GMSSL_DLL     "${GMSSL_ROOT}/lib/libgmssl.so")
+endif()
+message(STATUS "GMSSL_ROOT: ${GMSSL_ROOT}")
 message(STATUS "GMSSL_INCLUDE_DIR: ${GMSSL_INCLUDE_DIR}")
 message(STATUS "GMSSL_LIBRARY: ${GMSSL_LIBRARY}")
 # 验证 GmSSL 文件是否存在
@@ -54,7 +61,7 @@ set_target_properties(gmssl::gmssl PROPERTIES
     IMPORTED_IMPLIB "${GMSSL_LIBRARY}"
     INTERFACE_INCLUDE_DIRECTORIES "${GMSSL_INCLUDE_DIR}"
 )
-message(STATUS "Found GmSSL at ${GMSSL_INSTALL_DIR}")
+message(STATUS "Found GmSSL at ${GMSSL_ROOT}")
 # 定义库目标
 add_library(crossmool
     src/error.c
@@ -83,7 +90,7 @@ target_link_libraries(crossmool
 )
 # MinGW 需要额外的链接选项来正确链接 DLL
 if(MINGW)
-    target_link_options(crossmool PRIVATE -Wl,-rpath,"${GMSSL_INSTALL_DIR}/bin")
+    target_link_options(crossmool PRIVATE -Wl,-rpath,"${GMSSL_ROOT}/bin")
 endif()
 # 设置编译定义
 target_compile_definitions(crossmool
