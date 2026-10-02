@@ -76,3 +76,4 @@ dist/
 java/crossmool/classpath.txt
 java/crossmool/cp.txt
 java/crossmool/-
+build-vcpkg-test/

@@ -65,8 +65,9 @@ add_library(crossmool
 )
 
 target_include_directories(crossmool PUBLIC
-    ${PROJECT_SOURCE_DIR}/include
-    ${PROJECT_SOURCE_DIR}/utils
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/utils>
+    $<INSTALL_INTERFACE:include>
 )
 
 if(USE_SYSTEM_GMSSL AND GMSSL_FOUND)

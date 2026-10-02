@@ -364,27 +364,34 @@ SM2Util::KeyPair SM2Util::generateKeyPairRaw() {
         throw std::runtime_error("Failed to generate SM2 key pair");
     }
 
-    // Convert public key to X.509 SubjectPublicKeyInfo DER
-    uint8_t* pub_der = nullptr;
+    // GmSSL to_der API is two-pass: pass 1 (out == NULL) only measures the
+    // length, pass 2 (out != NULL) writes into a caller-owned buffer. It never
+    // mallocs, so the caller must not free anything (the old malloc/free usage
+    // dereferenced a NULL pointer and caused a segfault).
     size_t pub_der_len = 0;
-    if (sm2_public_key_info_to_der(&key, &pub_der, &pub_der_len) != 1) {
-        throw std::runtime_error("Failed to encode public key to X.509 DER");
+    size_t priv_der_len = 0;
+    if (sm2_public_key_info_to_der(&key, NULL, &pub_der_len) != 1) {
+        throw std::runtime_error("Failed to measure public key X.509 DER length");
+    }
+    if (sm2_private_key_info_to_der(&key, NULL, &priv_der_len) != 1) {
+        throw std::runtime_error("Failed to measure private key PKCS#8 DER length");
     }
 
-    // Convert private key to PKCS#8 PrivateKeyInfo DER
-    uint8_t* priv_der = nullptr;
-    size_t priv_der_len = 0;
-    if (sm2_private_key_info_to_der(&key, &priv_der, &priv_der_len) != 1) {
-        free(pub_der);
+    std::vector<unsigned char> pub_der(pub_der_len);
+    std::vector<unsigned char> priv_der(priv_der_len);
+
+    uint8_t* pub_p = pub_der.data();
+    uint8_t* priv_p = priv_der.data();
+    if (sm2_public_key_info_to_der(&key, &pub_p, &pub_der_len) != 1) {
+        throw std::runtime_error("Failed to encode public key to X.509 DER");
+    }
+    if (sm2_private_key_info_to_der(&key, &priv_p, &priv_der_len) != 1) {
         throw std::runtime_error("Failed to encode private key to PKCS#8 DER");
     }
 
     KeyPair pair;
-    pair.publicKey = HexUtil::encodeHexStr(std::vector<unsigned char>(pub_der, pub_der + pub_der_len));
-    pair.privateKey = HexUtil::encodeHexStr(std::vector<unsigned char>(priv_der, priv_der + priv_der_len));
-
-    free(pub_der);
-    free(priv_der);
+    pair.publicKey = HexUtil::encodeHexStr(pub_der);
+    pair.privateKey = HexUtil::encodeHexStr(priv_der);
     return pair;
 #else
     // Stub implementation: hand-craft DER-encoded key pair
