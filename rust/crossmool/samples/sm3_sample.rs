@@ -37,10 +37,10 @@ fn main() {
     let hmac_key = sm3::generate_hmac_key_str_default();
     println!("  HMAC Key      ::: {}", hmac_key);
 
-    let hmac_val = sm3::hmac_str_default(&hmac_key, input).unwrap();
+    let hmac_val = sm3::hmac_str_default(input, &hmac_key).unwrap();
     println!("  HMAC Value    ::: {}", hmac_val);
 
-    let hmac_val2 = sm3::hmac_str_default(&hmac_key, input).unwrap();
+    let hmac_val2 = sm3::hmac_str_default(input, &hmac_key).unwrap();
     println!("  HMAC Value 2  ::: {}", hmac_val2);
     println!("  Whether HMAC Values Equal ::: {}", hmac_val == hmac_val2);
     println!();
@@ -48,10 +48,10 @@ fn main() {
     // === 3. HMAC 校验 ===
     println!(">>> 3. HMAC 校验（防篡改验证）");
 
-    let verified = sm3::hmac_verify(&hmac_key, input, &hmac_val).unwrap();
+    let verified = sm3::hmac_verify(input, &hmac_key, &hmac_val).unwrap();
     println!("  HMAC Verify (correct)   ::: {}", verified);
 
-    let tampered = sm3::hmac_verify(&hmac_key, &(input.to_owned() + "X"), &hmac_val).unwrap();
+    let tampered = sm3::hmac_verify(&(input.to_owned() + "X"), &hmac_key, &hmac_val).unwrap();
     println!("  HMAC Verify (tampered)  ::: {}", tampered);
     println!();
 

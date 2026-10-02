@@ -34,11 +34,11 @@ function normalizeCiphertextToHex(ciphertext: string): string {
     throw new Error('Ciphertext must be hex or base64');
   }
   
-  // 处理 Bouncy Castle 输出的带 04 前缀的密文格式
-  // sm-crypto-v2 期望的格式：X(64 字符) + Y(64 字符) + C3(64 字符) + C2
-  // Bouncy Castle 输出格式：04 + X(64 字符) + Y(64 字符) + C3(64 字符) + C2
+  // Handle ciphertext with the 04 prefix produced by Bouncy Castle
+  // sm-crypto-v2 expects: X(64 chars) + Y(64 chars) + C3(64 chars) + C2
+  // Bouncy Castle outputs: 04 + X(64 chars) + Y(64 chars) + C3(64 chars) + C2
   if (hex.startsWith('04') && hex.length > 130) {
-    // 去掉 04 前缀
+    // Strip the 04 prefix
     hex = hex.substring(2);
   }
   

@@ -39,3 +39,40 @@ hs_err_pid*
 /cpp/crossmool/build_msvc
 /userdoc/build_all.py
 /userdoc/build_python_wheel.py
+/java/crossmool/docs/Maven_Central_Publish_Guide.md
+/java/crossmool/pubkey.asc
+/java/crossmool/.vscode/settings.json
+/java/crossmool/docs
+/python/crossmool/dist
+
+# ============================================================
+# Build artifacts & temp files (non-source, never commit)
+# ============================================================
+
+# C/C++/Rust compiled artifacts
+*.obj
+*.dll
+*.lib
+*.exp
+*.pdb
+*.exe
+*.rlib
+*.rmeta
+
+# GPG publish temp home (contains PRIVATE KEYS - never commit)
+gpg-publish-home/
+
+# Python build / cache artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+
+# Generic build output directories (any level)
+build/
+dist/
+
+# Java temp exports / stray files
+java/crossmool/classpath.txt
+java/crossmool/cp.txt
+java/crossmool/-

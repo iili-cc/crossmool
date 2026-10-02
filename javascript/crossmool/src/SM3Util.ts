@@ -35,7 +35,7 @@ export class SM3Util {
     return toBase64 ? this.digestToBase64(input) : this.digestToHex(input);
   }
 
-  static hmacBytes(key: Uint8Array, data: Uint8Array): Uint8Array {
+  static hmacBytes(data: Uint8Array, key: Uint8Array): Uint8Array {
     const blockSize = 64;
     let k = key;
     if (k.length > blockSize) {
@@ -62,20 +62,20 @@ export class SM3Util {
     return this.digestToBytes(outerData);
   }
 
-  static hmacToHex(key: Uint8Array | string, data: Uint8Array | string): string {
+  static hmacToHex(data: Uint8Array | string, key: Uint8Array | string): string {
     const keyBytes = typeof key === 'string' ? decodeHexOrBase64ToBytes(key) : key;
     const dataBytes = typeof data === 'string' ? utf8ToBytes(data) : data;
-    return bytesToHex(this.hmacBytes(keyBytes, dataBytes));
+    return bytesToHex(this.hmacBytes(dataBytes, keyBytes));
   }
 
-  static hmacToBase64(key: Uint8Array | string, data: Uint8Array | string): string {
+  static hmacToBase64(data: Uint8Array | string, key: Uint8Array | string): string {
     const keyBytes = typeof key === 'string' ? decodeHexOrBase64ToBytes(key) : key;
     const dataBytes = typeof data === 'string' ? utf8ToBytes(data) : data;
-    return bytesToBase64(this.hmacBytes(keyBytes, dataBytes));
+    return bytesToBase64(this.hmacBytes(dataBytes, keyBytes));
   }
 
-  static hmac(key: Uint8Array | string, data: Uint8Array | string, toBase64 = false): string {
-    return toBase64 ? this.hmacToBase64(key, data) : this.hmacToHex(key, data);
+  static hmac(data: Uint8Array | string, key: Uint8Array | string, toBase64 = false): string {
+    return toBase64 ? this.hmacToBase64(data, key) : this.hmacToHex(data, key);
   }
 
   static generateHmacKeyBytes(keyLength = HMAC_KEY_MIN_LENGTH): Uint8Array {
@@ -106,10 +106,10 @@ export class SM3Util {
     return toBase64 ? bytesToBase64(keyBytes) : bytesToHex(keyBytes);
   }
 
-  static hmacVerify(key: Uint8Array | string, data: Uint8Array | string, receivedHmac: string): boolean {
+  static hmacVerify(data: Uint8Array | string, key: Uint8Array | string, receivedHmac: string): boolean {
     const computed = this.hmacBytes(
-      typeof key === 'string' ? decodeHexOrBase64ToBytes(key) : key,
-      typeof data === 'string' ? utf8ToBytes(data) : data
+      typeof data === 'string' ? utf8ToBytes(data) : data,
+      typeof key === 'string' ? decodeHexOrBase64ToBytes(key) : key
     );
     const enc = detectStringEncoding(receivedHmac);
     let receivedBytes: Uint8Array;

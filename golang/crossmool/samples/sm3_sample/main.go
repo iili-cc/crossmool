@@ -49,7 +49,7 @@ func main() {
 	fmt.Printf("  HMAC Key      ::: %s\n", hmacKey)
 
 	// 计算 HMAC（Hex 输出）
-	hmacValue, err := crossmool.HMACToStr(hmacKey, input, false)
+	hmacValue, err := crossmool.HMACToStr(input, hmacKey, false)
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 		return
@@ -57,7 +57,7 @@ func main() {
 	fmt.Printf("  HMAC Value    ::: %s\n", hmacValue)
 
 	// 相同密钥 + 相同输入 → 相同输出（确定性）
-	hmacValue2, err := crossmool.HMACToStr(hmacKey, input, false)
+	hmacValue2, err := crossmool.HMACToStr(input, hmacKey, false)
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 		return
@@ -71,7 +71,7 @@ func main() {
 	// ==================== 3. HMAC 校验 ====================
 	fmt.Println(">>> 3. HMAC 校验（防篡改验证）")
 
-	hmacVerified, err := crossmool.HMACVerify(hmacKey, input, hmacValue)
+	hmacVerified, err := crossmool.HMACVerify(input, hmacKey, hmacValue)
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 		return
@@ -79,7 +79,7 @@ func main() {
 	fmt.Printf("  HMAC Verify (correct)   ::: %t\n", hmacVerified)
 
 	// 篡改消息后校验失败
-	hmacTampered, err := crossmool.HMACVerify(hmacKey, input+"X", hmacValue)
+	hmacTampered, err := crossmool.HMACVerify(input+"X", hmacKey, hmacValue)
 	if err != nil {
 		fmt.Printf("Error: %v\n", err)
 		return

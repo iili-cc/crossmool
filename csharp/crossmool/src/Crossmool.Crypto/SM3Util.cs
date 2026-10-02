@@ -45,7 +45,7 @@ namespace Crossmool.Crypto
 
         #region HMAC
 
-        public static byte[] hmac(byte[] key, byte[] data)
+        public static byte[] hmac(byte[] data, byte[] key)
         {
             if (key == null) throw new ArgumentNullException(nameof(key));
             if (data == null) throw new ArgumentNullException(nameof(data));
@@ -58,7 +58,7 @@ namespace Crossmool.Crypto
             return output;
         }
 
-        public static byte[] hmac(string key, string data)
+        public static byte[] hmac(string data, string key)
         {
             if (string.IsNullOrWhiteSpace(key)) throw new ArgumentException("Key cannot be empty", nameof(key));
             if (string.IsNullOrWhiteSpace(data)) throw new ArgumentException("Data cannot be empty", nameof(data));
@@ -80,18 +80,18 @@ namespace Crossmool.Crypto
                     dataBytes = EncodingUtils.Utf8GetBytes(data);
                 }
             }
-            return hmac(keyBytes, dataBytes);
+            return hmac(dataBytes, keyBytes);
         }
 
-        public static string hmacToStr(byte[] key, byte[] data, bool toBase64 = false)
+        public static string hmacToStr(byte[] data, byte[] key, bool toBase64 = false)
         {
-            var result = hmac(key, data);
+            var result = hmac(data, key);
             return toBase64 ? EncodingUtils.ToBase64(result) : EncodingUtils.ToHex(result);
         }
 
-        public static string hmacToStr(string key, string data, bool toBase64 = false)
+        public static string hmacToStr(string data, string key, bool toBase64 = false)
         {
-            var result = hmac(key, data);
+            var result = hmac(data, key);
             return toBase64 ? EncodingUtils.ToBase64(result) : EncodingUtils.ToHex(result);
         }
 
@@ -119,9 +119,9 @@ namespace Crossmool.Crypto
             return generateHmacKeyToStr(32, toBase64);
         }
 
-        public static bool hmacVerify(string key, string data, string receivedHmac)
+        public static bool hmacVerify(string data, string key, string receivedHmac)
         {
-            return hmacToStr(key, data) == receivedHmac;
+            return hmacToStr(data, key) == receivedHmac;
         }
 
         #endregion

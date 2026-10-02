@@ -40,7 +40,7 @@ class SM3Util:
         return bytes_to_hex(digest_bytes)
 
     @staticmethod
-    def hmac(key: bytes, data: bytes) -> bytes:
+    def hmac(data: bytes, key: bytes) -> bytes:
         block_size = 64
         if len(key) > block_size:
             key = SM3Util.digest(key)
@@ -54,7 +54,7 @@ class SM3Util:
         return bytes.fromhex(outer)
 
     @staticmethod
-    def hmac_from_str(key_str: str, data_str: str) -> bytes:
+    def hmac_from_str(data_str: str, key_str: str) -> bytes:
         if not key_str or not key_str.strip():
             raise ValueError("key_str cannot be empty")
         if not data_str or not data_str.strip():
@@ -74,26 +74,26 @@ class SM3Util:
         else:
             data_bytes = data_str.encode('utf-8')
 
-        return SM3Util.hmac(key_bytes, data_bytes)
+        return SM3Util.hmac(data_bytes, key_bytes)
 
     @staticmethod
-    def hmac_to_hex(key: bytes, data: bytes) -> str:
-        return bytes_to_hex(SM3Util.hmac(key, data))
+    def hmac_to_hex(data: bytes, key: bytes) -> str:
+        return bytes_to_hex(SM3Util.hmac(data, key))
 
     @staticmethod
-    def hmac_to_base64(key: bytes, data: bytes) -> str:
-        return bytes_to_base64(SM3Util.hmac(key, data))
+    def hmac_to_base64(data: bytes, key: bytes) -> str:
+        return bytes_to_base64(SM3Util.hmac(data, key))
 
     @staticmethod
-    def hmac_to_str(key: bytes, data: bytes, to_base64: bool = False) -> str:
-        hmac_bytes = SM3Util.hmac(key, data)
+    def hmac_to_str(data: bytes, key: bytes, to_base64: bool = False) -> str:
+        hmac_bytes = SM3Util.hmac(data, key)
         if to_base64:
             return bytes_to_base64(hmac_bytes)
         return bytes_to_hex(hmac_bytes)
 
     @staticmethod
-    def hmac_str(key_str: str, data_str: str, to_base64: bool = False) -> str:
-        hmac_bytes = SM3Util.hmac_from_str(key_str, data_str)
+    def hmac_str(data_str: str, key_str: str, to_base64: bool = False) -> str:
+        hmac_bytes = SM3Util.hmac_from_str(data_str, key_str)
         if to_base64:
             return bytes_to_base64(hmac_bytes)
         return bytes_to_hex(hmac_bytes)
@@ -112,6 +112,6 @@ class SM3Util:
         return bytes_to_hex(key_bytes)
 
     @staticmethod
-    def hmac_verify(key_str: str, data_str: str, received_hmac: str) -> bool:
+    def hmac_verify(data_str: str, key_str: str, received_hmac: str) -> bool:
         """Verify HMAC by computing expected value and comparing."""
-        return SM3Util.hmac_str(key_str, data_str) == received_hmac
+        return SM3Util.hmac_str(data_str, key_str) == received_hmac

@@ -123,7 +123,7 @@ int main(void)
     const char *hmac_key_str = "crossmool_interop_key_2024!!";
     const char *hmac_data = "Hello, HMAC!";
     char *hmac_hex = NULL;
-    ret = crossmool_sm3_hmac_str(hmac_key_str, NULL, hmac_data, NULL,
+    ret = crossmool_sm3_hmac_str(hmac_data, NULL, hmac_key_str, NULL,
                                   &hmac_hex);
     if (ret != CROSSMOOL_SUCCESS) {
         printf("Error: %s\n", crossmool_error_string(ret));

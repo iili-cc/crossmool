@@ -45,10 +45,10 @@ function main() {
   const hmacKey = SM3Util.generateHmacKeyToStr();
   console.log(`  HMAC Key      ::: ${hmacKey}`);
 
-  const hmacValue = SM3Util.hmac(hmacKey, input);
+  const hmacValue = SM3Util.hmac(input, hmacKey);
   console.log(`  HMAC Value    ::: ${hmacValue}`);
 
-  const hmacValue2 = SM3Util.hmac(hmacKey, input);
+  const hmacValue2 = SM3Util.hmac(input, hmacKey);
   console.log(`  HMAC Value 2  ::: ${hmacValue2}`);
 
   const hmacEquals = hmacValue === hmacValue2;
@@ -58,10 +58,10 @@ function main() {
   // ==================== 3. HMAC 校验 ====================
   console.log('>>> 3. HMAC 校验（防篡改验证）');
 
-  const hmacVerified = SM3Util.hmacVerify(hmacKey, input, hmacValue);
+  const hmacVerified = SM3Util.hmacVerify(input, hmacKey, hmacValue);
   console.log(`  HMAC Verify (correct)   ::: ${hmacVerified}`);
 
-  const hmacTampered = SM3Util.hmacVerify(hmacKey, input + 'X', hmacValue);
+  const hmacTampered = SM3Util.hmacVerify(input + 'X', hmacKey, hmacValue);
   console.log(`  HMAC Verify (tampered)  ::: ${hmacTampered}`);
   console.log();
 

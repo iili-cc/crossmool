@@ -193,7 +193,7 @@ func TestSM3_HMAC_Basic(t *testing.T) {
 	key := []byte("my-secret-key")
 	data := []byte("Hello, HMAC-SM3")
 
-	mac := HMAC(key, data)
+	mac := HMAC(data, key)
 
 	if len(mac) != 32 {
 		t.Fatalf("HMAC-SM3 length should be 32 bytes, got %d", len(mac))
@@ -204,8 +204,8 @@ func TestSM3_HMAC_Determinism(t *testing.T) {
 	key := []byte("fixed-key-12345678901234567890123456")
 	data := []byte("fixed message")
 
-	mac1 := HMAC(key, data)
-	mac2 := HMAC(key, data)
+	mac1 := HMAC(data, key)
+	mac2 := HMAC(data, key)
 
 	if string(mac1) != string(mac2) {
 		t.Fatalf("HMAC determinism failed")
@@ -216,7 +216,7 @@ func TestSM3_HMAC_EmptyData(t *testing.T) {
 	key := []byte("some-key")
 	data := []byte("")
 
-	mac := HMAC(key, data)
+	mac := HMAC(data, key)
 
 	if len(mac) != 32 {
 		t.Fatalf("HMAC on empty data should produce 32-byte output, got %d", len(mac))
@@ -228,8 +228,8 @@ func TestSM3_HMAC_DifferentKeyDifferentMAC(t *testing.T) {
 	key1 := []byte("key-aaaaaaaaaaaaaaaaaaaaaaaaaa")
 	key2 := []byte("key-bbbbbbbbbbbbbbbbbbbbbbbbbb")
 
-	mac1 := HMAC(key1, data)
-	mac2 := HMAC(key2, data)
+	mac1 := HMAC(data, key1)
+	mac2 := HMAC(data, key2)
 
 	if string(mac1) == string(mac2) {
 		t.Fatal("HMAC with different keys should produce different outputs")
@@ -247,7 +247,7 @@ func TestSM3_HMAC_Interop(t *testing.T) {
 
 	key, _ := hex.DecodeString(keyHex)
 
-	mac := HMAC(key, []byte(msg))
+	mac := HMAC([]byte(msg), key)
 	macHex := hex.EncodeToString(mac)
 
 	if macHex != expected {
@@ -263,7 +263,7 @@ func TestSM3_HMACToStr_Hex(t *testing.T) {
 	key := "0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20"
 	data := "Hello, 这是跨语言国密互通性测试数据"
 
-	mac, err := HMACToStr(key, data, false)
+	mac, err := HMACToStr(data, key, false)
 	if err != nil {
 		t.Fatalf("HMACToStr failed: %v", err)
 	}
@@ -280,7 +280,7 @@ func TestSM3_HMACToStr_Base64(t *testing.T) {
 	key := "0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20"
 	data := "Hello, 这是跨语言国密互通性测试数据"
 
-	mac, err := HMACToStr(key, data, true)
+	mac, err := HMACToStr(data, key, true)
 	if err != nil {
 		t.Fatalf("HMACToStr(base64) failed: %v", err)
 	}
@@ -295,7 +295,7 @@ func TestSM3_HMACToStr_UTF8Data(t *testing.T) {
 	key := "0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20"
 	data := "测试数据test data 中文"
 
-	mac, err := HMACToStr(key, data, false)
+	mac, err := HMACToStr(data, key, false)
 	if err != nil {
 		t.Fatalf("HMACToStr with UTF-8 data failed: %v", err)
 	}
@@ -309,7 +309,7 @@ func TestSM3_HMACToStr_Base64Key(t *testing.T) {
 	key := "AQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyA=" // base64 of the hex key above
 	data := "Hello, 跨语言测试"
 
-	mac, err := HMACToStr(key, data, false)
+	mac, err := HMACToStr(data, key, false)
 	if err != nil {
 		t.Fatalf("HMACToStr with base64 key failed: %v", err)
 	}
@@ -325,14 +325,14 @@ func TestSM3_HMACToStr_Consistency(t *testing.T) {
 	data := "Hello, SM3 HMAC"
 
 	// Via string API
-	macStr, err := HMACToStr(keyHex, data, false)
+	macStr, err := HMACToStr(data, keyHex, false)
 	if err != nil {
 		t.Fatalf("HMACToStr failed: %v", err)
 	}
 
 	// Via raw bytes API
 	keyBytes, _ := hex.DecodeString(keyHex)
-	macRaw := HMAC(keyBytes, []byte(data))
+	macRaw := HMAC([]byte(data), keyBytes)
 	macRawHex := hex.EncodeToString(macRaw)
 
 	if macStr != macRawHex {
@@ -341,14 +341,14 @@ func TestSM3_HMACToStr_Consistency(t *testing.T) {
 }
 
 func TestSM3_HMACToStr_EmptyKey(t *testing.T) {
-	_, err := HMACToStr("", "some data", false)
+	_, err := HMACToStr("some data", "", false)
 	if err == nil {
 		t.Fatal("HMACToStr with empty key should return error")
 	}
 }
 
 func TestSM3_HMACToStr_EmptyData(t *testing.T) {
-	_, err := HMACToStr("0102030405060708090a0b0c0d0e0f10", "", false)
+	_, err := HMACToStr("", "0102030405060708090a0b0c0d0e0f10", false)
 	if err == nil {
 		t.Fatal("HMACToStr with empty data should return error")
 	}

@@ -121,15 +121,15 @@ int crossmool_sm3_digest_str_to_base64(const char* str, const char* charset, cha
 
 /**
  * HMAC-SM3 计算（返回字节数组）
- * @param key HMAC 密钥
- * @param key_len 密钥长度
  * @param data 输入数据
  * @param data_len 数据长度
+ * @param key HMAC 密钥
+ * @param key_len 密钥长度
  * @param hmac 输出参数，存储 HMAC 值（至少 32 字节）
  * @return 成功返回 0，失败返回负数错误码
  */
-int crossmool_sm3_hmac(const unsigned char* key, size_t key_len,
-                       const unsigned char* data, size_t data_len,
+int crossmool_sm3_hmac(const unsigned char* data, size_t data_len,
+                       const unsigned char* key, size_t key_len,
                        unsigned char* hmac) {
     if (key == NULL || data == NULL || hmac == NULL) {
         return CROSSMOOL_ERR_INVALID_PARAM;
@@ -145,14 +145,14 @@ int crossmool_sm3_hmac(const unsigned char* key, size_t key_len,
 
 /**
  * HMAC-SM3 计算（返回 HEX 字符串）
- * @param key_hex HEX 编码的 HMAC 密钥
  * @param data 输入数据
  * @param data_len 数据长度
+ * @param key_hex HEX 编码的 HMAC 密钥
  * @param hmac_hex 输出参数，存储 HEX 编码的 HMAC 值
  * @return 成功返回 0，失败返回负数错误码
  * @note 调用者需调用 free() 释放 hmac_hex 内存
  */
-int crossmool_sm3_hmac_hex(const char* key_hex, const unsigned char* data, size_t data_len, char** hmac_hex) {
+int crossmool_sm3_hmac_hex(const unsigned char* data, size_t data_len, const char* key_hex, char** hmac_hex) {
     if (key_hex == NULL || data == NULL || hmac_hex == NULL) {
         return CROSSMOOL_ERR_INVALID_PARAM;
     }
@@ -166,7 +166,7 @@ int crossmool_sm3_hmac_hex(const char* key_hex, const unsigned char* data, size_
     }
     
     unsigned char hmac[SM3_DIGEST_SIZE];
-    ret = crossmool_sm3_hmac(key, key_len, data, data_len, hmac);
+    ret = crossmool_sm3_hmac(data, data_len, key, key_len, hmac);
     free(key);
     
     if (ret != CROSSMOOL_SUCCESS) {
@@ -180,17 +180,17 @@ int crossmool_sm3_hmac_hex(const char* key_hex, const unsigned char* data, size_
 
 /**
  * HMAC-SM3 计算（字符串输入，返回 HEX 字符串）
+ * @param data_str 输入数据字符串
+ * @param data_charset 数据字符集（NULL 表示使用默认 UTF-8）
  * @param key_str HMAC 密钥字符串（支持 HEX / Base64 编码或 UTF-8 明文）
  * @param charset 密钥字符集（NULL 表示使用默认 UTF-8）
  *              当 key_str 为 HEX/Base64 时此参数无效
- * @param data_str 输入数据字符串
- * @param data_charset 数据字符集（NULL 表示使用默认 UTF-8）
  * @param hmac_hex 输出参数，存储 HEX 编码的 HMAC 值
  * @return 成功返回 0，失败返回负数错误码
  * @note 调用者需调用 free() 释放 hmac_hex 内存
  */
-int crossmool_sm3_hmac_str(const char* key_str, const char* charset,
-                           const char* data_str, const char* data_charset,
+int crossmool_sm3_hmac_str(const char* data_str, const char* data_charset,
+                           const char* key_str, const char* charset,
                            char** hmac_hex) {
     if (key_str == NULL || data_str == NULL || hmac_hex == NULL) {
         return CROSSMOOL_ERR_INVALID_PARAM;
@@ -226,7 +226,7 @@ int crossmool_sm3_hmac_str(const char* key_str, const char* charset,
     }
     
     unsigned char hmac[SM3_DIGEST_SIZE];
-    ret = crossmool_sm3_hmac(key, key_len, data, data_len, hmac);
+    ret = crossmool_sm3_hmac(data, data_len, key, key_len, hmac);
     free(key);
     free(data);
     
@@ -288,25 +288,25 @@ int crossmool_sm3_generate_hmac_key(size_t key_length, unsigned char** key) {
  * HMAC-SM3（字符串接口，返回 HEX）
  * key / data 均视为 UTF-8 字符串处理
  */
-int crossmool_sm3_hmac_to_hex(const char* key, const char* data, char** mac_hex) {
+int crossmool_sm3_hmac_to_hex(const char* data, const char* key, char** mac_hex) {
     if (key == NULL || data == NULL || mac_hex == NULL) {
         return CROSSMOOL_ERR_INVALID_PARAM;
     }
-    return crossmool_sm3_hmac_str(key, NULL, data, NULL, mac_hex);
+    return crossmool_sm3_hmac_str(data, NULL, key, NULL, mac_hex);
 }
 
 /**
  * HMAC-SM3（字符串接口，返回 Base64）
  * key / data 均视为 UTF-8 字符串处理
  */
-int crossmool_sm3_hmac_to_base64(const char* key, const char* data, char** mac_base64) {
+int crossmool_sm3_hmac_to_base64(const char* data, const char* key, char** mac_base64) {
     if (key == NULL || data == NULL || mac_base64 == NULL) {
         return CROSSMOOL_ERR_INVALID_PARAM;
     }
 
     /* 先计算 HEX，再解码为字节，再 Base64 编码 */
     char* hmac_hex = NULL;
-    int ret = crossmool_sm3_hmac_str(key, NULL, data, NULL, &hmac_hex);
+    int ret = crossmool_sm3_hmac_str(data, NULL, key, NULL, &hmac_hex);
     if (ret != CROSSMOOL_SUCCESS) {
         return ret;
     }
@@ -326,18 +326,18 @@ int crossmool_sm3_hmac_to_base64(const char* key, const char* data, char** mac_b
 
 /**
  * HMAC-SM3 验证（5 参数字符串接口）
- * @param key      密钥字符串
- * @param charset  密钥字符集（NULL 表示 UTF-8）
  * @param data     数据字符串
  * @param data_charset 数据字符集（NULL 表示 UTF-8）
+ * @param key      密钥字符串
+ * @param charset  密钥字符集（NULL 表示 UTF-8）
  * @param received_mac 接收到的 HMAC（HEX 或 Base64）
  * @return 验证成功返回 1，失败返回 0，错误返回负数
  */
 int crossmool_sm3_hmac_verify(
-    const char* key,
-    const char* charset,
     const char* data,
     const char* data_charset,
+    const char* key,
+    const char* charset,
     const char* received_mac) {
 
     if (key == NULL || data == NULL || received_mac == NULL) {
@@ -346,7 +346,7 @@ int crossmool_sm3_hmac_verify(
 
     /* 计算 HMAC（HEX 格式） */
     char* computed_hmac = NULL;
-    int ret = crossmool_sm3_hmac_str(key, charset, data, data_charset, &computed_hmac);
+    int ret = crossmool_sm3_hmac_str(data, data_charset, key, charset, &computed_hmac);
     if (ret != CROSSMOOL_SUCCESS) {
         return ret;
     }

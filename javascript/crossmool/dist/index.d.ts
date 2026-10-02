@@ -70,15 +70,15 @@ declare class SM3Util {
     static digestToBase64(input: Uint8Array | string): string;
     static digestFromBase64ToHex(base64: string): string;
     static digest(input: Uint8Array | string, toBase64?: boolean): string;
-    static hmacBytes(key: Uint8Array, data: Uint8Array): Uint8Array;
-    static hmacToHex(key: Uint8Array | string, data: Uint8Array | string): string;
-    static hmacToBase64(key: Uint8Array | string, data: Uint8Array | string): string;
-    static hmac(key: Uint8Array | string, data: Uint8Array | string, toBase64?: boolean): string;
+    static hmacBytes(data: Uint8Array, key: Uint8Array): Uint8Array;
+    static hmacToHex(data: Uint8Array | string, key: Uint8Array | string): string;
+    static hmacToBase64(data: Uint8Array | string, key: Uint8Array | string): string;
+    static hmac(data: Uint8Array | string, key: Uint8Array | string, toBase64?: boolean): string;
     static generateHmacKeyBytes(keyLength?: number): Uint8Array;
     static generateHmacKeyHex(keyLength?: number): string;
     static generateHmacKeyBase64(keyLength?: number): string;
     static generateHmacKeyToStr(keyLength?: number | boolean, toBase64?: boolean): string;
-    static hmacVerify(key: Uint8Array | string, data: Uint8Array | string, receivedHmac: string): boolean;
+    static hmacVerify(data: Uint8Array | string, key: Uint8Array | string, receivedHmac: string): boolean;
 }
 
 declare class SM4Util {

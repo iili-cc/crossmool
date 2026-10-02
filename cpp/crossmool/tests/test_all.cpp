@@ -152,25 +152,25 @@ void test_sm3_hmac() {
     std::string data = "test data";
 
     // hmacToStr(string, string)
-    std::string hm = SM3Util::hmacToStr(key, data, false);
+    std::string hm = SM3Util::hmacToStr(data, key, false);
     TEST("hmacToStr hex len 64", hm.length() == 64);
 
     // hmacToStr(string, string, base64)
-    std::string hm_b64 = SM3Util::hmacToStr(key, data, true);
+    std::string hm_b64 = SM3Util::hmacToStr(data, key, true);
     TEST("hmacToStr base64", Base64Util::isBase64String(hm_b64));
 
     // hmacVerify
-    TEST("hmacVerify pass", SM3Util::hmacVerify(key, data, hm));
+    TEST("hmacVerify pass", SM3Util::hmacVerify(data, key, hm));
     // Test with invalid HMAC - should fail verification
     std::string wrongKey = SM3Util::generateHmacKeyToStr(32, false);
-    std::string wrongHmac = SM3Util::hmacToStr(wrongKey, data, false);
-    TEST("hmacVerify fail wrong key", !SM3Util::hmacVerify(key, data, wrongHmac));
-    TEST("hmacVerify fail wrong data", !SM3Util::hmacVerify(key, "wrong_data", hm));
+    std::string wrongHmac = SM3Util::hmacToStr(data, wrongKey, false);
+    TEST("hmacVerify fail wrong key", !SM3Util::hmacVerify(data, key, wrongHmac));
+    TEST("hmacVerify fail wrong data", !SM3Util::hmacVerify("wrong_data", key, hm));
 
     // hmac(vector, vector)
     std::vector<unsigned char> vKey = HexUtil::decodeHexStr(key);
     std::vector<unsigned char> vData(data.begin(), data.end());
-    auto raw_hmac = SM3Util::hmac(vKey, vData);
+    auto raw_hmac = SM3Util::hmac(vData, vKey);
     TEST("hmac raw len 32", raw_hmac.size() == 32);
 
     // generateHmacKey

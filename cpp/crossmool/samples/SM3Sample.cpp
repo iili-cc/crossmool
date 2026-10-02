@@ -52,11 +52,11 @@ int main()
     std::cout << "  HMAC Key      ::: " << hmacKey << std::endl;
 
     // 计算 HMAC（Hex 输出）
-    std::string hmacValue = SM3Util::hmacToStr(hmacKey, input, false);
+    std::string hmacValue = SM3Util::hmacToStr(input, hmacKey, false);
     std::cout << "  HMAC Value    ::: " << hmacValue << std::endl;
 
     // 相同密钥 + 相同输入 → 相同输出（确定性）
-    std::string hmacValue2 = SM3Util::hmacToStr(hmacKey, input, false);
+    std::string hmacValue2 = SM3Util::hmacToStr(input, hmacKey, false);
     std::cout << "  HMAC Value 2  ::: " << hmacValue2 << std::endl;
 
     bool hmacEquals = hmacValue == hmacValue2;
@@ -66,11 +66,11 @@ int main()
     // ==================== 3. HMAC 校验 ====================
     std::cout << ">>> 3. HMAC 校验（防篡改验证）" << std::endl;
 
-    bool hmacVerified = SM3Util::hmacVerify(hmacKey, input, hmacValue);
+    bool hmacVerified = SM3Util::hmacVerify(input, hmacKey, hmacValue);
     std::cout << "  HMAC Verify (correct)   ::: " << (hmacVerified ? "true" : "false") << std::endl;
 
     // 篡改消息后校验失败
-    bool hmacTampered = SM3Util::hmacVerify(hmacKey, input + "X", hmacValue);
+    bool hmacTampered = SM3Util::hmacVerify(input + "X", hmacKey, hmacValue);
     std::cout << "  HMAC Verify (tampered)  ::: " << (hmacTampered ? "true" : "false") << std::endl;
     std::cout << std::endl;
 

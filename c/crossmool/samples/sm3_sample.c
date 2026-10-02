@@ -44,7 +44,7 @@ int main(void)
 
     const char *hmac_key_str = "my_secret_hmac_key_32bytes!!";  /* 简易演示密钥 */
     char *hmac_value = NULL;
-    ret = crossmool_sm3_hmac_str(hmac_key_str, NULL, input, NULL, &hmac_value);
+    ret = crossmool_sm3_hmac_str(input, NULL, hmac_key_str, NULL, &hmac_value);
     if (ret != CROSSMOOL_SUCCESS) {
         printf("Error: %s\n", crossmool_error_string(ret));
         free(hash);
@@ -56,7 +56,7 @@ int main(void)
 
     /* 相同密钥 + 相同输入 → 相同输出（确定性） */
     char *hmac_value2 = NULL;
-    ret = crossmool_sm3_hmac_str(hmac_key_str, NULL, input, NULL, &hmac_value2);
+    ret = crossmool_sm3_hmac_str(input, NULL, hmac_key_str, NULL, &hmac_value2);
     if (ret != CROSSMOOL_SUCCESS) {
         printf("Error: %s\n", crossmool_error_string(ret));
         free(hash);
@@ -72,16 +72,16 @@ int main(void)
     /* ==================== 3. HMAC 校验 ==================== */
     printf(">>> 3. HMAC 校验（防篡改验证）\n");
 
-    int verify_ok = crossmool_sm3_hmac_verify(hmac_key_str, NULL,
-                                               input, NULL, hmac_value);
+    int verify_ok = crossmool_sm3_hmac_verify(input, NULL,
+                                               hmac_key_str, NULL, hmac_value);
     printf("  HMAC Verify (correct)   ::: %s\n",
            verify_ok == 1 ? "true" : "false");
 
     /* 篡改消息后校验失败 */
     const char *tampered_input = "在这个全球化时代，無論身處何地，"
                                   "HACKED!";
-    int verify_bad = crossmool_sm3_hmac_verify(hmac_key_str, NULL,
-                                                tampered_input, NULL, hmac_value);
+    int verify_bad = crossmool_sm3_hmac_verify(tampered_input, NULL,
+                                                hmac_key_str, NULL, hmac_value);
     printf("  HMAC Verify (tampered)  ::: %s\n\n",
            verify_bad == 1 ? "true" : "false");
 

@@ -299,36 +299,36 @@ static void test_sm3_hmac(void) {
                                0x18,0x19,0x1a,0x1b,0x1c,0x1d,0x1e,0x1f};
     unsigned char data_raw[] = "data";
     unsigned char mac[32];
-    TEST("hmac raw", crossmool_sm3_hmac(key_raw, 32, data_raw, 4, mac) == CROSSMOOL_SUCCESS);
+    TEST("hmac raw", crossmool_sm3_hmac(data_raw, 4, key_raw, 32, mac) == CROSSMOOL_SUCCESS);
 
     /* hmac_hex */
     char* key_hex = NULL;
     crossmool_hex_encode(key_raw, 32, &key_hex);
     char* hmac_hex = NULL;
-    TEST("hmac_hex", crossmool_sm3_hmac_hex(key_hex, data_raw, 4, &hmac_hex) == CROSSMOOL_SUCCESS);
+    TEST("hmac_hex", crossmool_sm3_hmac_hex(data_raw, 4, key_hex, &hmac_hex) == CROSSMOOL_SUCCESS);
     TEST("hmac_hex len 64", hmac_hex != NULL && strlen(hmac_hex) == 64);
     free(hmac_hex); free(key_hex);
 
     /* hmac_str */
     char* hs = NULL;
-    TEST("hmac_str", crossmool_sm3_hmac_str("mykey", NULL, "mydata", NULL, &hs) == CROSSMOOL_SUCCESS);
+    TEST("hmac_str", crossmool_sm3_hmac_str("mydata", NULL, "mykey", NULL, &hs) == CROSSMOOL_SUCCESS);
     TEST("hmac_str not null", hs != NULL);
     free(hs);
 
     /* hmac_to_hex / hmac_to_base64 */
     char* hh = NULL;
-    TEST("hmac_to_hex", crossmool_sm3_hmac_to_hex("key", "data", &hh) == CROSSMOOL_SUCCESS);
+    TEST("hmac_to_hex", crossmool_sm3_hmac_to_hex("data", "key", &hh) == CROSSMOOL_SUCCESS);
     free(hh);
 
     char* hb = NULL;
-    TEST("hmac_to_base64", crossmool_sm3_hmac_to_base64("key", "data", &hb) == CROSSMOOL_SUCCESS);
+    TEST("hmac_to_base64", crossmool_sm3_hmac_to_base64("data", "key", &hb) == CROSSMOOL_SUCCESS);
     free(hb);
 
     /* hmac_verify */
     char* my_hmac = NULL;
-    crossmool_sm3_hmac_str("mykey", NULL, "mydata", NULL, &my_hmac);
-    TEST("hmac_verify pass", crossmool_sm3_hmac_verify("mykey", NULL, "mydata", NULL, my_hmac) == 1);
-    TEST("hmac_verify fail", crossmool_sm3_hmac_verify("badkey", NULL, "mydata", NULL, my_hmac) == 0);
+    crossmool_sm3_hmac_str("mydata", NULL, "mykey", NULL, &my_hmac);
+    TEST("hmac_verify pass", crossmool_sm3_hmac_verify("mydata", NULL, "mykey", NULL, my_hmac) == 1);
+    TEST("hmac_verify fail", crossmool_sm3_hmac_verify("mydata", NULL, "badkey", NULL, my_hmac) == 0);
     free(my_hmac);
 
     /* generate_hmac_key */

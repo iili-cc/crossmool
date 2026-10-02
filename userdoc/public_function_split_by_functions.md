@@ -565,7 +565,7 @@ let sig_hex = hex::encode(&sig);
 | **C** | `crossmool_sm2_verify_bytes(content, content_len, signature, public_key)` |
 | **C++** | `SM2Util::verify(content_bytes, signature_bytes, publicKey_bytes)` |
 | **C#** | `SM2Util.verify(messageBytes, signatureBytes, publicKeyBytes)` |
-| **Java** | `SM2Util.verify(contentBytes, signatureBytes, publicKeyBytes)` |
+| **Java** | `SM2Util.verify(contentBytes, publicKeyBytes, signatureBytes)` |
 | **Python** | `SM2Util.verify(content_bytes, public_key, signature_bytes)` |
 | **JavaScript** | `SM2Util.verify(content, publicKey, signatureHexOrBase64)` → content: Uint8Array |
 | **Go** | `VerifyBytes(content, signature, pubDer)` |
@@ -954,14 +954,14 @@ let hash = sm3::digest_str_default("Hello, SM3!");
 
 | 语言 | 调用方式 | 输出类型 |
 |------|----------|----------|
-| **C** | `crossmool_sm3_hmac(key, key_len, data, data_len, mac)` | `unsigned char[32]` |
-| **C++** | `SM3Util::hmac(key_bytes, data_bytes)` | `vector<unsigned char>` |
-| **C#** | `SM3Util.hmac(keyBytes, dataBytes)` | `byte[]` |
-| **Java** | `SM3Util.hmac(keyBytes, dataBytes)` | `byte[]` |
-| **Python** | `SM3Util.hmac(key, data)` → bytes | `bytes` |
-| **JavaScript** | `SM3Util.hmacBytes(key, data)` | `Uint8Array` |
-| **Go** | `HMAC(key, data)` | `[]byte` |
-| **Rust** | `sm3::hmac_bytes(key, data)` | `Vec<u8>` |
+| **C** | `crossmool_sm3_hmac(data, data_len, key, key_len, mac)` | `unsigned char[32]` |
+| **C++** | `SM3Util::hmac(data_bytes, key_bytes)` | `vector<unsigned char>` |
+| **C#** | `SM3Util.hmac(dataBytes, keyBytes)` | `byte[]` |
+| **Java** | `SM3Util.hmac(dataBytes, keyBytes)` | `byte[]` |
+| **Python** | `SM3Util.hmac(data, key)` → bytes | `bytes` |
+| **JavaScript** | `SM3Util.hmacBytes(data, key)` | `Uint8Array` |
+| **Go** | `HMAC(data, key)` | `[]byte` |
+| **Rust** | `sm3::hmac_bytes(data, key)` | `Vec<u8>` |
 
 ---
 
@@ -971,45 +971,45 @@ let hash = sm3::digest_str_default("Hello, SM3!");
 
 | 语言 | 调用方式 | 参数说明 |
 |------|----------|----------|
-| **C** | `crossmool_sm3_hmac_hex(key_hex, data, data_len, &hmac_hex)` | `key_hex`: HEX 字符串, `data`: 字节数组 |
-| **C++** | `SM3Util::hmacToStr(key_str, data_str, false)` | 默认 HEX 输出 |
-| **C#** | `SM3Util.hmacToStr(key, data, false)` | 默认 HEX 输出 |
-| **Java** | `SM3Util.hmacToStr(key, data)` 或 `SM3Util.hmacToStr(key, data, false)` | 默认 HEX 输出 |
-| **Python** | `SM3Util.hmac_str(key_str, data_str)` | 默认 HEX 输出 |
-| **JavaScript** | `SM3Util.hmac(key, data)` 或 `SM3Util.hmacToHex(key, data)` | 默认 HEX 输出 |
-| **Go** | `HMACToStr(key, data, false)` | `false`: HEX |
-| **Rust** | `sm3::hmac_str_default(key, data)` | 默认 HEX 输出 |
+| **C** | `crossmool_sm3_hmac_hex(data, data_len, key_hex, &hmac_hex)` | `key_hex`: HEX 字符串, `data`: 字节数组 |
+| **C++** | `SM3Util::hmacToStr(data_str, key_str, false)` | 默认 HEX 输出 |
+| **C#** | `SM3Util.hmacToStr(data, key, false)` | 默认 HEX 输出 |
+| **Java** | `SM3Util.hmacToStr(data, key)` 或 `SM3Util.hmacToStr(data, key, false)` | 默认 HEX 输出 |
+| **Python** | `SM3Util.hmac_str(data_str, key_str)` | 默认 HEX 输出 |
+| **JavaScript** | `SM3Util.hmac(data, key)` 或 `SM3Util.hmacToHex(data, key)` | 默认 HEX 输出 |
+| **Go** | `HMACToStr(data, key, false)` | `false`: HEX |
+| **Rust** | `sm3::hmac_str_default(data, key)` | 默认 HEX 输出 |
 
 **调用示例**:
 
 ```cpp
 // C++
-std::string mac = SM3Util::hmacToStr("my-hmac-key", "Hello, HMAC-SM3!");
+std::string mac = SM3Util::hmacToStr("Hello, HMAC-SM3!", "my-hmac-key");
 ```
 
 ```java
 // Java
-String mac = SM3Util.hmacToStr("my-hmac-key", "Hello, HMAC-SM3!");
+String mac = SM3Util.hmacToStr("Hello, HMAC-SM3!", "my-hmac-key");
 ```
 
 ```python
 # Python
-mac = SM3Util.hmac_str("my-hmac-key", "Hello, HMAC-SM3!")
+mac = SM3Util.hmac_str("Hello, HMAC-SM3!", "my-hmac-key")
 ```
 
 ```typescript
 // JavaScript / TypeScript
-const mac = SM3Util.hmac('my-hmac-key', 'Hello, HMAC-SM3!');
+const mac = SM3Util.hmac('Hello, HMAC-SM3!', 'my-hmac-key');
 ```
 
 ```go
 // Go
-mac, _ := crossmool.HMACToStr("my-hmac-key", "Hello, HMAC-SM3!", false)
+mac, _ := crossmool.HMACToStr("Hello, HMAC-SM3!", "my-hmac-key", false)
 ```
 
 ```rust
 // Rust
-let mac = sm3::hmac_str_default("my-hmac-key", "Hello, HMAC-SM3!").unwrap();
+let mac = sm3::hmac_str_default("Hello, HMAC-SM3!", "my-hmac-key").unwrap();
 ```
 
 ---
@@ -1020,14 +1020,14 @@ let mac = sm3::hmac_str_default("my-hmac-key", "Hello, HMAC-SM3!").unwrap();
 
 | 语言 | 调用方式 |
 |------|----------|
-| **C** | `crossmool_sm3_hmac_to_base64(key, data, &mac_b64)` |
-| **C++** | `SM3Util::hmacToStr(key_str, data_str, true)` |
-| **C#** | `SM3Util.hmacToStr(key, data, true)` |
-| **Java** | `SM3Util.hmacToStr(key, data, true)` |
-| **Python** | `SM3Util.hmac_str(key_str, data_str, to_base64=True)` |
-| **JavaScript** | `SM3Util.hmac(key, data, true)` 或 `SM3Util.hmacToBase64(key, data)` |
-| **Go** | `HMACToStr(key, data, true)` |
-| **Rust** | `sm3::hmac_str(key, data, true)` |
+| **C** | `crossmool_sm3_hmac_to_base64(data, key, &mac_b64)` |
+| **C++** | `SM3Util::hmacToStr(data_str, key_str, true)` |
+| **C#** | `SM3Util.hmacToStr(data, key, true)` |
+| **Java** | `SM3Util.hmacToStr(data, key, true)` |
+| **Python** | `SM3Util.hmac_str(data_str, key_str, to_base64=True)` |
+| **JavaScript** | `SM3Util.hmac(data, key, true)` 或 `SM3Util.hmacToBase64(data, key)` |
+| **Go** | `HMACToStr(data, key, true)` |
+| **Rust** | `sm3::hmac_str(data, key, true)` |
 
 ---
 
@@ -1037,13 +1037,13 @@ let mac = sm3::hmac_str_default("my-hmac-key", "Hello, HMAC-SM3!").unwrap();
 
 | 语言 | 调用方式 |
 |------|----------|
-| **C++** | `SM3Util::hmacToStr(key_bytes, data_bytes, false)` |
-| **C#** | `SM3Util.hmacToStr(keyBytes, dataBytes, false)` |
-| **Java** | `SM3Util.hmacToStr(keyBytes, dataBytes)` 或 `SM3Util.hmacToStr(keyBytes, dataBytes, false)` |
-| **Python** | `SM3Util.hmac_to_hex(key, data)` 或 `SM3Util.hmac_to_str(key, data, False)` |
-| **JavaScript** | `SM3Util.hmacToHex(key, data)` |
-| **Go** | `HMACToStr(EncodeHex(key), EncodeHex(data), false)` (需先转 hex) |
-| **Rust** | `sm3::hmac_hex(key, data)` |
+| **C++** | `SM3Util::hmacToStr(data_bytes, key_bytes, false)` |
+| **C#** | `SM3Util.hmacToStr(dataBytes, keyBytes, false)` |
+| **Java** | `SM3Util.hmacToStr(dataBytes, keyBytes)` 或 `SM3Util.hmacToStr(dataBytes, keyBytes, false)` |
+| **Python** | `SM3Util.hmac_to_hex(data, key)` 或 `SM3Util.hmac_to_str(data, key, False)` |
+| **JavaScript** | `SM3Util.hmacToHex(data, key)` |
+| **Go** | `HMACToStr(EncodeHex(data), EncodeHex(key), false)` (需先转 hex) |
+| **Rust** | `sm3::hmac_hex(data, key)` |
 
 ---
 
@@ -1053,12 +1053,12 @@ let mac = sm3::hmac_str_default("my-hmac-key", "Hello, HMAC-SM3!").unwrap();
 
 | 语言 | 调用方式 |
 |------|----------|
-| **C++** | `SM3Util::hmacToStr(key_bytes, data_bytes, true)` |
-| **C#** | `SM3Util.hmacToStr(keyBytes, dataBytes, true)` |
-| **Python** | `SM3Util.hmac_to_base64(key, data)` 或 `SM3Util.hmac_to_str(key, data, True)` |
-| **JavaScript** | `SM3Util.hmacToBase64(key, data)` |
-| **Go** | `HMACToStr(EncodeHex(key), EncodeHex(data), true)` (需先转 hex) |
-| **Rust** | `sm3::hmac_base64(key, data)` |
+| **C++** | `SM3Util::hmacToStr(data_bytes, key_bytes, true)` |
+| **C#** | `SM3Util.hmacToStr(dataBytes, keyBytes, true)` |
+| **Python** | `SM3Util.hmac_to_base64(data, key)` 或 `SM3Util.hmac_to_str(data, key, True)` |
+| **JavaScript** | `SM3Util.hmacToBase64(data, key)` |
+| **Go** | `HMACToStr(EncodeHex(data), EncodeHex(key), true)` (需先转 hex) |
+| **Rust** | `sm3::hmac_base64(data, key)` |
 
 ---
 
@@ -1070,14 +1070,14 @@ let mac = sm3::hmac_str_default("my-hmac-key", "Hello, HMAC-SM3!").unwrap();
 
 | 语言 | 调用方式 | 返回值 |
 |------|----------|--------|
-| **C** | `crossmool_sm3_hmac_verify(key, charset, data, data_charset, received_mac)` | int (1=匹配, 0=不匹配, 负=错误) |
-| **C++** | `SM3Util::hmacVerify(key, data, receivedHmac)` | bool |
-| **JavaScript** | `SM3Util.hmacVerify(key, data, receivedHmac)` | boolean |
-| **Java** | `SM3Util.hmacVerify(key, data, receivedHmac)` | boolean |
-| **C#** | `SM3Util.hmacVerify(key, data, receivedHmac)` | bool |
-| **Python** | `SM3Util.hmac_verify(key_str, data_str, received_hmac)` | bool |
-| **Go** | `HMACVerify(key, data, receivedHmac)` | (bool, error) |
-| **Rust** | `sm3::hmac_verify(key, data, received_hmac)` | `Result<bool, String>` |
+| **C** | `crossmool_sm3_hmac_verify(data, data_charset, key, charset, received_mac)` | int (1=匹配, 0=不匹配, 负=错误) |
+| **C++** | `SM3Util::hmacVerify(data, key, receivedHmac)` | bool |
+| **JavaScript** | `SM3Util.hmacVerify(data, key, receivedHmac)` | boolean |
+| **Java** | `SM3Util.hmacVerify(data, key, receivedHmac)` | boolean |
+| **C#** | `SM3Util.hmacVerify(data, key, receivedHmac)` | bool |
+| **Python** | `SM3Util.hmac_verify(data_str, key_str, received_hmac)` | bool |
+| **Go** | `HMACVerify(data, key, receivedHmac)` | (bool, error) |
+| **Rust** | `sm3::hmac_verify(data, key, received_hmac)` | `Result<bool, String>` |
 
 ---
 
@@ -1179,7 +1179,7 @@ const hexKey = SM4Util.generateKeyHex();
 | **C** | `crossmool_sm4_encrypt_gcm_hex(key, plaintext, plaintext_len, &ciphertext_hex)` | `key`: 16 字节 |
 | **C++** | `SM4Util::encryptGcm(key, plaintext, false)` | `false`: HEX 输出 |
 | **C#** | `SM4Util.EncryptGcm(key, plaintext, false)` 或 `SM4Util.EncryptGcmHex(key, plaintext)` | `false`: HEX 输出 |
-| **Java** | `SM4Util.encrypt(key, plaintext, false)` 或 `SM4Util.encryptToHex(key, plaintext)` | `false`: HEX |
+| **Java** | `SM4Util.encrypt(plaintext, key, false)` 或 `SM4Util.encryptToHex(plaintext, key)` | `false`: HEX |
 | **Python** | `SM4Util.encrypt_gcm(key, plaintext, to_base64=False)` 或 `SM4Util.encrypt_gcm_hex(key, plaintext)` | |
 | **JavaScript** | `SM4Util.encryptGcm(plaintext, key, iv, false)` 或 `SM4Util.encryptGcmHex(plaintext, key, iv)` | `false`: HEX |
 | **Go** | `EncryptGcm(key, plain, false)` 或 `EncryptGcmHex(key, plain)` | `false`: HEX |
@@ -1211,7 +1211,7 @@ string ct = SM4Util.EncryptGcm(key, Encoding.UTF8.GetBytes("Hello"), false);
 ```java
 // Java
 byte[] key = SM4Util.generateKey();
-String ct = SM4Util.encrypt(key, "Hello".getBytes(StandardCharsets.UTF_8), false);
+String ct = SM4Util.encrypt("Hello".getBytes(StandardCharsets.UTF_8), key, false);
 ```
 
 ```python
@@ -1249,7 +1249,7 @@ let ct = sm4::encrypt_gcm(&key, b"Hello", false).unwrap();
 | **C** | `crossmool_sm4_encrypt_gcm_base64(key, plaintext, plaintext_len, &ciphertext_b64)` |
 | **C++** | `SM4Util::encryptGcm(key, plaintext, true)` |
 | **C#** | `SM4Util.EncryptGcm(key, plaintext, true)` |
-| **Java** | `SM4Util.encrypt(key, plaintext, true)` 或 `SM4Util.encryptToBase64(key, plaintext)` |
+| **Java** | `SM4Util.encrypt(plaintext, key, true)` 或 `SM4Util.encryptToBase64(plaintext, key)` |
 | **Python** | `SM4Util.encrypt_gcm(key, plaintext, to_base64=True)` |
 | **JavaScript** | `SM4Util.encryptGcm(plaintext, key, iv, true)` 或 `SM4Util.encryptGcmBase64(plaintext, key, iv)` |
 | **Go** | `EncryptGcm(key, plain, true)` |
@@ -1266,7 +1266,7 @@ let ct = sm4::encrypt_gcm(&key, b"Hello", false).unwrap();
 | **C** | `crossmool_sm4_encrypt_gcm_str_hex(key, plaintext_str, &ct_hex)` |
 | **C++** | `SM4Util::encryptGcmString(key, plainText)` → Base64 输出 (需手动调用 HEX 版) |
 | **C#** | `SM4Util.EncryptGcmString(key, plainText, false)` |
-| **Java** | `SM4Util.encrypt(key, plaintext, false)` (重载 String, String) |
+| **Java** | `SM4Util.encrypt(plaintext, key, false)` (重载 String, String) |
 | **Python** | `SM4Util.encrypt_gcm_string(key, plain_text, to_base64=False)` |
 | **JavaScript** | `SM4Util.encryptGcmString(plainText, key, undefined, false)` |
 | **Go** | `EncryptGcm(key, []byte(plainText), false)` (需手动转换) |
@@ -1283,7 +1283,7 @@ let ct = sm4::encrypt_gcm(&key, b"Hello", false).unwrap();
 | **C** | `crossmool_sm4_encrypt_gcm_str_base64(key, plaintext_str, &ct_base64)` |
 | **C++** | `SM4Util::encryptGcmString(key, plainText)` |
 | **C#** | `SM4Util.EncryptGcmString(key, plainText, true)` |
-| **Java** | `SM4Util.encrypt(key, plaintext, true)` (重载 String, String) |
+| **Java** | `SM4Util.encrypt(plaintext, key, true)` (重载 String, String) |
 | **Python** | `SM4Util.encrypt_gcm_string(key, plain_text, to_base64=True)` |
 | **JavaScript** | `SM4Util.encryptGcmString(plainText, key, undefined, true)` |
 | **Go** | `EncryptGcm(key, []byte(plainText), true)` (需手动转换) |
@@ -1302,7 +1302,7 @@ let ct = sm4::encrypt_gcm(&key, b"Hello", false).unwrap();
 | **C** | `crossmool_sm4_decrypt_gcm_hex(key, ciphertext_hex, &plaintext, &plaintext_len)` | `key`: 16 字节, `ciphertext_hex`: HEX 密文 |
 | **C++** | `SM4Util::decryptGcm(key, ciphertextEncoded)` | 自动检测 HEX/Base64 |
 | **C#** | `SM4Util.DecryptGcmFromHex(key, ciphertextHex)` | 明确指定 HEX |
-| **Java** | `SM4Util.decryptToBytes(key, ciphertext)` | 自动检测 HEX/Base64 |
+| **Java** | `SM4Util.decryptToBytes(ciphertext, key)` | 自动检测 HEX/Base64 |
 | **Python** | `SM4Util.decrypt_gcm_from_hex(key, hex_str)` 或 `SM4Util.decrypt_gcm(key, ciphertext_str)` | 自动检测 |
 | **JavaScript** | `SM4Util.decryptGcmFromHex(ciphertextHex, key)` 或 `SM4Util.decryptGcm(ciphertextHexOrBase64, key)` | 自动检测 |
 | **Go** | `DecryptGcm(key, encodedData)` 或 `DecryptGcmHex(key, hexStr)` | 自动检测 |
@@ -1332,7 +1332,7 @@ Console.WriteLine(Encoding.UTF8.GetString(pt));
 
 ```java
 // Java
-byte[] pt = SM4Util.decryptToBytes(key, ctHex);
+byte[] pt = SM4Util.decryptToBytes(ctHex, key);
 ```
 
 ```python
@@ -1366,7 +1366,7 @@ let pt = sm4::decrypt_gcm(&key, &ct_hex).unwrap();
 | **C** | `crossmool_sm4_decrypt_gcm_base64(key, ciphertext_b64, &plaintext, &plaintext_len)` |
 | **C++** | `SM4Util::decryptGcm(key, ciphertextEncoded)` (自动检测) |
 | **C#** | `SM4Util.DecryptGcm(key, ciphertextEncoded)` (自动检测) |
-| **Java** | `SM4Util.decryptToBytes(key, ciphertext)` (自动检测) |
+| **Java** | `SM4Util.decryptToBytes(ciphertext, key)` (自动检测) |
 | **Python** | `SM4Util.decrypt_gcm(key, ciphertext_str)` (自动检测) |
 | **JavaScript** | `SM4Util.decryptGcm(ciphertextHexOrBase64, key)` (自动检测) |
 | **Go** | `DecryptGcm(key, encodedData)` (自动检测) |
@@ -1383,7 +1383,7 @@ let pt = sm4::decrypt_gcm(&key, &ct_hex).unwrap();
 | **C** | `crossmool_sm4_decrypt_gcm_hex_str(key, ciphertext_hex, &plaintext_str)` |
 | **C++** | `SM4Util::decryptGcmToString(key, ciphertextHex)` |
 | **C#** | `SM4Util.DecryptGcmToString(key, ciphertextHex)` |
-| **Java** | `SM4Util.decrypt(key, ciphertextHex)` (重载 byte[], String) |
+| **Java** | `SM4Util.decrypt(ciphertextHex, key)` (重载 String, byte[]) |
 | **Python** | `SM4Util.decrypt_gcm_to_string(key, ciphertext_str)` |
 | **JavaScript** | `SM4Util.decryptGcmToString(ciphertextHexOrBase64, key)` |
 | **Go** | `DecryptGcmToString(key, encodedData)` |
@@ -1400,7 +1400,7 @@ let pt = sm4::decrypt_gcm(&key, &ct_hex).unwrap();
 | **C** | `crossmool_sm4_decrypt_gcm_base64_str(key, ciphertext_base64, &plaintext_str)` |
 | **C++** | `SM4Util::decryptGcmToString(key, ciphertextBase64)` (自动检测) |
 | **C#** | `SM4Util.DecryptGcmToString(key, ciphertextEncoded)` (自动检测) |
-| **Java** | `SM4Util.decrypt(key, ciphertextBase64)` (自动检测) |
+| **Java** | `SM4Util.decrypt(ciphertextBase64, key)` (自动检测) |
 | **Python** | `SM4Util.decrypt_gcm_to_string(key, ciphertext_str)` (自动检测) |
 | **JavaScript** | `SM4Util.decryptGcmToString(ciphertextHexOrBase64, key)` (自动检测) |
 | **Go** | `DecryptGcmToString(key, encodedData)` (自动检测) |

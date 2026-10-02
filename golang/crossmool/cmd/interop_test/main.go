@@ -5,7 +5,7 @@ var EXP=map[string]string{"sm3": "0880efb46176002c6cd1d94bcc3d9d9161488e099317d3
 var MSG="Hello, 这是跨语言国密互通性测试数据"
 func main(){r:=map[string]any{}
 d:=crossmool.DigestToStr(MSG,false);r["sm3"]=d;r["sm3_ok"]=(d==EXP["sm3"])
-h,_:=crossmool.HMACToStr(D["hmac_key"],MSG,false);r["sm3_hmac"]=h;r["sm3_hmac_ok"]=(h==EXP["sm3_hmac"])
+h,_:=crossmool.HMACToStr(MSG,D["hmac_key"],false);r["sm3_hmac"]=h;r["sm3_hmac_ok"]=(h==EXP["sm3_hmac"])
 c,_:=crossmool.Encrypt(MSG,D["sm2_enc_pub"],false);r["sm2_enc"]=c
 s,_:=crossmool.Sign(MSG,D["sm2_sig_priv"],false);r["sm2_sig"]=s
 _=s

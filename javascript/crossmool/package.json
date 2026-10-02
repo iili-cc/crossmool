@@ -1,8 +1,26 @@
 {
   "name": "crossmool",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "Crossmool SM2/SM3/SM4 utilities based on sm-crypto-v2 (Java interoperable)",
-  "license": "GPLv3",
+  "license": "LGPL-3.0-only",
+  "author": "iili <iilicc@outlook.com>",
+  "homepage": "https://gitee.com/iilic/crossmool",
+  "repository": {
+    "type": "git",
+    "url": "https://gitee.com/iilic/crossmool.git"
+  },
+  "keywords": [
+    "sm2",
+    "sm3",
+    "sm4",
+    "crypto",
+    "encryption",
+    "signature",
+    "gcm",
+    "chinese-standard",
+    "国密",
+    "crossmool"
+  ],
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",

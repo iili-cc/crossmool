@@ -43,8 +43,8 @@ from crossmool import SM3Util
 
 digest = SM3Util.digest_str('hello 国密')
 key = SM3Util.generate_hmac_key_to_str()
-mac = SM3Util.hmac_str(key, 'hello 国密')
-assert SM3Util.hmac_verify(key, 'hello 国密', mac)
+mac = SM3Util.hmac_str('hello 国密', key)
+assert SM3Util.hmac_verify('hello 国密', key, mac)
 ```
 
 ### SM4 — GCM encrypt / decrypt

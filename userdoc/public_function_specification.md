@@ -498,9 +498,9 @@ HMAC-SM3（字节数组输入，返回字节数组）。
 
 | 字段 | 描述 |
 |------|------|
-| **签名** | `int crossmool_sm3_hmac(const unsigned char* key, size_t key_len, const unsigned char* data, size_t data_len, unsigned char* mac)` |
-| **入参** | `key` — HMAC 密钥, `key_len` — 密钥长度 |
-| | `data` — 输入数据, `data_len` — 数据长度 |
+| **签名** | `int crossmool_sm3_hmac(const unsigned char* data, size_t data_len, const unsigned char* key, size_t key_len, unsigned char* mac)` |
+| **入参** | `data` — 输入数据, `data_len` — 数据长度 |
+| | `key` — HMAC 密钥, `key_len` — 密钥长度 |
 | **出参** | `mac` — HMAC 值（至少 32 字节） |
 
 ##### `crossmool_sm3_hmac_hex`
@@ -509,7 +509,7 @@ HMAC-SM3（HEX 密钥 + 字节数据，返回 HEX 字符串）。
 
 | 字段 | 描述 |
 |------|------|
-| **签名** | `int crossmool_sm3_hmac_hex(const char* key_hex, const unsigned char* data, size_t data_len, char** hmac_hex)` |
+| **签名** | `int crossmool_sm3_hmac_hex(const unsigned char* data, size_t data_len, const char* key_hex, char** hmac_hex)` |
 
 ##### `crossmool_sm3_hmac_str`
 
@@ -517,7 +517,7 @@ HMAC-SM3（字符串密钥和数据，返回 HEX 字符串）。
 
 | 字段 | 描述 |
 |------|------|
-| **签名** | `int crossmool_sm3_hmac_str(const char* key_str, const char* charset, const char* data_str, const char* data_charset, char** hmac_hex)` |
+| **签名** | `int crossmool_sm3_hmac_str(const char* data_str, const char* data_charset, const char* key_str, const char* charset, char** hmac_hex)` |
 
 ##### `crossmool_sm3_hmac_to_hex` / `crossmool_sm3_hmac_to_base64`
 
@@ -529,7 +529,7 @@ HMAC 验证。
 
 | 字段 | 描述 |
 |------|------|
-| **签名** | `int crossmool_sm3_hmac_verify(const char* key, const char* charset, const char* data, const char* data_charset, const char* received_mac)` |
+| **签名** | `int crossmool_sm3_hmac_verify(const char* data, const char* data_charset, const char* key, const char* charset, const char* received_mac)` |
 | **返回值** | 验证成功返回 1，失败返回 0，错误返回负数 |
 
 ---
@@ -831,11 +831,11 @@ std::cout << "Decrypted: " << plaintext << std::endl;
 |------|------|------|
 | `generateHmacKey` | `static std::vector<unsigned char> generateHmacKey(int keyLengthInBytes = 32)` | 随机 HMAC 密钥 |
 | `generateHmacKeyToStr` | `static std::string generateHmacKeyToStr(int keyLengthInBytes = 32, bool toBase64 = false)` | HEX/Base64 密钥 |
-| `hmac` | `static std::vector<unsigned char> hmac(const std::vector<unsigned char>& key, const std::vector<unsigned char>& data)` | HMAC 字节 |
-| `hmac` | `static std::vector<unsigned char> hmac(const std::string& key, const std::string& data)` | HMAC 字节 |
-| `hmacToStr` | `static std::string hmacToStr(const std::vector<unsigned char>& key, const std::vector<unsigned char>& data, bool toBase64 = false)` | HEX/Base64 HMAC |
-| `hmacToStr` | `static std::string hmacToStr(const std::string& key, const std::string& data, bool toBase64 = false)` | HEX/Base64 HMAC |
-| `hmacVerify` | `static bool hmacVerify(const std::string& key, const std::string& data, const std::string& receivedHmac)` | 验证结果 |
+| `hmac` | `static std::vector<unsigned char> hmac(const std::vector<unsigned char>& data, const std::vector<unsigned char>& key)` | HMAC 字节 |
+| `hmac` | `static std::vector<unsigned char> hmac(const std::string& data, const std::string& key)` | HMAC 字节 |
+| `hmacToStr` | `static std::string hmacToStr(const std::vector<unsigned char>& data, const std::vector<unsigned char>& key, bool toBase64 = false)` | HEX/Base64 HMAC |
+| `hmacToStr` | `static std::string hmacToStr(const std::string& data, const std::string& key, bool toBase64 = false)` | HEX/Base64 HMAC |
+| `hmacVerify` | `static bool hmacVerify(const std::string& data, const std::string& key, const std::string& receivedHmac)` | 验证结果 |
 
 **调用示例**：
 
@@ -846,7 +846,7 @@ std::string hash = SM3Util::digestToStr("Hello, SM3!");
 std::cout << "SM3: " << hash << std::endl;
 
 auto key = SM3Util::generateHmacKey();
-auto mac = SM3Util::hmacToStr(key, std::vector<unsigned char>(data, data+len));
+auto mac = SM3Util::hmacToStr(std::vector<unsigned char>(data, data+len), key);
 ```
 
 ---
@@ -993,10 +993,11 @@ bool valid = SM2Util.verify("Hello", signature, publicKeyHex);
 |------|------|------|
 | `generateHmacKey` | `public static byte[] generateHmacKey(int keyLengthInBytes = 32)` | 随机 HMAC 密钥 |
 | `generateHmacKeyToStr` | `public static string generateHmacKeyToStr(int keyLengthInBytes = 32, bool toBase64 = false)` | HEX/Base64 密钥 |
-| `hmac` | `public static byte[] hmac(byte[] key, byte[] data)` | HMAC 字节 |
-| `hmac` | `public static byte[] hmac(string key, string data)` | HMAC 字节 |
-| `hmacToStr` | `public static string hmacToStr(byte[] key, byte[] data, bool toBase64 = false)` | HEX/Base64 HMAC |
-| `hmacToStr` | `public static string hmacToStr(string key, string data, bool toBase64 = false)` | HEX/Base64 HMAC |
+| `hmac` | `public static byte[] hmac(byte[] data, byte[] key)` | HMAC 字节 |
+| `hmac` | `public static byte[] hmac(string data, string key)` | HMAC 字节 |
+| `hmacToStr` | `public static string hmacToStr(byte[] data, byte[] key, bool toBase64 = false)` | HEX/Base64 HMAC |
+| `hmacToStr` | `public static string hmacToStr(string data, string key, bool toBase64 = false)` | HEX/Base64 HMAC |
+| `hmacVerify` | `public static bool hmacVerify(string data, string key, string receivedHmac)` | 验证结果 |
 
 ---
 
@@ -1101,13 +1102,17 @@ public class CiphertextSignaturePair {
 | 方法 | 签名 | 出参 |
 |------|------|------|
 | `sign` | `public static byte[] sign(byte[] content, byte[] privateKey)` | 签名字节 |
+| `sign` | `public static byte[] sign(byte[] content, byte[] privateKey, byte[] userId)` | 签名字节（自定义 userID） |
 | `sign` | `public static byte[] sign(String content, String privateKey, Charset charset)` | 签名字节 |
+| `sign` | `public static byte[] sign(String content, String privateKey, String userId, Charset charset)` | 签名字节（自定义 userID） |
 | `signToHex` | `public static String signToHex(String content, String privateKey)` | HEX 签名 |
 | `signToBase64` | `public static String signToBase64(String content, String privateKey)` | Base64 签名 |
 | `sign` | `public static String sign(String content, String privateKey, boolean toBase64)` | HEX/Base64 签名 |
 | **`sign` ⭐** | `public static String sign(String content, String privateKey)` | HEX 签名（默认） |
-| `verify` | `public static boolean verify(byte[] content, byte[] signature, byte[] publicKeyBytes)` | 验证结果 |
+| `verify` | `public static boolean verify(byte[] content, byte[] publicKeyBytes, byte[] signature)` | 验证结果 |
+| `verify` | `public static boolean verify(byte[] content, byte[] publicKeyBytes, byte[] signature, byte[] userId)` | 验证结果（自定义 userID） |
 | `verify` | `public static boolean verify(String content, String publicKey, String signature, Charset charset)` | 验证结果 |
+| `verify` | `public static boolean verify(String content, String publicKey, String signature, String userId)` | 验证结果（自定义 userID，UTF-8） |
 | **`verify` ⭐** | `public static boolean verify(String content, String publicKey, String signature)` | 验证结果（UTF-8） |
 
 #### 6.1.4 加密签名组合
@@ -1176,13 +1181,13 @@ String plain = SM2Util.verifyDecrypt(pair.getCiphertext(), pair.getSignature(), 
 | `generateHmacKey` | `public static byte[] generateHmacKey()` | 32 字节密钥（默认） |
 | `generateHmacKeyToStr` | `public static String generateHmacKeyToStr(int keyLengthInBytes, boolean toBase64)` | HEX/Base64 密钥 |
 | `generateHmacKeyToStr` | `public static String generateHmacKeyToStr(boolean toBase64)` | 32 字节 HEX/Base64 密钥 |
-| `hmac` | `public static byte[] hmac(byte[] key, byte[] data)` | HMAC 字节 |
-| `hmac` | `public static byte[] hmac(String key, String data)` | HMAC 字节 |
-| `hmacToStr` | `public static String hmacToStr(byte[] key, byte[] data, boolean toBase64)` | HEX/Base64 HMAC |
-| **`hmacToStr` ⭐** | `public static String hmacToStr(byte[] key, byte[] data)` | HEX HMAC（默认） |
-| `hmacToStr` | `public static String hmacToStr(String key, String data, boolean toBase64)` | HEX/Base64 HMAC |
-| **`hmacToStr` ⭐** | `public static String hmacToStr(String key, String data)` | HEX HMAC（默认） |
-| `hmacVerify` | `public static boolean hmacVerify(String key, String data, String receivedHmac)` | 验证结果 |
+| `hmac` | `public static byte[] hmac(byte[] data, byte[] key)` | HMAC 字节 |
+| `hmac` | `public static byte[] hmac(String data, String key)` | HMAC 字节 |
+| `hmacToStr` | `public static String hmacToStr(byte[] data, byte[] key, boolean toBase64)` | HEX/Base64 HMAC |
+| **`hmacToStr` ⭐** | `public static String hmacToStr(byte[] data, byte[] key)` | HEX HMAC（默认） |
+| `hmacToStr` | `public static String hmacToStr(String data, String key, boolean toBase64)` | HEX/Base64 HMAC |
+| **`hmacToStr` ⭐** | `public static String hmacToStr(String data, String key)` | HEX HMAC（默认） |
+| `hmacVerify` | `public static boolean hmacVerify(String data, String key, String receivedHmac)` | 验证结果 |
 
 **调用示例**：
 
@@ -1193,7 +1198,7 @@ String hash = SM3Util.digestToStr("Hello, SM3!");
 System.out.println(hash);  // HEX 杂凑值
 
 byte[] hmacKey = SM3Util.generateHmacKey();
-String mac = SM3Util.hmacToStr(hmacKey, someData);
+String mac = SM3Util.hmacToStr(someData, hmacKey);
 ```
 
 ---
@@ -1211,19 +1216,19 @@ String mac = SM3Util.hmacToStr(hmacKey, someData);
 | `parseBase64Key` | `public static byte[] parseBase64Key(String base64Key)` | 解析后的密钥 |
 | `parseKey` | `public static byte[] parseKey(String key)` | 自动检测 HEX/Base64 |
 | `generateGcmIv` | `public static byte[] generateGcmIv()` | 12 字节随机 IV |
-| `encryptGcmNative` | `public static String encryptGcmNative(byte[] key, byte[] input)` | Base64(IV+密文) |
-| `encryptGcmNative` | `public static String encryptGcmNative(byte[] key, byte[] input, byte[] iv)` | Base64(IV+密文) |
-| `decryptGcmNative` | `public static byte[] decryptGcmNative(byte[] key, String encodedData)` | 明文字节 |
-| `decryptGcmNativeToString` | `public static String decryptGcmNativeToString(byte[] key, String encodedData)` | UTF-8 明文 |
-| `encryptGcmJca` | `public static String encryptGcmJca(byte[] key, String plainText)` | Base64(IV+密文) |
-| `encryptGcmJca` | `public static String encryptGcmJca(byte[] key, String plainText, byte[] iv)` | Base64(IV+密文) |
-| `decryptGcmJca` | `public static String decryptGcmJca(byte[] key, String encodedData)` | UTF-8 明文 |
-| **`encrypt` ⭐** | `public static String encrypt(byte[] key, byte[] plaintext, boolean toBase64)` | HEX/Base64 密文 |
-| **`encrypt` ⭐** | `public static String encrypt(byte[] key, byte[] plaintext)` | HEX 密文 |
-| **`encrypt` ⭐** | `public static String encrypt(String key, String plaintext, boolean toBase64)` | HEX/Base64 密文 |
-| **`encrypt` ⭐** | `public static String encrypt(String key, String plaintext)` | HEX 密文 |
-| **`decrypt` ⭐** | `public static String decrypt(byte[] key, String ciphertext)` | UTF-8 明文 |
-| **`decrypt` ⭐** | `public static String decrypt(String key, String ciphertext)` | UTF-8 明文 |
+| `encryptGcmNative` | `public static String encryptGcmNative(byte[] input, byte[] key)` | Base64(IV+密文) |
+| `encryptGcmNative` | `public static String encryptGcmNative(byte[] input, byte[] key, byte[] iv)` | Base64(IV+密文) |
+| `decryptGcmNative` | `public static byte[] decryptGcmNative(String encodedData, byte[] key)` | 明文字节 |
+| `decryptGcmNativeToString` | `public static String decryptGcmNativeToString(String encodedData, byte[] key)` | UTF-8 明文 |
+| `encryptGcmJca` | `public static String encryptGcmJca(String plainText, byte[] key)` | Base64(IV+密文) |
+| `encryptGcmJca` | `public static String encryptGcmJca(String plainText, byte[] key, byte[] iv)` | Base64(IV+密文) |
+| `decryptGcmJca` | `public static String decryptGcmJca(String encodedData, byte[] key)` | UTF-8 明文 |
+| **`encrypt` ⭐** | `public static String encrypt(byte[] plaintext, byte[] key, boolean toBase64)` | HEX/Base64 密文 |
+| **`encrypt` ⭐** | `public static String encrypt(byte[] plaintext, byte[] key)` | HEX 密文 |
+| **`encrypt` ⭐** | `public static String encrypt(String plaintext, String key, boolean toBase64)` | HEX/Base64 密文 |
+| **`encrypt` ⭐** | `public static String encrypt(String plaintext, String key)` | HEX 密文 |
+| **`decrypt` ⭐** | `public static String decrypt(String ciphertext, byte[] key)` | UTF-8 明文 |
+| **`decrypt` ⭐** | `public static String decrypt(String ciphertext, String key)` | UTF-8 明文 |
 
 **调用示例**：
 
@@ -1231,9 +1236,9 @@ String mac = SM3Util.hmacToStr(hmacKey, someData);
 import cc.iili.tools.crossmool.tool.SM4Util;
 
 String hexKey = SM4Util.generateKeyAsHex();
-String encrypted = SM4Util.encrypt(hexKey, "Hello, SM4!");
+String encrypted = SM4Util.encrypt("Hello, SM4!", hexKey);
 System.out.println(encrypted);
-String decrypted = SM4Util.decrypt(hexKey, encrypted);
+String decrypted = SM4Util.decrypt(encrypted, hexKey);
 System.out.println(decrypted);  // Hello, SM4!
 ```
 
@@ -1338,12 +1343,13 @@ print(valid)  # True
 |------|------|------|
 | `generate_hmac_key` | `@staticmethod generate_hmac_key(key_length: int = 32) -> bytes` | 随机密钥 |
 | `generate_hmac_key_to_str` | `@staticmethod generate_hmac_key_to_str(key_length: int = 32, to_base64: bool = False) -> str` | HEX/Base64 密钥 |
-| `hmac` | `@staticmethod hmac(key: bytes, data: bytes) -> bytes` | HMAC 字节 |
-| `hmac_from_str` | `@staticmethod hmac_from_str(key_str: str, data_str: str) -> bytes` | HMAC 字节 |
-| `hmac_to_hex` | `@staticmethod hmac_to_hex(key: bytes, data: bytes) -> str` | HEX HMAC |
-| `hmac_to_base64` | `@staticmethod hmac_to_base64(key: bytes, data: bytes) -> str` | Base64 HMAC |
-| `hmac_to_str` | `@staticmethod hmac_to_str(key: bytes, data: bytes, to_base64: bool = False) -> str` | HEX/Base64 HMAC |
-| **`hmac_str` ⭐** | `@staticmethod hmac_str(key_str: str, data_str: str, to_base64: bool = False) -> str` | HEX/Base64 HMAC |
+| `hmac` | `@staticmethod hmac(data: bytes, key: bytes) -> bytes` | HMAC 字节 |
+| `hmac_from_str` | `@staticmethod hmac_from_str(data_str: str, key_str: str) -> bytes` | HMAC 字节 |
+| `hmac_to_hex` | `@staticmethod hmac_to_hex(data: bytes, key: bytes) -> str` | HEX HMAC |
+| `hmac_to_base64` | `@staticmethod hmac_to_base64(data: bytes, key: bytes) -> str` | Base64 HMAC |
+| `hmac_to_str` | `@staticmethod hmac_to_str(data: bytes, key: bytes, to_base64: bool = False) -> str` | HEX/Base64 HMAC |
+| **`hmac_str` ⭐** | `@staticmethod hmac_str(data_str: str, key_str: str, to_base64: bool = False) -> str` | HEX/Base64 HMAC |
+| `hmac_verify` | `@staticmethod hmac_verify(data_str: str, key_str: str, received_hmac: str) -> bool` | 验证结果 |
 
 **调用示例**：
 
@@ -1354,7 +1360,7 @@ hash_hex = SM3Util.digest_str("Hello, SM3!")
 print(hash_hex)
 
 key = SM3Util.generate_hmac_key()
-mac = SM3Util.hmac_to_hex(key, b"data")
+mac = SM3Util.hmac_to_hex(b"data", key)
 ```
 
 ---
@@ -1491,8 +1497,9 @@ fmt.Println(valid)  // true
 | `DigestHex` | `func DigestHex(data []byte) string` | HEX 杂凑 |
 | `DigestBase64` | `func DigestBase64(data []byte) string` | Base64 杂凑 |
 | **`DigestToStr` ⭐** | `func DigestToStr(input string, toBase64 bool) string` | HEX/Base64 杂凑 |
-| `HMAC` | `func HMAC(key, data []byte) []byte` | HMAC 字节 |
-| **`HMACToStr` ⭐** | `func HMACToStr(key string, data string, toBase64 bool) (string, error)` | HEX/Base64 HMAC |
+| `HMAC` | `func HMAC(data, key []byte) []byte` | HMAC 字节 |
+| **`HMACToStr` ⭐** | `func HMACToStr(data string, key string, toBase64 bool) (string, error)` | HEX/Base64 HMAC |
+| `HMACVerify` | `func HMACVerify(data string, key string, receivedHmac string) (bool, error)` | 验证结果 |
 | `GenerateHmacKey` | `func GenerateHmacKey(length int) []byte` | 随机密钥（≥32字节） |
 | `GenerateHmacKeyToStr` | `func GenerateHmacKeyToStr(length int, toBase64 bool) string` | HEX/Base64 密钥 |
 
@@ -1503,7 +1510,7 @@ hash := crossmool.DigestToStr("Hello, SM3!", false)
 fmt.Println(hash)  // HEX 杂凑值
 
 key := crossmool.GenerateHmacKey(32)
-mac, _ := crossmool.HMACToStr(EncodeHex(key), "data", false)
+mac, _ := crossmool.HMACToStr("data", EncodeHex(key), false)
 ```
 
 ---
@@ -1633,13 +1640,14 @@ let valid = sm2::verify_with_public_pem(b"Hello", &sig, &keypair.public_key_pem)
 
 | 函数 | 签名 | 出参 |
 |------|------|------|
-| `hmac_bytes` | `pub fn hmac_bytes(key: &[u8], data: &[u8]) -> Vec<u8>` | HMAC 字节 |
-| `hmac_hex` | `pub fn hmac_hex(key: &[u8], data: &[u8]) -> String` | HEX HMAC |
-| `hmac_base64` | `pub fn hmac_base64(key: &[u8], data: &[u8]) -> String` | Base64 HMAC |
-| `hmac_to_str` | `pub fn hmac_to_str(key: &[u8], data: &[u8], to_base64: bool) -> String` | HEX/Base64 HMAC |
-| `hmac_from_str` | `pub fn hmac_from_str(key: &str, data: &str) -> Result<Vec<u8>, String>` | HMAC 字节 |
-| **`hmac_str` ⭐** | `pub fn hmac_str(key: &str, data: &str, to_base64: bool) -> Result<String, String>` | HEX/Base64 HMAC |
-| `hmac_str_default` | `pub fn hmac_str_default(key: &str, data: &str) -> Result<String, String>` | HEX HMAC（默认） |
+| `hmac_bytes` | `pub fn hmac_bytes(data: &[u8], key: &[u8]) -> Vec<u8>` | HMAC 字节 |
+| `hmac_hex` | `pub fn hmac_hex(data: &[u8], key: &[u8]) -> String` | HEX HMAC |
+| `hmac_base64` | `pub fn hmac_base64(data: &[u8], key: &[u8]) -> String` | Base64 HMAC |
+| `hmac_to_str` | `pub fn hmac_to_str(data: &[u8], key: &[u8], to_base64: bool) -> String` | HEX/Base64 HMAC |
+| `hmac_from_str` | `pub fn hmac_from_str(data: &str, key: &str) -> Result<Vec<u8>, String>` | HMAC 字节 |
+| **`hmac_str` ⭐** | `pub fn hmac_str(data: &str, key: &str, to_base64: bool) -> Result<String, String>` | HEX/Base64 HMAC |
+| `hmac_str_default` | `pub fn hmac_str_default(data: &str, key: &str) -> Result<String, String>` | HEX HMAC（默认） |
+| `hmac_verify` | `pub fn hmac_verify(data: &str, key: &str, received_hmac: &str) -> Result<bool, String>` | 验证结果 |
 | `generate_hmac_key` | `pub fn generate_hmac_key(length: usize) -> Vec<u8>` | 随机密钥（≥32 字节） |
 | `generate_hmac_key_to_str` | `pub fn generate_hmac_key_to_str(length: usize, to_base64: bool) -> String` | HEX/Base64 密钥 |
 | `generate_hmac_key_str` | `pub fn generate_hmac_key_str(to_base64: bool) -> String` | HEX/Base64 32 字节密钥 |
@@ -1794,15 +1802,15 @@ const plain = SM2Util.verifyDecrypt(pair.ciphertext, pair.signature, signPubKey,
 
 | 方法 | 签名 | 出参 |
 |------|------|------|
-| `hmacBytes` | `static hmacBytes(key: Uint8Array, data: Uint8Array): Uint8Array` | HMAC 字节 |
-| `hmacToHex` | `static hmacToHex(key: Uint8Array \| string, data: Uint8Array \| string): string` | HEX HMAC |
-| `hmacToBase64` | `static hmacToBase64(key: Uint8Array \| string, data: Uint8Array \| string): string` | Base64 HMAC |
-| **`hmac` ⭐** | `static hmac(key: Uint8Array \| string, data: Uint8Array \| string, toBase64 = false): string` | HEX/Base64 HMAC |
+| `hmacBytes` | `static hmacBytes(data: Uint8Array, key: Uint8Array): Uint8Array` | HMAC 字节 |
+| `hmacToHex` | `static hmacToHex(data: Uint8Array \| string, key: Uint8Array \| string): string` | HEX HMAC |
+| `hmacToBase64` | `static hmacToBase64(data: Uint8Array \| string, key: Uint8Array \| string): string` | Base64 HMAC |
+| **`hmac` ⭐** | `static hmac(data: Uint8Array \| string, key: Uint8Array \| string, toBase64 = false): string` | HEX/Base64 HMAC |
 | `generateHmacKeyBytes` | `static generateHmacKeyBytes(keyLength = 32): Uint8Array` | 随机密钥 |
 | `generateHmacKeyHex` | `static generateHmacKeyHex(keyLength = 32): string` | HEX 密钥 |
 | `generateHmacKeyBase64` | `static generateHmacKeyBase64(keyLength = 32): string` | Base64 密钥 |
 | `generateHmacKeyToStr` | `static generateHmacKeyToStr(keyLength: number \| boolean = 32, toBase64 = false): string` | HEX/Base64 密钥 |
-| `hmacVerify` | `static hmacVerify(key: Uint8Array \| string, data: Uint8Array \| string, receivedHmac: string): boolean` | 验证结果 |
+| `hmacVerify` | `static hmacVerify(data: Uint8Array \| string, key: Uint8Array \| string, receivedHmac: string): boolean` | 验证结果 |
 
 ---
 
@@ -1887,7 +1895,7 @@ C1(65字节: 04 + X坐标32字节 + Y坐标32字节) + C3(32字节: SM3哈希) +
 ### B.2 SM2 签名格式
 
 - DER 编码: `30 || len || 02 || r_len || r || 02 || s_len || s`（与 Java BouncyCastle 兼容）
-- USER_ID 固定为 `"1234567812345678"`（GB/T 32918 标准）
+- USER_ID 默认为 `"1234567812345678"`（GB/T 32918 标准），签名/验签支持传入自定义 userID（如身份证号、手机号等）
 
 ### B.3 SM4 GCM 密文格式
 

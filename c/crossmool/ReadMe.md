@@ -250,7 +250,7 @@ GPLv3 License
 
 ## 标准发布包结构
 
-crossmool-1.2.0-x64/
+crossmool-1.3.1-x64/
 ├── include/
 │   ├── crossmool.h
 │   ├── crossmool_error.h

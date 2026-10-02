@@ -93,7 +93,7 @@ std::string SM3Util::generateHmacKeyToStr(int keyLengthInBytes, bool toBase64) {
     }
 }
 
-std::vector<unsigned char> SM3Util::hmac(const std::vector<unsigned char>& key, const std::vector<unsigned char>& data) {
+std::vector<unsigned char> SM3Util::hmac(const std::vector<unsigned char>& data, const std::vector<unsigned char>& key) {
 #ifdef USE_GMSSL
     uint8_t out[SM3_DIGEST_SIZE];
     sm3_hmac(key.data(), key.size(), data.data(), data.size(), out);
@@ -110,7 +110,7 @@ std::vector<unsigned char> SM3Util::hmac(const std::vector<unsigned char>& key, 
 #endif
 }
 
-std::vector<unsigned char> SM3Util::hmac(const std::string& key, const std::string& data) {
+std::vector<unsigned char> SM3Util::hmac(const std::string& data, const std::string& key) {
     // Check if key is hex or base64
     bool isKeyHex = HexUtil::isHexString(key);
     bool isKeyBase64 = Base64Util::isBase64String(key);
@@ -137,11 +137,11 @@ std::vector<unsigned char> SM3Util::hmac(const std::string& key, const std::stri
         dataBytes = StringUtil::stringToBytes(data, "UTF-8");
     }
 
-    return hmac(keyBytes, dataBytes);
+    return hmac(dataBytes, keyBytes);
 }
 
-std::string SM3Util::hmacToStr(const std::vector<unsigned char>& key, const std::vector<unsigned char>& data, bool toBase64) {
-    auto hmacResult = hmac(key, data);
+std::string SM3Util::hmacToStr(const std::vector<unsigned char>& data, const std::vector<unsigned char>& key, bool toBase64) {
+    auto hmacResult = hmac(data, key);
     if (toBase64) {
         return Base64Util::encodeBase64Str(hmacResult);
     } else {
@@ -149,8 +149,8 @@ std::string SM3Util::hmacToStr(const std::vector<unsigned char>& key, const std:
     }
 }
 
-std::string SM3Util::hmacToStr(const std::string& key, const std::string& data, bool toBase64) {
-    auto hmacResult = hmac(key, data);
+std::string SM3Util::hmacToStr(const std::string& data, const std::string& key, bool toBase64) {
+    auto hmacResult = hmac(data, key);
     if (toBase64) {
         return Base64Util::encodeBase64Str(hmacResult);
     } else {
@@ -158,8 +158,8 @@ std::string SM3Util::hmacToStr(const std::string& key, const std::string& data, 
     }
 }
 
-bool SM3Util::hmacVerify(const std::string& key, const std::string& data, const std::string& receivedHmac) {
-    auto hmacResult = hmac(key, data);
+bool SM3Util::hmacVerify(const std::string& data, const std::string& key, const std::string& receivedHmac) {
+    auto hmacResult = hmac(data, key);
 
     // Check if receivedHmac is hex or base64
     bool isReceivedHmacHex = HexUtil::isHexString(receivedHmac);

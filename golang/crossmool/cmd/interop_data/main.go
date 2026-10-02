@@ -45,8 +45,8 @@ func main() {
 	result["sm3"] = map[string]string{"digest_hex": digestHex, "digest_b64": digestB64}
 
 	// SM3-HMAC
-	hmacHex, _ := crossmool.HMACToStr(hmacKeyHex, msg, false)
-	hmacB64, _ := crossmool.HMACToStr(hmacKeyHex, msg, true)
+	hmacHex, _ := crossmool.HMACToStr(msg, hmacKeyHex, false)
+	hmacB64, _ := crossmool.HMACToStr(msg, hmacKeyHex, true)
 	result["sm3_hmac"] = map[string]string{"hmac_hex": hmacHex, "hmac_b64": hmacB64}
 
 	// SM4 GCM

@@ -90,11 +90,12 @@ namespace Crossmool.Crypto.Tests
 
     public class SM3HmacTests
     {
-        [Fact] public void Hmac_Roundtrip() { var key = SM3Util.generateHmacKeyToStr(false); var h = SM3Util.hmacToStr(key, "data"); Assert.Equal(64, h.Length); }
-        [Fact] public void Hmac_Base64() { var key = SM3Util.generateHmacKeyToStr(true); var h = SM3Util.hmacToStr(key, "data", true); Assert.True(h.Length > 0); }
+        [Fact] public void Hmac_Roundtrip() { var key = SM3Util.generateHmacKeyToStr(false); var h = SM3Util.hmacToStr("data", key); Assert.Equal(64, h.Length); }
+        [Fact] public void Hmac_Base64() { var key = SM3Util.generateHmacKeyToStr(true); var h = SM3Util.hmacToStr("data", key, true); Assert.True(h.Length > 0); }
         [Fact] public void GenerateHmacKey() { var key = SM3Util.generateHmacKey(32); Assert.Equal(32, key.Length); }
-        [Fact] public void Hmac_Bytes() { var key = SM3Util.generateHmacKey(32); var data = Encoding.UTF8.GetBytes("test"); var mac = SM3Util.hmac(key, data); Assert.Equal(32, mac.Length); }
-        [Fact] public void HmacToStr_Bytes() { var key = SM3Util.generateHmacKey(32); var data = Encoding.UTF8.GetBytes("test"); var h = SM3Util.hmacToStr(key, data); Assert.Equal(64, h.Length); }
+        [Fact] public void Hmac_Bytes() { var key = SM3Util.generateHmacKey(32); var data = Encoding.UTF8.GetBytes("test"); var mac = SM3Util.hmac(data, key); Assert.Equal(32, mac.Length); }
+        [Fact] public void HmacToStr_Bytes() { var key = SM3Util.generateHmacKey(32); var data = Encoding.UTF8.GetBytes("test"); var h = SM3Util.hmacToStr(data, key); Assert.Equal(64, h.Length); }
+        [Fact] public void Hmac_CrossLanguage_Vector() { var msg = "Hello, 这是跨语言国密互通性测试数据"; var key = "0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20"; Assert.Equal("3e0c629ac18e2ad27415a549707565b0063872d65384e88ee2d1f88735b280f6", SM3Util.hmacToStr(msg, key)); }
     }
 
     public class SM4GcmTests

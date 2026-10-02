@@ -45,27 +45,27 @@ public:
     /**
      * Perform HMAC-SM3 operation
      */
-    static std::vector<unsigned char> hmac(const std::vector<unsigned char>& key, const std::vector<unsigned char>& data);
+    static std::vector<unsigned char> hmac(const std::vector<unsigned char>& data, const std::vector<unsigned char>& key);
 
     /**
      * Perform HMAC-SM3 operation with string parameters
      */
-    static std::vector<unsigned char> hmac(const std::string& key, const std::string& data);
+    static std::vector<unsigned char> hmac(const std::string& data, const std::string& key);
 
     /**
      * Perform HMAC-SM3 operation and return as hex or base64 string
      */
-    static std::string hmacToStr(const std::vector<unsigned char>& key, const std::vector<unsigned char>& data, bool toBase64 = false);
+    static std::string hmacToStr(const std::vector<unsigned char>& data, const std::vector<unsigned char>& key, bool toBase64 = false);
 
     /**
      * Perform HMAC-SM3 operation with string parameters and return as hex or base64 string
      */
-    static std::string hmacToStr(const std::string& key, const std::string& data, bool toBase64 = false);
+    static std::string hmacToStr(const std::string& data, const std::string& key, bool toBase64 = false);
 
     /**
      * Verify HMAC-SM3 signature
      */
-    static bool hmacVerify(const std::string& key, const std::string& data, const std::string& receivedHmac);
+    static bool hmacVerify(const std::string& data, const std::string& key, const std::string& receivedHmac);
 };
 
 #endif // SM3UTIL_H

@@ -37,16 +37,16 @@ def main():
     hmac_key = SM3Util.generate_hmac_key_to_str()
     print(f"  HMAC Key      ::: {hmac_key}")
 
-    hmac_val = SM3Util.hmac_str(hmac_key, input_str)
+    hmac_val = SM3Util.hmac_str(input_str, hmac_key)
     print(f"  HMAC Value    ::: {hmac_val}")
-    hmac_val2 = SM3Util.hmac_str(hmac_key, input_str)
+    hmac_val2 = SM3Util.hmac_str(input_str, hmac_key)
     print(f"  HMAC Value 2  ::: {hmac_val2}")
     print(f"  Whether HMAC Values Equal ::: {hmac_val == hmac_val2}")
     print()
 
     print(">>> 3. HMAC 校验（防篡改验证）")
-    print(f"  HMAC Verify (correct)   ::: {SM3Util.hmac_verify(hmac_key, input_str, hmac_val)}")
-    print(f"  HMAC Verify (tampered)  ::: {SM3Util.hmac_verify(hmac_key, input_str + 'X', hmac_val)}")
+    print(f"  HMAC Verify (correct)   ::: {SM3Util.hmac_verify(input_str, hmac_key, hmac_val)}")
+    print(f"  HMAC Verify (tampered)  ::: {SM3Util.hmac_verify(input_str + 'X', hmac_key, hmac_val)}")
     print()
 
     print(">>> 4. 字节数组摘要（非字符串场景）")

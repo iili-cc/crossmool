@@ -51,11 +51,11 @@ public static class SM3Sample
         Console.WriteLine($"  HMAC Key      ::: {hmacKey}");
 
         // 计算 HMAC（Hex 输出）
-        string hmacValue = SM3Util.hmacToStr(hmacKey, input);
+        string hmacValue = SM3Util.hmacToStr(input, hmacKey);
         Console.WriteLine($"  HMAC Value    ::: {hmacValue}");
 
         // 相同密钥 + 相同输入 → 相同输出（确定性）
-        string hmacValue2 = SM3Util.hmacToStr(hmacKey, input);
+        string hmacValue2 = SM3Util.hmacToStr(input, hmacKey);
         Console.WriteLine($"  HMAC Value 2  ::: {hmacValue2}");
 
         bool hmacEquals = hmacValue == hmacValue2;
@@ -65,11 +65,11 @@ public static class SM3Sample
         // ==================== 3. HMAC 校验 ====================
         Console.WriteLine(">>> 3. HMAC 校验（防篡改验证）");
 
-        bool hmacVerified = SM3Util.hmacVerify(hmacKey, input, hmacValue);
+        bool hmacVerified = SM3Util.hmacVerify(input, hmacKey, hmacValue);
         Console.WriteLine($"  HMAC Verify (correct)   ::: {hmacVerified}");
 
         // 篡改消息后校验失败
-        bool hmacTampered = SM3Util.hmacVerify(hmacKey, input + "X", hmacValue);
+        bool hmacTampered = SM3Util.hmacVerify(input + "X", hmacKey, hmacValue);
         Console.WriteLine($"  HMAC Verify (tampered)  ::: {hmacTampered}");
         Console.WriteLine();
 

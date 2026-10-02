@@ -37,7 +37,7 @@ func DigestToStr(input string, toBase64 bool) string {
 }
 
 // HMAC-SM3 using standard HMAC with SM3 as hash
-func HMAC(key, data []byte) []byte {
+func HMAC(data, key []byte) []byte {
 	var mac hash.Hash = hmac.New(func() hash.Hash { return sm3.New() }, key)
 	mac.Write(data)
 	return mac.Sum(nil)
@@ -46,7 +46,7 @@ func HMAC(key, data []byte) []byte {
 // HMACToStr computes HMAC-SM3 with string key and data inputs.
 // key must be Hex or Base64 encoded; data can be Hex, Base64, or UTF-8 string.
 // Returns Hex by default, or Base64 when toBase64 is true.
-func HMACToStr(key string, data string, toBase64 bool) (string, error) {
+func HMACToStr(data string, key string, toBase64 bool) (string, error) {
 	if key == "" || data == "" {
 		return "", errors.New("HMAC-SM3: key and data cannot be empty")
 	}
@@ -69,7 +69,7 @@ func HMACToStr(key string, data string, toBase64 bool) (string, error) {
 	} else {
 		dataBytes = []byte(data)
 	}
-	hmacBytes := HMAC(keyBytes, dataBytes)
+	hmacBytes := HMAC(dataBytes, keyBytes)
 	if toBase64 {
 		return EncodeBase64(hmacBytes), nil
 	}
@@ -103,8 +103,8 @@ func GenerateHmacKeyToStr(length int, toBase64 bool) string {
 }
 
 // HMACVerify computes HMAC-SM3 and compares it with the received value.
-func HMACVerify(key string, data string, receivedHmac string) (bool, error) {
-	expected, err := HMACToStr(key, data, false)
+func HMACVerify(data string, key string, receivedHmac string) (bool, error) {
+	expected, err := HMACToStr(data, key, false)
 	if err != nil {
 		return false, err
 	}

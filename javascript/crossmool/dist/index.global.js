@@ -183,7 +183,7 @@ var CrossmoolCrypto = (() => {
   }
   function _abytes2(value, length, title = "") {
     const bytes = isBytes(value);
-    const len = value == null ? void 0 : value.length;
+    const len = value?.length;
     const needsLen = length !== void 0;
     if (!bytes || needsLen && len !== length) {
       const prefix = title && `"${title}" `;
@@ -3074,7 +3074,7 @@ var CrossmoolCrypto = (() => {
     const c3 = bytesToHex3(sm3(concatBytes2(x2, msgArr, y2)));
     xorCipherStream(x2, y2, msgArr);
     const c2 = bytesToHex3(msgArr);
-    if (options == null ? void 0 : options.asn1) {
+    if (options?.asn1) {
       const point = sm2Curve.ProjectivePoint.fromHex(keypair.publicKey);
       const encode = cipherMode === C1C2C3 ? encodeEnc(point.x, point.y, c2, c3) : encodeEnc(point.x, point.y, c3, c2);
       return encode;
@@ -4411,7 +4411,7 @@ var CrossmoolCrypto = (() => {
     static digest(input, toBase64 = false) {
       return toBase64 ? this.digestToBase64(input) : this.digestToHex(input);
     }
-    static hmacBytes(key, data) {
+    static hmacBytes(data, key) {
       const blockSize = 64;
       let k = key;
       if (k.length > blockSize) {
@@ -4437,26 +4437,25 @@ var CrossmoolCrypto = (() => {
       outerData.set(innerHash, blockSize);
       return this.digestToBytes(outerData);
     }
-    static hmacToHex(key, data) {
+    static hmacToHex(data, key) {
       const keyBytes = typeof key === "string" ? decodeHexOrBase64ToBytes(key) : key;
       const dataBytes = typeof data === "string" ? utf8ToBytes3(data) : data;
-      return bytesToHex4(this.hmacBytes(keyBytes, dataBytes));
+      return bytesToHex4(this.hmacBytes(dataBytes, keyBytes));
     }
-    static hmacToBase64(key, data) {
+    static hmacToBase64(data, key) {
       const keyBytes = typeof key === "string" ? decodeHexOrBase64ToBytes(key) : key;
       const dataBytes = typeof data === "string" ? utf8ToBytes3(data) : data;
-      return bytesToBase64(this.hmacBytes(keyBytes, dataBytes));
+      return bytesToBase64(this.hmacBytes(dataBytes, keyBytes));
     }
-    static hmac(key, data, toBase64 = false) {
-      return toBase64 ? this.hmacToBase64(key, data) : this.hmacToHex(key, data);
+    static hmac(data, key, toBase64 = false) {
+      return toBase64 ? this.hmacToBase64(data, key) : this.hmacToHex(data, key);
     }
     static generateHmacKeyBytes(keyLength = HMAC_KEY_MIN_LENGTH) {
-      var _a;
       if (keyLength < HMAC_KEY_MIN_LENGTH) {
         throw new Error(`HMAC key length must be at least ${HMAC_KEY_MIN_LENGTH} bytes`);
       }
       const key = new Uint8Array(keyLength);
-      if ((_a = globalThis.crypto) == null ? void 0 : _a.getRandomValues) {
+      if (globalThis.crypto?.getRandomValues) {
         globalThis.crypto.getRandomValues(key);
         return key;
       }
@@ -4475,10 +4474,10 @@ var CrossmoolCrypto = (() => {
       const keyBytes = this.generateHmacKeyBytes(keyLength);
       return toBase64 ? bytesToBase64(keyBytes) : bytesToHex4(keyBytes);
     }
-    static hmacVerify(key, data, receivedHmac) {
+    static hmacVerify(data, key, receivedHmac) {
       const computed = this.hmacBytes(
-        typeof key === "string" ? decodeHexOrBase64ToBytes(key) : key,
-        typeof data === "string" ? utf8ToBytes3(data) : data
+        typeof data === "string" ? utf8ToBytes3(data) : data,
+        typeof key === "string" ? decodeHexOrBase64ToBytes(key) : key
       );
       const enc = detectStringEncoding(receivedHmac);
       let receivedBytes;
@@ -4521,32 +4520,32 @@ var CrossmoolCrypto = (() => {
     return c;
   }
   function gf128Mul(x2, y) {
-    const R = /* @__PURE__ */ BigInt("0xE1000000000000000000000000000000");
-    const MASK = (/* @__PURE__ */ BigInt("1") << /* @__PURE__ */ BigInt("128")) - /* @__PURE__ */ BigInt("1");
-    let z = /* @__PURE__ */ BigInt("0");
+    const R = 0xE1000000000000000000000000000000n;
+    const MASK = (1n << 128n) - 1n;
+    let z = 0n;
     let v = y;
     for (let i = 0; i < 128; i++) {
-      if (x2 & /* @__PURE__ */ BigInt("1") << BigInt(127 - i)) {
+      if (x2 & 1n << BigInt(127 - i)) {
         z ^= v;
       }
-      if (v & /* @__PURE__ */ BigInt("1")) {
-        v = v >> /* @__PURE__ */ BigInt("1") ^ R;
+      if (v & 1n) {
+        v = v >> 1n ^ R;
       } else {
-        v >>= /* @__PURE__ */ BigInt("1");
+        v >>= 1n;
       }
     }
     return z & MASK;
   }
   function bytesToBigint(b) {
-    let n = /* @__PURE__ */ BigInt("0");
-    for (let i = 0; i < b.length; i++) n = n << /* @__PURE__ */ BigInt("8") | BigInt(b[i]);
+    let n = 0n;
+    for (let i = 0; i < b.length; i++) n = n << 8n | BigInt(b[i]);
     return n;
   }
   function bigintToBytes(n, len) {
     const out = new Uint8Array(len);
     for (let i = len - 1; i >= 0; i--) {
-      out[i] = Number(n & /* @__PURE__ */ BigInt("0xff"));
-      n >>= /* @__PURE__ */ BigInt("8");
+      out[i] = Number(n & 0xffn);
+      n >>= 8n;
     }
     return out;
   }
@@ -4562,10 +4561,10 @@ var CrossmoolCrypto = (() => {
     const aadBitLen = BigInt(aad.length * 8);
     const ctBitLen = BigInt(ciphertext.length * 8);
     for (let i = 7; i >= 0; i--) {
-      lenBlock[i] = Number(aadBitLen >> BigInt(7 - i) * /* @__PURE__ */ BigInt("8") & /* @__PURE__ */ BigInt("0xff"));
-      lenBlock[8 + i] = Number(ctBitLen >> BigInt(7 - i) * /* @__PURE__ */ BigInt("8") & /* @__PURE__ */ BigInt("0xff"));
+      lenBlock[i] = Number(aadBitLen >> BigInt(7 - i) * 8n & 0xffn);
+      lenBlock[8 + i] = Number(ctBitLen >> BigInt(7 - i) * 8n & 0xffn);
     }
-    let y = /* @__PURE__ */ BigInt("0");
+    let y = 0n;
     for (let i = 0; i < aadPadded.length; i += 16) {
       y ^= bytesToBigint(aadPadded.subarray(i, i + 16));
       y = gf128Mul(y, hInt);
@@ -4631,9 +4630,8 @@ var CrossmoolCrypto = (() => {
   }
   var SM4Util = class _SM4Util {
     static generateKeyBytes() {
-      var _a;
       const key = new Uint8Array(KEY_SIZE_BYTES);
-      if ((_a = globalThis.crypto) == null ? void 0 : _a.getRandomValues) {
+      if (globalThis.crypto?.getRandomValues) {
         globalThis.crypto.getRandomValues(key);
         return key;
       }
@@ -4649,9 +4647,8 @@ var CrossmoolCrypto = (() => {
       return hexToBytes2(hexKey);
     }
     static generateGcmIV() {
-      var _a;
       const iv = new Uint8Array(GCM_IV_SIZE);
-      if ((_a = globalThis.crypto) == null ? void 0 : _a.getRandomValues) {
+      if (globalThis.crypto?.getRandomValues) {
         globalThis.crypto.getRandomValues(iv);
         return iv;
       }
@@ -4663,7 +4660,7 @@ var CrossmoolCrypto = (() => {
      */
     static encryptGcm(plaintext, key, iv, toBase64 = false) {
       const k = normalizeKeyBytes(key);
-      const actualIv = iv != null ? iv : _SM4Util.generateGcmIV();
+      const actualIv = iv ?? _SM4Util.generateGcmIV();
       if (actualIv.length !== GCM_IV_SIZE) {
         throw new Error(`GCM IV must be ${GCM_IV_SIZE} bytes`);
       }

@@ -82,12 +82,12 @@ describe('SM3 Digest', () => {
 describe('SM3 HMAC', () => {
   test('hmacToHex length 64', () => {
     const key = SM3Util.generateHmacKeyHex();
-    expect(SM3Util.hmacToHex(key, 'data').length).toBe(64);
+    expect(SM3Util.hmacToHex('data', key).length).toBe(64);
   });
 
   test('hmacToBase64', () => {
     const key = SM3Util.generateHmacKeyHex();
-    const b64 = SM3Util.hmacToBase64(key, 'data');
+    const b64 = SM3Util.hmacToBase64('data', key);
     expect(b64.length).toBeGreaterThan(0);
   });
 
@@ -107,16 +107,26 @@ describe('SM3 HMAC', () => {
   test('hmacVerify', () => {
     const key = SM3Util.generateHmacKeyHex();
     const data = 'test-data';
-    const mac = SM3Util.hmacToHex(key, data);
-    expect(SM3Util.hmacVerify(key, data, mac)).toBe(true);
-    expect(SM3Util.hmacVerify(key, 'wrong', mac)).toBe(false);
+    const mac = SM3Util.hmacToHex(data, key);
+    expect(SM3Util.hmacVerify(data, key, mac)).toBe(true);
+    expect(SM3Util.hmacVerify('wrong', key, mac)).toBe(false);
   });
 
   test('hmacBytes', () => {
     const key = SM3Util.generateHmacKeyBytes();
     const data = utf8ToBytes('data');
-    const mac = SM3Util.hmacToHex(key, data);
+    const mac = SM3Util.hmacToHex(data, key);
     expect(mac.length).toBe(64);
+  });
+
+  test('interop fixed vector (Java authoritative)', () => {
+    const MSG = 'Hello, 这是跨语言国密互通性测试数据';
+    const HMAC_KEY_HEX = '0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f20';
+    const hmacHex = SM3Util.hmac(MSG, HMAC_KEY_HEX);
+    expect(hmacHex).toBe('3e0c629ac18e2ad27415a549707565b0063872d65384e88ee2d1f88735b280f6');
+    const hmacB64 = SM3Util.hmac(MSG, HMAC_KEY_HEX, true);
+    expect(hmacB64).toBe('PgximsGOKtJ0FaVJcHVlsAY4ctZThOiO4tH4hzWygPY=');
+    expect(SM3Util.hmacVerify(MSG, HMAC_KEY_HEX, hmacHex)).toBe(true);
   });
 });
 
